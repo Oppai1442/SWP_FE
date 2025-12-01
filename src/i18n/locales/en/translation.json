@@ -1,0 +1,860 @@
+{
+  "auth": {
+    "login": {
+      "title": "Login to <1>Evally</1>",
+      "username": "Username",
+      "password": "Password",
+      "rememberMe": "Remember Me",
+      "forgotPassword": "Forgot Password?",
+      "loginButton": "Login",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Register here"
+    },
+    "register": {
+      "title": "Create an Account",
+      "name": "Name",
+      "email": "Email",
+      "confirmPassword": "Confirm Password",
+      "registerButton": "Register",
+      "alreadyHaveAccount": "Already have an account?",
+      "loginLink": "Login here"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "email": "Email",
+      "sendResetLinkButton": "Send Reset Link"
+    },
+    "misc": {
+      "withProvider": "or {{action}} with",
+      "signInWith": "Login with {{provider}}",
+      "registerWith": "Register with {{provider}}",
+      "signInWithApple": "Sign in with Apple",
+      "signInWithGoogle": "Sign in with Google"
+    }
+  },
+  "navbar": {
+    "home": "Home",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "about": "About Us",
+    "login": "Login",
+    "register": "Register",
+    "authdropdown": {
+      "header": {
+        "title": "Quick Actions",
+        "subtitle": "Manage your account"
+      },
+      "items": {
+        "dashboard": "Dashboard",
+        "settings": "Settings",
+        "logout": "Log Out"
+      },
+      "footer": {
+        "version": "v1.0.0"
+      }
+    },
+    "toggleMenu": "Toggle Menu",
+    "welcomeBack": "Welcome back"
+  },
+  "footer": {
+    "tagline": "Evally lets students share feedback and insights about their courses to improve the learning experience",
+    "about": {
+      "title": "About Us",
+      "contact": "Contact",
+      "blog": "Blog",
+      "ourStory": "Our Story",
+      "carrers": "Careers"
+    },
+    "company": {
+      "title": "Company",
+      "press": "Press",
+      "brandAssets": "Brand Assets",
+      "changeLog": "Change Log",
+      "helpCenter": "Help Center"
+    },
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact Us",
+    "socialMedia": {
+      "twitterUpdate": "Follow us on Twitter for updates",
+      "discordUpdate": "Join our Discord channel for updates",
+      "telegramUpdate": "Join our Telegram channel for updates"
+    },
+    "services": "Services",
+    "functionalTesting": "Functional Testing",
+    "performanceTesting": "Performance Testing",
+    "securityTesting": "Security Testing",
+    "automation": "Automation",
+    "team": "Team",
+    "connect": "Connect",
+    "linkedIn": "LinkedIn",
+    "twitter": "Twitter",
+    "gitHub": "GitHub",
+    "copyright": "© 2025 Reviux. All rights reserved."
+  },
+  "home": {
+    "banner": {
+      "slides": [
+        {
+          "title": "AI Grading",
+          "subtitle": "Save time, improve education quality"
+        },
+        {
+          "title": "Accurate and Fair",
+          "subtitle": "Advanced AI analysis, detailed per paper"
+        },
+        {
+          "title": "Supports Multiple Subjects",
+          "subtitle": "Math, Literature, English, Science and more"
+        }
+      ],
+      "button": "Discover Now"
+    },
+    "features": {
+      "title": "Why Choose Evally?",
+      "items": [
+        {
+          "title": "Fast",
+          "desc": "Grade papers in seconds, save hours of work"
+        },
+        {
+          "title": "Accurate",
+          "desc": "AI trained on millions of papers with 99.8% accuracy"
+        },
+        {
+          "title": "Professional",
+          "desc": "Detailed reports analyzing strengths and weaknesses"
+        }
+      ]
+    },
+    "partners": {
+      "title": "Trusted Partners",
+      "items": [
+        "Polytechnic University",
+        "Economics University",
+        "Le Quy Don High School",
+        "Tran Phu High School",
+        "Ho Chi Minh City Department of Education",
+        "Technology Academy"
+      ]
+    },
+    "stats": {
+      "graded_exams": "Graded Exams",
+      "trusted_teachers": "Trusted Teachers",
+      "accuracy": "Accuracy"
+    },
+    "cta": {
+      "title": "Ready to experience?",
+      "subtitle": "Join thousands of teachers using Evally to enhance teaching quality and save grading time.",
+      "button1": "Try for Free",
+      "button2": "Contact Us",
+      "feature1": "30 days free",
+      "feature2": "24/7 support",
+      "feature3": "No contract commitment"
+    },
+    "premiumSolutions": "Premium Testing Solutions",
+    "whyChooseReviux": "Why Choose Reviux",
+    "ourProcess": "Our Process",
+    "analysisPlanning": "Analysis & Planning",
+    "executionTesting": "Execution & Testing",
+    "reportingDelivery": "Reporting & Delivery",
+    "clientTestimonials": "Client Testimonials",
+    "elevateSoftwareQuality": "Ready to Elevate Your Software Quality?"
+  },
+  "pricing": {
+    "header": {
+      "title": "Service Pricing",
+      "subtitle": "Choose the plan that fits your needs. All plans can be upgraded or canceled at any time."
+    },
+    "toggle": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "discount": "-25%"
+    },
+    "plan": {
+      "popular": "Most Popular",
+      "contact": "Contact Us",
+      "custom_quote": "Custom quote available",
+      "button_contact": "Contact Sales",
+      "button_start": "Get Started",
+      "period": {
+        "month": "/month",
+        "year": "/year"
+      },
+      "starter": {
+        "name": "Starter",
+        "desc": "For individual teachers just getting started",
+        "features": [
+          "100 exams/month",
+          "Auto-grading",
+          "Basic reports",
+          "Email support",
+          "2 subjects",
+          "1GB storage"
+        ]
+      },
+      "professional": {
+        "name": "Professional",
+        "desc": "Ideal for professional teachers",
+        "features": [
+          "500 exams/month",
+          "Grading + detailed analysis",
+          "Advanced reports",
+          "Priority support",
+          "5 subjects",
+          "5GB storage",
+          "Export to PDF/Excel",
+          "Basic API integration"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "desc": "For schools and educational organizations",
+        "features": [
+          "2000 exams/month",
+          "Advanced AI analysis",
+          "Management dashboard",
+          "24/7 support",
+          "Unlimited subjects",
+          "20GB storage",
+          "Customizable reports",
+          "Full API access",
+          "Multi-user accounts",
+          "Automatic backups"
+        ]
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "desc": "Custom solution for large organizations",
+        "features": [
+          "Unlimited exams",
+          "Custom AI solutions",
+          "Enterprise dashboard",
+          "Dedicated support team",
+          "System integration",
+          "Unlimited storage",
+          "White-label solution",
+          "SLA 99.9% uptime",
+          "Training & onboarding",
+          "Custom features",
+          "Advanced security",
+          "Compliance support"
+        ]
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": [
+        {
+          "q": "Can I change my plan later?",
+          "a": "Yes, you can upgrade or downgrade your plan anytime. Changes will take effect immediately."
+        },
+        {
+          "q": "Do you support bank payments?",
+          "a": "Yes, we support credit card, bank transfer, and popular e-wallets."
+        },
+        {
+          "q": "Is my data secure?",
+          "a": "All data is encrypted and stored on secure servers. We comply with international security standards."
+        },
+        {
+          "q": "Is training available?",
+          "a": "Yes, all plans include detailed guides. Premium and Enterprise plans offer direct training sessions."
+        }
+      ]
+    },
+    "bottom_cta": {
+      "title": "Not Sure Yet?",
+      "subtitle": "Try it free for 14 days with no credit card required.",
+      "button_try": "Try for Free",
+      "button_demo": "View Demo"
+    },
+    "detailedFeatureComparison": "Detailed Feature Comparison",
+    "readyToGetStarted": "Ready to Get Started?"
+  },
+  "subscription": {
+    "features": {
+      "MAX_USERS": "Maximum users",
+      "MAX_ADMINS": "Maximum admins",
+      "INVITE_GUESTS": "Guest invitations allowed",
+      "UNLIMITED_PROJECTS": "Unlimited projects",
+      "FILE_UPLOAD": "File uploads",
+      "FILE_STORAGE_MB": "Storage capacity (MB)",
+      "HISTORY_RETENTION_DAYS": "History retention (days)",
+      "CUSTOM_BRANDING": "Custom branding",
+      "ANALYTICS_DASHBOARD": "Analytics dashboard",
+      "PRIORITY_SUPPORT": "Priority support",
+      "EXPORT_DATA": "Data export",
+      "INTEGRATIONS": "App integrations",
+      "MULTI_LANGUAGE_SUPPORT": "Multi-language support",
+      "SSO_AUTHENTICATION": "Single sign-on",
+      "TWO_FACTOR_AUTH": "Two-factor authentication",
+      "API_ACCESS": "API access",
+      "API_RATE_LIMIT_PER_MINUTE": "API rate limit (per minute)",
+      "API_WEBHOOKS": "API webhooks",
+      "API_SANDBOX_MODE": "API sandbox mode",
+      "INVOICE_DOWNLOAD": "Invoice downloads",
+      "CUSTOM_BILLING_CYCLE": "Custom billing cycles",
+      "TEAM_CHAT": "Team chat",
+      "TASK_ASSIGNMENT": "Task assignments",
+      "AUTOMATION_RULES": "Automation rules",
+      "WORKFLOW_TEMPLATES": "Workflow templates",
+      "ENCRYPTION_AT_REST": "Encryption at rest",
+      "AUDIT_LOGS": "Audit logs",
+      "ROLE_BASED_ACCESS": "Role-based access",
+      "AI_ASSISTANT": "AI assistant",
+      "AI_GENERATION_LIMIT": "AI generation limit",
+      "CUSTOM_DOMAINS": "Custom domains",
+      "MULTI_WORKSPACE_SUPPORT": "Multi-workspace support",
+      "SUPPORT_RESPONSE_TIME_HOURS": "Support response time (hours)",
+      "EXTENDED_LOGS_RETENTION_DAYS": "Extended log retention (days)"
+    }
+  },
+  "contact": {
+    "header": {
+      "title": "Contact Us",
+      "subtitle": "Ready to support you 24/7 with professional grading services"
+    },
+    "info": {
+      "title": "Contact Information",
+      "address": {
+        "title": "Address",
+        "detail": "123 Nguyen Van Cu Street, District 1, Ho Chi Minh City"
+      },
+      "phone": {
+        "title": "Phone",
+        "detail": "+84 901 234 567"
+      },
+      "email": {
+        "title": "Email",
+        "detail": "support@evally.vn"
+      },
+      "hours": {
+        "title": "Working Hours",
+        "detail": "Monday - Sunday: 8:00 AM - 10:00 PM"
+      }
+    },
+    "emergency": {
+      "title": "Emergency Support",
+      "desc": "Need urgent assistance? Our technical team is available 24/7 to help you.",
+      "hotline": "Hotline: 1900 1234"
+    },
+    "map": {
+      "title": "Our Location",
+      "interactive": {
+        "title": "Interactive Map",
+        "desc": "Click to view on Google Maps"
+      },
+      "office": {
+        "title": "Main Office",
+        "desc": "Modern building, convenient transportation, close to major universities"
+      },
+      "button": "Get Directions"
+    },
+    "getInTouch": "Get in Touch",
+    "emergencyLine": "24/7 Emergency Line",
+    "emergencyPhoneNumber": "+84 999 888 777",
+    "clickToLoadMap": "Click to load map",
+    "visitUs": "Visit Us"
+  },
+  "about": {
+    "header": {
+      "title": "About Evally",
+      "subtitle": "Pioneering the application of AI to revolutionize Vietnam's education system"
+    },
+    "mission": {
+      "title": "Our Mission",
+      "desc": "Evally was born with the mission to democratize educational assessment through advanced AI technology. We believe every student deserves fair, accurate, and timely evaluations to help them reach their fullest potential."
+    },
+    "vision": {
+      "title": "Our Vision",
+      "desc": "To become Southeast Asia's leading AI platform in educational assessment, contributing to raising educational quality and nurturing a generation of critical thinkers, innovators, and future-ready individuals."
+    },
+    "story": {
+      "title": "Our Story",
+      "part1": "Evally was founded in 2023 by a group of AI engineers and education experts who shared a passion for improving the education system. It stemmed from the realization that teachers spent too much time on grading instead of focusing on teaching and engaging with students.",
+      "part2": "After two years of research and development, we created an AI system capable of understanding and assessing student work as accurately as humans, even surpassing them in consistency and objectivity. Our system not only grades but also provides detailed feedback to help students understand their strengths and areas for improvement."
+    },
+    "values": {
+      "title": "Core Values",
+      "excellence": {
+        "title": "Excellence",
+        "desc": "We constantly strive to deliver the best product for our users."
+      },
+      "collaboration": {
+        "title": "Collaboration",
+        "desc": "Working closely with teachers and students to understand real needs."
+      },
+      "innovation": {
+        "title": "Innovation",
+        "desc": "Pioneering the use of the latest technologies in education."
+      }
+    },
+    "achievements": {
+      "title": "Our Achievements",
+      "schools": "Partner Schools",
+      "teachers": "Teachers Using Evally",
+      "exams": "Exams Graded",
+      "uptime": "System Uptime"
+    },
+    "buildingTheFuture": "Building the Future"
+  },
+  "tos": {
+    "title": "Terms of Service",
+    "lastUpdated": "Last updated: May 20, 2025",
+    "intro": "By accessing and using our platform, you agree to be bound by these Terms of Service. If you do not agree with any part of the terms, you may not access the service.",
+    "section1": {
+      "title": "1. Use of the Service",
+      "content": "You agree to use the service in compliance with all applicable local, state, national, and international laws and regulations."
+    },
+    "section2": {
+      "title": "2. Account Responsibilities",
+      "content": "You are responsible for maintaining the confidentiality of your account credentials and all activities that occur under your account."
+    },
+    "section3": {
+      "title": "3. Intellectual Property",
+      "content": "All content, trademarks, and data on this site, including but not limited to software, databases, text, graphics, icons, and hyperlinks are the property of Evally or its licensors."
+    },
+    "section4": {
+      "title": "4. Termination",
+      "content": "We may suspend or terminate your access to the service at any time without prior notice or liability, for any reason, including if you breach the Terms."
+    },
+    "section5": {
+      "title": "5. Disclaimer of Warranty",
+      "content": "The service is provided on an 'as is' and 'as available' basis. We disclaim all warranties of any kind."
+    },
+    "section6": {
+      "title": "6. Limitation of Liability",
+      "content": "In no event shall Evally be liable for any indirect, incidental, special, consequential or punitive damages arising out of your access to or use of the service."
+    },
+    "section7": {
+      "title": "7. Changes to Terms",
+      "content": "We reserve the right to update or modify these terms at any time without prior notice. Your continued use of the service after such changes constitutes your acceptance of the new terms."
+    }
+  },
+  "policy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: May 20, 2025",
+    "intro": "This Privacy Policy explains how we collect, use, and protect your personal information when you use our services.",
+    "section1": {
+      "title": "1. Information We Collect",
+      "content": "We collect personal information that you provide to us directly, as well as data collected automatically such as browser type, IP address, and usage data."
+    },
+    "section2": {
+      "title": "2. How We Use Your Information",
+      "content": "We use the collected information to provide and improve our services, personalize user experience, and ensure platform security."
+    },
+    "section3": {
+      "title": "3. Sharing of Information",
+      "content": "We do not sell your personal information. We may share it with third-party service providers for the purposes of platform functionality, analytics, or compliance."
+    },
+    "section4": {
+      "title": "4. Data Security",
+      "content": "We implement reasonable technical and organizational measures to protect your data against unauthorized access, alteration, disclosure, or destruction."
+    },
+    "section5": {
+      "title": "5. Cookies and Tracking",
+      "content": "We use cookies to enhance your experience. You can disable cookies in your browser settings, though some features may not function properly."
+    },
+    "section6": {
+      "title": "6. Your Rights",
+      "content": "You have the right to access, correct, or delete your personal information at any time by contacting our support team."
+    },
+    "section7": {
+      "title": "7. Changes to This Policy",
+      "content": "We may update this Privacy Policy occasionally. Continued use of our services after changes are posted indicates your agreement to the revised policy."
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "nodata": "No data to display",
+    "search": "Search...",
+    "filter": "Filter",
+    "status": "Status",
+    "actions": "Actions",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "add": "Add",
+    "new": "New",
+    "name": "Name",
+    "description": "Description",
+    "type": "Type",
+    "date": "Date",
+    "amount": "Amount",
+    "price": "Price",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "continue": "Continue",
+    "back": "Back",
+    "tryAgain": "Try Again",
+    "active": "Active",
+    "inactive": "Inactive",
+    "completed": "Completed",
+    "pending": "Pending",
+    "failed": "Failed",
+    "yes": "Yes",
+    "no": "No",
+    "true": "True",
+    "false": "False",
+    "or": "or",
+    "and": "and",
+    "of": "of",
+    "at": "at",
+    "by": "by",
+    "for": "for",
+    "in": "in",
+    "with": "with",
+    "revi": "Revi",
+    "reviux": "Reviux",
+    "solutions": "Solutions",
+    "testing": "Testing",
+    "premium": "Premium",
+    "page": "Page",
+    "pages": "Pages",
+    "item": "Item",
+    "items": "Items",
+    "result": "Result",
+    "results": "Results",
+    "message": "Message",
+    "notification": "Notification",
+    "notifications": "Notifications",
+    "welcome": "Welcome",
+    "goodbye": "Goodbye",
+    "hello": "Hello",
+    "version": "Version 1.0.0",
+    "emailAddress": "Email address",
+    "username": "Username",
+    "password": "Password",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "optional": "(optional)",
+    "required": "*",
+    "miscDot": "•",
+    "miscDash": "--",
+    "miscPipe": "|",
+    "miscArrow": "→"
+  },
+  "notFound": {
+    "title": "Lost in cyberspace",
+    "header": "404",
+    "errorCode": "Error Code",
+    "pagesHere": "Pages Here",
+    "betterPages": "Better Pages",
+    "errorCodeStatus": "Error code: NOT_FOUND • Status: 404",
+    "infinity": "∞"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "monitorMetrics": "Monitor your business metrics in real-time",
+    "searchAnalytics": "Search analytics...",
+    "last24Hours": "Last 24 hours",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last90Days": "Last 90 days",
+    "revenueAnalytics": "Revenue Analytics",
+    "chartVisualization": "Chart visualization",
+    "revenueTrend": "Revenue trending upward by 12.5%",
+    "recentActivity": "Recent Activity",
+    "topProducts": "Top Products",
+    "performanceMetrics": "Performance Metrics",
+    "serverResponseTime": "Server Response Time",
+    "serverResponseTimeValue": "124ms",
+    "dbPerformance": "Database Performance",
+    "dbPerformanceValue": "92%",
+    "apiSuccessRate": "API Success Rate",
+    "apiSuccessRateValue": "99.7%",
+    "memoryUsage": "Memory Usage",
+    "memoryUsageValue": "68%",
+    "adminDashboard": "Admin Dashboard",
+    "adminInitial": "AD",
+    "adminUser": "Admin User",
+    "adminEmail": "admin@reviux.com",
+    "admin": "Admin",
+    "userManagement": {
+      "title": "User Management",
+      "subtitle": "Manage system user accounts",
+      "searchPlaceholder": "Search by name or email...",
+      "allRoles": "All Roles",
+      "roleAdmin": "ROLE_ADMIN",
+      "roleUser": "ROLE_USER",
+      "allStatuses": "All Status",
+      "statusActive": "ACTIVE",
+      "statusInactive": "INACTIVE",
+      "statusLocked": "LOCKED",
+      "statusSuspended": "SUSPENDED",
+      "statusDisable": "DISABLE",
+      "editUser": "Edit User",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "role": "Role",
+      "noUserSelected": "No user selected.",
+      "confirmDeleteTitle": "Confirm Delete",
+      "confirmDeleteMessage": "Are you sure you want to delete this user?",
+      "undoneAction": "This action cannot be undone.",
+      "deleteUser": "Delete User"
+    },
+    "testingRequest": {
+      "title": "Testing Request Management",
+      "subtitle": "Manage and track all testing requests efficiently",
+      "searchPlaceholder": "Search requests by ID, project, type, or description...",
+      "allPriorities": "All Priority",
+      "priorityUrgent": "Urgent",
+      "priorityHigh": "High",
+      "priorityMedium": "Medium",
+      "priorityLow": "Low",
+      "testType": "Test Type",
+      "allTypes": "All Types",
+      "typeFunctional": "Functional",
+      "typePerformance": "Performance",
+      "typeSecurity": "Security",
+      "typeUsability": "Usability",
+      "typeCompatibility": "Compatibility",
+      "dateRange": "Date Range",
+      "allTime": "All Time",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "last90Days": "Last 90 Days",
+      "progress": "Progress",
+      "requestId": "Request ID",
+      "assignedTester": "Assigned Tester",
+      "assignTesterTitle": "Assign Tester",
+      "selectTester": "Select tester",
+      "noteOptional": "Note (optional)",
+      "notePlaceholder": "Optional message for this assignment",
+      "addLogTitle": "Add Test Log",
+      "logLevel": "Log Level",
+      "logMessagePlaceholder": "Describe the outcome or error observed during testing",
+      "addBugReportTitle": "Add Bug Report",
+      "severity": "Severity",
+      "assignTesterOptional": "Assign Tester (optional)",
+      "unassigned": "Unassigned",
+      "bugTitlePlaceholder": "Short summary of the issue",
+      "bugDescriptionPlaceholder": "Detailed steps to reproduce, expected vs actual behavior.",
+      "progressUpdates": "Progress Updates",
+      "recentLogs": "Recent Test Logs",
+      "bugReports": "Bug Reports",
+      "productType": "Product type",
+      "allProductTypes": "All product types",
+      "updates": "Updates",
+      "logs": "Logs",
+      "customer": "Customer",
+      "createdDate": "Created",
+      "targetDeadline": "Target deadline",
+      "referenceFile": "Reference file",
+      "noFileAttached": "No file attached.",
+      "scopeAndAssets": "Request scope & assets",
+      "testingTypes": "Testing types",
+      "referenceLink": "Reference link",
+      "latestUpdates": "Latest updates",
+      "showingLatestEntries": "Showing up to 8 latest entries",
+      "linkedIssues": "Linked issues and conversations",
+      "comments": "Comments",
+      "signInRequired": "Sign in required",
+      "signInToView": "Please sign in to view and track your testing requests.",
+      "monitorSubmissions": "Monitor your submissions, progress, and testing feedback.",
+      "remainingTokens": "Remaining tokens",
+      "nextResetIn": "Next reset in",
+      "planType": "Plan type",
+      "totalRequests": "Total requests",
+      "highPriority": "High priority",
+      "noRequestsFound": "No requests match the current filters.",
+      "updateSearch": "Try updating your search terms or reset the filters.",
+      "newRequestTitle": "New Testing Request",
+      "estimatedTokenCost": "Estimated token cost",
+      "projectName": "Project Name",
+      "projectNamePlaceholder": "e.g. Checkout flow audit",
+      "referenceLinkOptional": "Reference Link (optional)",
+      "referenceLinkPlaceholder": "https://...",
+      "testingScope": "Testing Scope",
+      "toggleGuidance": "Toggle guidance",
+      "fileUpload": "Drag & drop archive here or browse",
+      "removeFile": "Remove file"
+    },
+    "subscriptionManagement": {
+      "title": "Subscription Plans",
+      "createNewPlan": "Create New Plan",
+      "editPlan": "Edit Plan",
+      "noPlans": "No subscription plans created yet",
+      "selectFeatureKeyFirst": "Select feature key first",
+      "selectValue": "Select value",
+      "enterNumber": "Enter number",
+      "featureValue": "Feature value",
+      "basicInfo": "Basic Information",
+      "planName": "Plan Name",
+      "planNamePlaceholder": "e.g., Premium",
+      "planDescription": "Plan description",
+      "pricingDetails": "Pricing Details",
+      "pricePlaceholder": "129000",
+      "discountPrice": "Discount Price",
+      "discountPricePlaceholder": "99000",
+      "billingPeriod": "Billing Period",
+      "appearanceStatus": "Appearance & Status",
+      "icon": "Icon",
+      "themeColor": "Theme Color",
+      "statusDraft": "DRAFT",
+      "popularPlan": "Popular Plan",
+      "planFeatures": "Plan Features",
+      "selectFeatureKey": "Select feature key"
+    },
+    "settings": {
+      "title": "Settings",
+      "accountSettingsTitle": "Account Settings",
+      "accountSettingsSubtitle": "Manage your account preferences and profile settings",
+      "activeNow": "Active Now",
+      "personalInfo": "Personal Information",
+      "appearancePreferences": "Appearance Preferences",
+      "comingSoon": "Coming soon...",
+      "passwordAuth": "Password & Authentication",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "twoFactorAuth": "Two-Factor Authentication",
+      "authenticatorApp": "Authenticator App",
+      "authenticatorAppDesc": "Use an app like Google Authenticator",
+      "biometricAuth": "Biometric Authentication",
+      "biometricAuthDesc": "Use fingerprint or face recognition",
+      "securityPreferences": "Security Preferences",
+      "sessionTimeout": "Session Timeout",
+      "timeout15": "15 minutes",
+      "timeout30": "30 minutes",
+      "timeout60": "1 hour",
+      "timeout120": "2 hours",
+      "loginAlerts": "Login Alerts",
+      "loginAlertsDesc": "Get notified of new login attempts",
+      "suspiciousActivityAlerts": "Suspicious Activity Alerts",
+      "suspiciousActivityAlertsDesc": "Get notified of unusual account activity",
+      "communicationMethods": "Communication Methods",
+      "emailNotifications": "Email Notifications",
+      "emailNotificationsDesc": "Receive updates via email",
+      "pushNotifications": "Push Notifications",
+      "pushNotificationsDesc": "Receive browser/app notifications",
+      "smsNotifications": "SMS Notifications",
+      "smsNotificationsDesc": "Receive text message alerts",
+      "notificationCategories": "Notification Categories",
+      "securityAlerts": "Security Alerts",
+      "securityAlertsDesc": "Login attempts, password changes",
+      "productUpdates": "Product Updates",
+      "productUpdatesDesc": "New features, maintenance notices",
+      "mentionsTags": "Mentions & Tags",
+      "mentionsTagsDesc": "When someone mentions you",
+      "commentsReplies": "Comments & Replies",
+      "commentsRepliesDesc": "Responses to your content",
+      "marketingPromotions": "Marketing & Promotions",
+      "marketingPromotionsDesc": "Special offers, newsletters",
+      "notificationSchedule": "Notification Schedule",
+      "quietHoursStart": "Quiet Hours Start",
+      "quietHoursEnd": "Quiet Hours End",
+      "activeDays": "Active Days",
+      "quietHoursActive": "Quiet Hours Active",
+      "quietHoursDesc": "Notifications will be silenced during these hours except for security alerts"
+    },
+    "notifications": {
+      "title": "My Notifications",
+      "searchPlaceholder": "Search notifications...",
+      "markAsRead": "Mark as read"
+    },
+    "mySubscriptions": {
+      "title": "Subscription Center",
+      "subtitle": "Manage Your Reviux Plan",
+      "price": "Price",
+      "billingCycle": "Billing Cycle",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "featuresIncluded": "Features Included",
+      "featuresInfo": "Feature information will be displayed once the service plan is updated.",
+      "tokenBalance": "Token Balance",
+      "tokensRemaining": "Tokens Remaining",
+      "balance": "Balance",
+      "nextReset": "Next Reset",
+      "needMore": "Need More?",
+      "history": "Subscription History",
+      "noHistory": "No subscription history found.",
+      "plan": "Plan",
+      "featuredPlans": "Featured Plans",
+      "featuredPlansDesc": "Choose the right plan to unlock more tokens and benefits.",
+      "cancelRequestTitle": "Cancel Subscription Request",
+      "currentPlan": "Current Plan"
+    },
+    "logs": {
+      "liveConsole": "Live Console",
+      "searchPlaceholder": "Search logs...",
+      "copyAll": "Copy All",
+      "download": "Download Logs",
+      "clear": "Clear Console",
+      "fontSize": "Font Size:",
+      "noLogs": "No logs to display"
+    },
+    "transactions": {
+      "title": "Payment Management",
+      "subtitle": "Track and manage your payment transactions",
+      "recentTransactions": "Recent Transactions",
+      "transactionId": "Transaction ID",
+      "method": "Method",
+      "noTransactions": "No transactions found",
+      "updateFilters": "Try changing your filters or search terms",
+      "topUpWallet": "Top up wallet",
+      "topUpAmountPlaceholder": "Enter amount...",
+      "quickSelectAmount": "Quick select amount",
+      "processing": "Processing transaction"
+    },
+    "permissions": {
+      "title": "Manage Permissions",
+      "searchPlaceholder": "Search roles or permissions...",
+      "noPermissions": "No permissions assigned yet"
+    }
+  },
+  "checkout": {
+    "title": "Secure Checkout",
+    "encrypted": "256-bit encryption",
+    "namePlaceholder": "John Doe",
+    "emailPlaceholder": "john@example.com",
+    "phonePlaceholder": "+84 123 456 789",
+    "countryVietnam": "Vietnam",
+    "countryUS": "United States",
+    "countrySG": "Singapore",
+    "countryTH": "Thailand",
+    "addressPlaceholder": "123 Main Street, District 1, Ho Chi Minh City",
+    "dataProtected": "Your data is protected.",
+    "checkingBalance": "Checking balance...",
+    "awaitingConfirmation": "Awaiting confirmation",
+    "topUpTitle": "Top Up Wallet",
+    "topUpSubtitle": "Add funds to your wallet instantly",
+    "paymentSummary": "Payment Summary",
+    "amountToPay": "Amount to Pay",
+    "bonusCredit": "Bonus Credit",
+    "totalWalletCredit": "Total Wallet Credit",
+    "planFeatures": "Plan Features",
+    "orderSummary": "Order Summary",
+    "annualDiscount": "Annual Discount",
+    "premiumPlan": "Premium Plan",
+    "subscriptionDetails": "Subscription Details",
+    "accountTopUp": "Account Top-up",
+    "balanceAddition": "Balance Addition",
+    "creditAdded": "credit added",
+    "processingPayment": "Processing Payment",
+    "doNotClose": "Please do not close this window",
+    "retryPayment": "Retry Payment",
+    "errorDetails": "Error Details",
+    "transactionId": "Transaction ID",
+    "supportEmail": "SBA_Support@gmail.com",
+    "securePayment": "Your payment information is encrypted and secure",
+    "securePaymentBadge": "Secure Payment",
+    "securePaymentBadgeDesc": "256-bit SSL encryption & PCI DSS compliant",
+    "processingPaymentButton": "Processing Payment...",
+    "topUpWalletButton": "Top Up Wallet",
+    "confirmPaymentButton": "Confirm Payment"
+  }
+}

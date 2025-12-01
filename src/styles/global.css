@@ -1,0 +1,9 @@
+* {
+  user-select: none !important;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
