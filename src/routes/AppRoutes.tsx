@@ -18,6 +18,7 @@ const DashboardLayout = lazy(() => import('@/modules/dashboard/DashboardLayout')
 const Dashboard = lazy(() => import('@/modules/dashboard/pages/Dashboard'));
 const AccountSettings = lazy(() => import('@/modules/dashboard/pages/settings/AccountSettings'));
 const PermissionManagement = lazy(() => import('@/modules/dashboard/pages/permission-management/PermissionManagement'));
+const ClubCreationQueue = lazy(() => import('@/modules/dashboard/pages/club-queue/ClubCreationQueue'));
 // const NotificationManagement = lazy(() => import('@/modules/dashboard/pages/notification/notification-management/NotificationManagement'));
 const UserManagement = lazy(() => import('@/modules/dashboard/pages/user-management/UserManagement'));
 
@@ -60,6 +61,7 @@ const routes: AppRoute[] = [
 
       { path: ROUTES.DASHBOARD.child.USER_MANAGEMENT.path, element: <UserManagement />},
       { path: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.path, element: <PermissionManagement /> },
+      { path: ROUTES.DASHBOARD.child.CLUB_QUEUE.path, element: <ClubCreationQueue /> },
       { path: ROUTES.DASHBOARD.child.MY_TRANSACTION.path, element: <TransactionManagement /> },
       { path: ROUTES.DASHBOARD.child.TRANSACTION.path, element: <UsersPaymentManagement /> },
       //Notification
