@@ -319,22 +319,22 @@ const ClubHubHome = () => {
 
       <section id="home" className="relative min-h-screen flex items-center justify-center pt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center bg-gradient-to-br from-white via-orange-50 to-white rounded-[32px] border border-orange-100 shadow-xl py-16">
-          <p className="inline-flex items-center px-4 py-1 rounded-full bg-white text-orange-500 text-sm border border-orange-100 mb-6">
+          {/* <p className="inline-flex items-center px-4 py-1 rounded-full bg-white text-orange-500 text-sm border border-orange-100 mb-6">
             Student • Club Leader • Admin
-          </p>
+          </p> */}
           <h1 className="text-5xl md:text-7xl font-light mb-6 leading-tight text-slate-900">
             ClubHub for <span className="text-orange-500 font-semibold">FPT University</span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-600 font-light mb-8 max-w-3xl mx-auto leading-relaxed">
             Orchestrate the entire club lifecycle: CRUD data, manage membership, collect fees, and deliver reports from one platform.
           </p>
-          <div className="flex flex-wrap gap-3 justify-center mb-10">
+          {/* <div className="flex flex-wrap gap-3 justify-center mb-10">
             {PERSONA_TARGETS.map((persona) => (
               <span key={persona} className="px-4 py-2 rounded-full bg-white text-sm text-slate-500 border border-slate-200">
                 {persona}
               </span>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
     </div>

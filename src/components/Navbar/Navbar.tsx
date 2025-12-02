@@ -86,12 +86,19 @@ const Navbar = () => {
 
   const menuItems = [
     // Primary entry depends on role
-    {
-      icon: User,
-      label: "Dashboard",
-      onClick: () => handleItemClick(),
-      href: ROUTES.DASHBOARD.getPath(),
-    },
+    user?.role?.name === "ROLE_ADMIN"
+      ? {
+        icon: User,
+        label: ROUTES.DASHBOARD.child.CLUB_QUEUE.label,
+        onClick: () => handleItemClick(),
+        href: ROUTES.DASHBOARD.child.CLUB_QUEUE.getPath(),
+      }
+      : {
+        icon: User,
+        label: ROUTES.DASHBOARD.child.MY_CLUB.label,
+        onClick: () => handleItemClick(),
+        href: ROUTES.DASHBOARD.child.MY_CLUB.getPath(),
+      },
     {
       icon: Settings,
       label: "Settings",
