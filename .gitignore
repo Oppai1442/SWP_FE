@@ -1,0 +1,43 @@
+# dependencies
+/node_modules
+
+# build output
+/dist
+
+# production
+*.log
+
+# local env files
+.env
+.env.local
+.env.*.local
+
+# Vite cache
+/.vite
+
+# system files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# IDEs & editors
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# TypeScript cache
+*.tsbuildinfo
+
+# test coverage
+/coverage
+
+# yarn / npm
+.yarn/
+.pnp.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

@@ -1,0 +1,156 @@
+{
+  "auth": {
+    "login": {
+      "title": "Đăng nhập vào <1>Evally</1>",
+      "email": "Email",
+      "password": "Mật khẩu",
+      "rememberMe": "Ghi nhớ đăng nhập",
+      "forgotPassword": "Quên mật khẩu?",
+      "loginButton": "Đăng nhập",
+      "noAccount": "Chưa có tài khoản?",
+      "registerLink": "Đăng ký tại đây"
+    },
+    "register": {
+      "title": "Tạo tài khoản",
+      "name": "Tên",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "registerButton": "Đăng ký",
+      "alreadyHaveAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập tại đây"
+    },
+    "resetPassword": {
+      "title": "Đặt lại mật khẩu",
+      "email": "Email",
+      "sendResetLinkButton": "Gửi liên kết đặt lại"
+    },
+    "misc": {
+      "withProvider": "hoặc {{action}} bằng",
+      "signInWith": "Đăng nhập bằng {{provider}}",
+      "registerWith": "Đăng ký bằng {{provider}}"
+    }
+  },
+  "navbar": {
+    "home": "Trang chủ",
+    "courses": "Khóa học",
+    "contact": "Liên hệ",
+    "about": "Về chúng tôi",
+    "login": "Đăng nhập",
+    "register": "Đăng ký"
+  },
+  "footer": {
+    "tagline": "Evally cho phép sinh viên chia sẻ phản hồi và hiểu biết về các khóa học để cải thiện trải nghiệm học tập",
+    "about": {
+      "title": "Về chúng tôi",
+      "contact": "Liên hệ",
+      "blog": "Blog",
+      "ourStory": "Câu chuyện của chúng tôi",
+      "carrers": "Nghề nghiệp"
+    },
+    "company": {
+      "title": "Công ty",
+      "press": "Báo chí",
+      "brandAssets": "Tài sản thương hiệu",
+      "changeLog": "Lịch sử thay đổi",
+      "helpCenter": "Trung tâm trợ giúp"
+    },
+    "terms": "Điều khoản dịch vụ",
+    "privacy": "Chính sách bảo mật",
+    "contact": "Liên hệ",
+    "socialMedia": {
+      "twitterUpdate": "Theo dõi chúng tôi trên Twitter để nhận cập nhật",
+      "discordUpdate": "Tham gia kênh Discord của chúng tôi để nhận cập nhật",
+      "telegramUpdate": "Tham gia kênh Telegram của chúng tôi để nhận cập nhật"
+    }
+  },
+  "homepage": {
+    "title": "Chào mừng đến với <1>Evally</1>",
+    "description": "Nơi sinh viên và giảng viên chia sẻ, đánh giá và phản hồi về các khóa học. Cùng xây dựng một cộng đồng học tập tích cực và minh bạch!",
+    "cta": {
+      "start": "Bắt đầu ngay",
+      "learnMore": "Tìm hiểu thêm",
+      "join": "Tham gia <1>Evally</1> hôm nay!",
+      "joinDesc": "Hãy góp phần xây dựng một hệ sinh thái giáo dục công bằng, sáng tạo và hiệu quả.",
+      "joinButton": "Tạo tài khoản"
+    },
+    "features": {
+      "grading": {
+        "title": "Chấm điểm minh bạch",
+        "desc": "Người dùng có thể đánh giá các khóa học, kỳ thi và chia sẻ trải nghiệm cá nhân."
+      },
+      "community": {
+        "title": "Cộng đồng học tập",
+        "desc": "Kết nối sinh viên và giảng viên để trao đổi, chia sẻ kiến thức và nâng cao kết quả học tập."
+      },
+      "payment": {
+        "title": "Thanh toán tiện lợi",
+        "desc": "Dễ dàng nạp tiền, quét mã QR và xem lịch sử giao dịch trong hệ thống."
+      }
+    }
+  },
+  "tos": {
+    "title": "Điều khoản dịch vụ",
+    "lastUpdated": "Cập nhật lần cuối: 20 tháng 5, 2025",
+    "intro": "Khi truy cập và sử dụng nền tảng của chúng tôi, bạn đồng ý với các điều khoản này. Nếu không đồng ý với bất kỳ phần nào, bạn không được phép sử dụng dịch vụ.",
+    "section1": {
+      "title": "1. Sử dụng dịch vụ",
+      "content": "Bạn đồng ý sử dụng dịch vụ phù hợp với các quy định pháp luật hiện hành của địa phương, quốc gia và quốc tế."
+    },
+    "section2": {
+      "title": "2. Trách nhiệm tài khoản",
+      "content": "Bạn chịu trách nhiệm bảo mật thông tin tài khoản và mọi hoạt động diễn ra trong tài khoản của mình."
+    },
+    "section3": {
+      "title": "3. Quyền sở hữu trí tuệ",
+      "content": "Tất cả nội dung, nhãn hiệu và dữ liệu trên trang này, bao gồm phần mềm, cơ sở dữ liệu, văn bản, đồ họa, biểu tượng và liên kết đều thuộc sở hữu của Evally hoặc bên cấp phép."
+    },
+    "section4": {
+      "title": "4. Chấm dứt",
+      "content": "Chúng tôi có thể tạm ngưng hoặc chấm dứt quyền truy cập của bạn bất kỳ lúc nào mà không cần thông báo trước, nếu bạn vi phạm các điều khoản."
+    },
+    "section5": {
+      "title": "5. Miễn trừ trách nhiệm",
+      "content": "Dịch vụ được cung cấp theo nguyên tắc 'như hiện có' và 'có sẵn'. Chúng tôi không bảo đảm bất kỳ điều gì liên quan đến dịch vụ."
+    },
+    "section6": {
+      "title": "6. Giới hạn trách nhiệm",
+      "content": "Evally không chịu trách nhiệm cho bất kỳ thiệt hại gián tiếp, đặc biệt, hoặc hệ quả nào phát sinh từ việc bạn sử dụng dịch vụ."
+    },
+    "section7": {
+      "title": "7. Thay đổi điều khoản",
+      "content": "Chúng tôi có quyền cập nhật hoặc sửa đổi điều khoản này bất kỳ lúc nào mà không cần thông báo trước. Việc bạn tiếp tục sử dụng dịch vụ đồng nghĩa với việc chấp nhận các điều khoản mới."
+    }
+  },
+  "policy": {
+    "title": "Chính sách bảo mật",
+    "lastUpdated": "Cập nhật lần cuối: 20 tháng 5, 2025",
+    "intro": "Chính sách này giải thích cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn khi sử dụng dịch vụ.",
+    "section1": {
+      "title": "1. Thông tin chúng tôi thu thập",
+      "content": "Chúng tôi thu thập thông tin cá nhân do bạn cung cấp và dữ liệu tự động như trình duyệt, địa chỉ IP và hành vi sử dụng."
+    },
+    "section2": {
+      "title": "2. Cách chúng tôi sử dụng thông tin",
+      "content": "Chúng tôi sử dụng thông tin để cung cấp và cải thiện dịch vụ, cá nhân hóa trải nghiệm và đảm bảo an toàn cho nền tảng."
+    },
+    "section3": {
+      "title": "3. Chia sẻ thông tin",
+      "content": "Chúng tôi không bán thông tin cá nhân của bạn. Chúng tôi có thể chia sẻ với bên thứ ba để vận hành nền tảng, phân tích hoặc tuân thủ quy định."
+    },
+    "section4": {
+      "title": "4. Bảo mật dữ liệu",
+      "content": "Chúng tôi áp dụng các biện pháp kỹ thuật và tổ chức hợp lý để bảo vệ dữ liệu khỏi truy cập trái phép, thay đổi, tiết lộ hoặc phá hủy."
+    },
+    "section5": {
+      "title": "5. Cookie và theo dõi",
+      "content": "Chúng tôi sử dụng cookie để nâng cao trải nghiệm. Bạn có thể tắt cookie trong cài đặt trình duyệt, tuy nhiên một số tính năng có thể không hoạt động bình thường."
+    },
+    "section6": {
+      "title": "6. Quyền của bạn",
+      "content": "Bạn có quyền truy cập, chỉnh sửa hoặc xóa thông tin cá nhân bất cứ lúc nào bằng cách liên hệ với đội ngũ hỗ trợ."
+    },
+    "section7": {
+      "title": "7. Thay đổi chính sách",
+      "content": "Chúng tôi có thể cập nhật chính sách bảo mật theo thời gian. Việc tiếp tục sử dụng dịch vụ sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận chính sách mới."
+    }
+  }
+}
