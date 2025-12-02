@@ -1,9 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { lazy, Suspense, type ReactNode } from 'react';
 import { ROUTES } from '@/constant/routes';
-import { CheckoutPage } from '@/modules/checkout';
-import { Log, MyTicket, NotificationManagement, TicketManagement, TransactionManagement } from '@/modules/dashboard';
-import { UsersPaymentManagement } from '@/modules/dashboard/pages/transaction-management/components';
+import { Log, MyTicket, NotificationManagement, TicketManagement } from '@/modules/dashboard';
 
 // Lazy load components
 const Home = lazy(() => import('@/modules/home'));
@@ -14,7 +12,6 @@ const ToSPage = lazy(() => import('@/modules/tos'));
 
 // Dashboard components
 const DashboardLayout = lazy(() => import('@/modules/dashboard/DashboardLayout'));
-const Dashboard = lazy(() => import('@/modules/dashboard/pages/Dashboard'));
 const AccountSettings = lazy(() => import('@/modules/dashboard/pages/settings/AccountSettings'));
 const PermissionManagement = lazy(() => import('@/modules/dashboard/pages/permission-management/PermissionManagement'));
 const ClubCreationQueue = lazy(() => import('@/modules/dashboard/pages/club-queue/ClubCreationQueue'));
@@ -49,21 +46,15 @@ const routes: AppRoute[] = [
   { path: ROUTES.POLICY.path, element: <Policy /> },
   { path: ROUTES.TOS.path, element: <ToSPage /> },
 
-  { path: ROUTES.CHECKOUT.path, element: <CheckoutPage/>},
-
   {
     path: ROUTES.DASHBOARD.path,
     element: <DashboardLayout />, 
     authOnly: false,
     children: [
-      { index: true, element: <Dashboard />},
-
       { path: ROUTES.DASHBOARD.child.USER_MANAGEMENT.path, element: <UserManagement />},
       { path: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.path, element: <PermissionManagement /> },
       { path: ROUTES.DASHBOARD.child.MY_CLUB.path, element: <MyClubs /> },
       { path: ROUTES.DASHBOARD.child.CLUB_QUEUE.path, element: <ClubCreationQueue /> },
-      { path: ROUTES.DASHBOARD.child.MY_TRANSACTION.path, element: <TransactionManagement /> },
-      { path: ROUTES.DASHBOARD.child.TRANSACTION.path, element: <UsersPaymentManagement /> },
       //Notification
       { path: ROUTES.DASHBOARD.child.NOTIFICATION_MANAGEMENT.path, element: <NotificationManagement /> },
 

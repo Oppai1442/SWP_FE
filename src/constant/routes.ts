@@ -28,10 +28,7 @@ export const ROUTES = {
         child: {
             USER_MANAGEMENT: { path: 'user-list', label: 'Quản lý người dùng', getPath: () => '/dashboard/user-list' },
             PERMISSION_MANAGEMENT: { path: 'permissions', label: 'Quản lý quyền', getPath: () => '/dashboard/permissions' },
-            MY_TRANSACTION: { path: 'transaction/my-transaction', label: 'Giao dịch của tôi', getPath: () => '/dashboard/transaction/my-transaction' },
-            TRANSACTION: { path: 'transactions', label: 'Quản lý giao dịch', getPath: () => '/dashboard/transactions' },
             MY_CLUB: { path: 'clubs/my', label: 'Club của tôi', getPath: () => '/dashboard/clubs/my' },
-
 
             // Notification
             NOTIFICATION_MANAGEMENT: {
