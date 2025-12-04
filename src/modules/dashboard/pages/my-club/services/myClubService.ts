@@ -1,4 +1,4 @@
-import { getData, postData, putData } from '@/services/api/apiService';
+import { deleteData, getData, postData, putData } from '@/services/api/apiService';
 import { buildQuery } from '@/utils';
 
 export type ClubStatus = 'ACTIVE' | 'INACTIVE' | 'ARCHIVED' | 'PENDING' | 'REJECTED';
@@ -129,6 +129,27 @@ export interface CreateClubActivityPayload {
   createdById?: number | null;
 }
 
+export interface UpdateClubPayload {
+  code?: string | null;
+  name?: string;
+  description?: string | null;
+  category?: string | null;
+  status?: ClubStatus;
+  meetingLocation?: string | null;
+  mission?: string | null;
+  foundedDate?: string | null;
+  advisorId?: number | null;
+  presidentId?: number | null;
+}
+
+export interface UpdateClubMemberPayload {
+  clubId?: number;
+  memberId?: number;
+  role?: ClubMemberRole;
+  status?: ClubMemberStatus;
+  notes?: string | null;
+}
+
 const unwrap = <T>(response: any): T => (response?.data ?? response) as T;
 
 export const getClubsAPI = async (status: ClubStatus | 'all' = 'all') => {
@@ -149,10 +170,24 @@ export const createClubAPI = async (payload: CreateClubPayload) => {
   return unwrap<ClubDetail>(response);
 };
 
+export const updateClubAPI = async (clubId: number, payload: UpdateClubPayload) => {
+  const response = await putData<ClubDetail>(`/clubs/${clubId}`, payload);
+  return unwrap<ClubDetail>(response);
+};
+
 export const getClubMembersAPI = async (clubId: number) => {
   const query = buildQuery({ clubId });
   const response = await getData<ClubMember[]>(`/club-members?${query}`);
   return unwrap<ClubMember[]>(response);
+};
+
+export const updateClubMemberAPI = async (memberId: number, payload: UpdateClubMemberPayload) => {
+  const response = await putData<ClubMember>(`/club-members/${memberId}`, payload);
+  return unwrap<ClubMember>(response);
+};
+
+export const removeClubMemberAPI = async (memberId: number) => {
+  await deleteData<void>(`/club-members/${memberId}`);
 };
 
 export const getClubSettingsAPI = async (clubId: number) => {
@@ -243,5 +278,13 @@ export const createClubActivityAPI = async (
     clubId,
     ...payload,
   });
+  return unwrap<ClubActivity>(response);
+};
+
+export const updateClubActivityAPI = async (
+  activityId: number,
+  payload: Partial<CreateClubActivityPayload> & { clubId?: number }
+) => {
+  const response = await putData<ClubActivity>(`/club-activities/${activityId}`, payload);
   return unwrap<ClubActivity>(response);
 };

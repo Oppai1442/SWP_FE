@@ -13,14 +13,17 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Crown,
   Eye,
   Image,
   Layers,
   Loader2,
+  LogOut,
   Plus,
   RefreshCcw,
   Search,
   Settings2,
+  UserMinus,
   Users,
   Users2,
   X,
@@ -39,8 +42,12 @@ import {
   getJoinRequestHistoryAPI,
   joinClubByInviteCodeAPI,
   refreshInviteCodeAPI,
+  removeClubMemberAPI,
   reviewClubJoinRequestAPI,
+  updateClubAPI,
+  updateClubMemberAPI,
   updateClubSettingsAPI,
+  updateClubActivityAPI,
   uploadPaymentProofAPI,
   type ClubDetail,
   type ClubJoinRequest,
@@ -51,6 +58,7 @@ import {
   type ClubSettingInfo,
   type ClubStatus,
   type ClubSummary,
+  type UpdateClubPayload,
 } from './services/myClubService';
 import SummaryCard from './components/SummaryCard';
 import LoadingRows from './components/LoadingRows';
@@ -153,6 +161,47 @@ const ACTIVITY_FORM_DEFAULT = {
 
 type ActivityFormState = typeof ACTIVITY_FORM_DEFAULT;
 
+const buildClubUpdatePayload = (
+  club: ClubDetail,
+  overrides: Partial<UpdateClubPayload> = {}
+): UpdateClubPayload => {
+  const toDateOnly = (value?: string | null) => {
+    if (!value) return null;
+    return value.split('T')[0] ?? value;
+  };
+  return {
+    code: overrides.code ?? club.code ?? undefined,
+    name: overrides.name ?? club.name ?? '',
+    description: overrides.description ?? club.description ?? null,
+    category: overrides.category ?? club.category ?? null,
+    status: overrides.status ?? club.status,
+    meetingLocation: overrides.meetingLocation ?? club.meetingLocation ?? null,
+    mission: overrides.mission ?? club.mission ?? null,
+    foundedDate: overrides.foundedDate ?? toDateOnly(club.foundedDate),
+    advisorId:
+      overrides.advisorId !== undefined ? overrides.advisorId : club.advisorId ?? null,
+    presidentId:
+      overrides.presidentId !== undefined ? overrides.presidentId : club.presidentId ?? null,
+  };
+};
+
+const formatDateTimeLocalInput = (value?: string | null) => {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const pad = (num: number) => String(num).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
+    date.getHours()
+  )}:${pad(date.getMinutes())}`;
+};
+
+const toIsoOrUndefined = (value?: string | null) => {
+  if (!value) return undefined;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toISOString();
+};
+
 const MyClubs = () => {
   const { user } = useAuth();
   const [clubs, setClubs] = useState<ClubSummary[]>([]);
@@ -225,6 +274,9 @@ const MyClubs = () => {
   const [isActivitiesLoading, setIsActivitiesLoading] = useState(false);
   const [activityForm, setActivityForm] = useState(ACTIVITY_FORM_DEFAULT);
   const [isCreatingActivity, setIsCreatingActivity] = useState(false);
+  const [memberActionLoading, setMemberActionLoading] = useState<Record<number, boolean>>({});
+  const [isLeavingClub, setIsLeavingClub] = useState(false);
+  const [editingActivityId, setEditingActivityId] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -372,6 +424,11 @@ const fetchJoinHistory = useCallback(
   }, [joinHistoryFilter, user?.id, fetchJoinHistory]);
 
   useEffect(() => {
+    setEditingActivityId(null);
+    setActivityForm(ACTIVITY_FORM_DEFAULT);
+  }, [selectedClub?.id]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [clubStatusFilter, debouncedClubSearch]);
 
@@ -421,6 +478,14 @@ const fetchJoinHistory = useCallback(
   const selectedClubCanManage = selectedClub ? canManageClub(selectedClub) : false;
   const selectedClubJoinRequests = selectedClub ? joinQueueCache[selectedClub.id] ?? [] : [];
   const selectedClubActivities = selectedClub ? activitiesCache[selectedClub.id] ?? [] : [];
+  const currentMemberRecord = useMemo(() => {
+    if (!selectedClub || !user?.id) return null;
+    return selectedClubMembers.find((member) => member.memberId === user.id) ?? null;
+  }, [selectedClub, selectedClubMembers, user?.id]);
+  const currentLeaderMember = useMemo(() => {
+    return selectedClubMembers.find((member) => member.role === 'PRESIDENT') ?? null;
+  }, [selectedClubMembers]);
+  const isCurrentLeader = selectedClub?.presidentId === user?.id;
   const filteredJoinRequests = useMemo(() => {
     if (joinQueueFilter === 'all') {
       return selectedClubJoinRequests;
@@ -686,6 +751,26 @@ const fetchJoinHistory = useCallback(
     }
   };
 
+  const setMemberLoadingState = useCallback((ids: Array<number | undefined>, loading: boolean) => {
+    setMemberActionLoading((prev) => {
+      const next = { ...prev };
+      ids.forEach((id) => {
+        if (!id) return;
+        if (loading) {
+          next[id] = true;
+        } else {
+          delete next[id];
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  const resetActivityForm = useCallback(() => {
+    setActivityForm(ACTIVITY_FORM_DEFAULT);
+    setEditingActivityId(null);
+  }, []);
+
   const handleActivityFormChange = useCallback(
     (field: keyof ActivityFormState, value: string) => {
       setActivityForm((prev) => ({ ...prev, [field]: value }));
@@ -693,7 +778,25 @@ const fetchJoinHistory = useCallback(
     []
   );
 
-  const handleCreateActivity = useCallback(async () => {
+  const handleEditActivity = useCallback(
+    (activity: ClubActivity) => {
+      setEditingActivityId(activity.id);
+      setActivityForm({
+        title: activity.title ?? '',
+        description: activity.description ?? '',
+        startDate: formatDateTimeLocalInput(activity.startDate),
+        endDate: formatDateTimeLocalInput(activity.endDate),
+        location: activity.location ?? '',
+        budget:
+          activity.budget !== undefined && activity.budget !== null ? String(activity.budget) : '',
+        status: activity.status ?? 'PLANNING',
+      });
+      setDetailTab('activities');
+    },
+    [setDetailTab]
+  );
+
+  const handleSubmitActivity = useCallback(async () => {
     if (!selectedClub) return;
     if (!activityForm.title.trim()) {
       toast.error('Activity title is required.');
@@ -704,27 +807,234 @@ const fetchJoinHistory = useCallback(
       const payload = {
         title: activityForm.title.trim(),
         description: activityForm.description.trim() || undefined,
-        startDate: activityForm.startDate || undefined,
-        endDate: activityForm.endDate || undefined,
+        startDate: toIsoOrUndefined(activityForm.startDate),
+        endDate: toIsoOrUndefined(activityForm.endDate),
         location: activityForm.location.trim() || undefined,
         budget: activityForm.budget ? Number(activityForm.budget) : undefined,
         status: activityForm.status,
         createdById: user?.id ?? undefined,
       };
-      const created = await createClubActivityAPI(selectedClub.id, payload);
-      setActivitiesCache((prev) => ({
-        ...prev,
-        [selectedClub.id]: [created, ...(prev[selectedClub.id] ?? [])],
-      }));
-      setActivityForm(ACTIVITY_FORM_DEFAULT);
-      toast.success('Activity added.');
+      if (editingActivityId) {
+        const updated = await updateClubActivityAPI(editingActivityId, {
+          ...payload,
+          clubId: selectedClub.id,
+        });
+        setActivitiesCache((prev) => ({
+          ...prev,
+          [selectedClub.id]: (prev[selectedClub.id] ?? []).map((activity) =>
+            activity.id === updated.id ? updated : activity
+          ),
+        }));
+        toast.success('Activity updated.');
+      } else {
+        const created = await createClubActivityAPI(selectedClub.id, payload);
+        setActivitiesCache((prev) => ({
+          ...prev,
+          [selectedClub.id]: [created, ...(prev[selectedClub.id] ?? [])],
+        }));
+        toast.success('Activity added.');
+      }
+      resetActivityForm();
     } catch (error) {
       console.error(error);
-      toast.error('Unable to create activity.');
+      toast.error(editingActivityId ? 'Unable to update activity.' : 'Unable to create activity.');
     } finally {
       setIsCreatingActivity(false);
     }
-  }, [activityForm, selectedClub, user?.id]);
+  }, [activityForm, selectedClub, user?.id, editingActivityId, resetActivityForm]);
+
+  const handleCancelActivityEdit = useCallback(() => {
+    resetActivityForm();
+  }, [resetActivityForm]);
+
+  const handleTransferLeadership = useCallback(
+    async (targetMember: ClubMember) => {
+      if (!selectedClub) return;
+      const clubId = selectedClub.id;
+      if (targetMember.memberId === selectedClub.presidentId) {
+        toast.error('This member is already the leader.');
+        return;
+      }
+      const confirmed = window.confirm(
+        `Transfer leadership of ${selectedClub.name} to ${targetMember.memberName ?? 'this member'}?`
+      );
+      if (!confirmed) {
+        return;
+      }
+      const previousLeaderId = currentLeaderMember?.id;
+      const affectedIds = [targetMember.id, previousLeaderId].filter(
+        (id): id is number => Boolean(id)
+      );
+      setMemberLoadingState(affectedIds, true);
+      try {
+        const payload = buildClubUpdatePayload(selectedClub, {
+          presidentId: targetMember.memberId ?? null,
+        });
+        await updateClubAPI(clubId, payload);
+        await updateClubMemberAPI(targetMember.id, { role: 'PRESIDENT' });
+        if (previousLeaderId && previousLeaderId !== targetMember.id) {
+          await updateClubMemberAPI(previousLeaderId, { role: 'MEMBER' });
+        }
+        const updatedClub = {
+          ...selectedClub,
+          presidentId: targetMember.memberId ?? null,
+          presidentName: targetMember.memberName,
+        };
+        setSelectedClub((prev) => (prev && prev.id === clubId ? updatedClub : prev));
+        setClubDetailCache((prev) => ({
+          ...prev,
+          [clubId]: {
+            ...(prev[clubId] ?? selectedClub),
+            presidentId: targetMember.memberId ?? null,
+            presidentName: targetMember.memberName,
+          },
+        }));
+        setClubs((prev) =>
+          prev.map((club) =>
+            club.id === clubId
+              ? { ...club, presidentId: targetMember.memberId ?? null, presidentName: targetMember.memberName }
+              : club
+          )
+        );
+        setMembersCache((prev) => ({
+          ...prev,
+          [clubId]: (prev[clubId] ?? selectedClubMembers).map((member) => {
+            if (member.id === targetMember.id) {
+              return { ...member, role: 'PRESIDENT' };
+            }
+            if (previousLeaderId && member.id === previousLeaderId && previousLeaderId !== targetMember.id) {
+              return { ...member, role: 'MEMBER' };
+            }
+            return member;
+          }),
+        }));
+        toast.success('Leadership transferred.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Unable to transfer leadership.');
+      } finally {
+        setMemberLoadingState(affectedIds, false);
+      }
+    },
+    [
+      selectedClub,
+      currentLeaderMember,
+      setMemberLoadingState,
+      setClubDetailCache,
+      setMembersCache,
+      setClubs,
+      selectedClubMembers,
+    ]
+  );
+
+  const handleKickMember = useCallback(
+    async (member: ClubMember) => {
+      if (!selectedClub) return;
+      const clubId = selectedClub.id;
+      if (member.memberId === selectedClub.presidentId) {
+        toast.error('Transfer leadership before removing this member.');
+        return;
+      }
+      const confirmed = window.confirm(
+        `Remove ${member.memberName ?? 'this member'} from ${selectedClub.name}?`
+      );
+      if (!confirmed) {
+        return;
+      }
+      setMemberLoadingState([member.id], true);
+      try {
+        await removeClubMemberAPI(member.id);
+        setMembersCache((prev) => ({
+          ...prev,
+          [clubId]: (prev[clubId] ?? []).filter((item) => item.id !== member.id),
+        }));
+        setSelectedClub((prev) => {
+          if (!prev || prev.id !== clubId) return prev;
+          const nextCount = Math.max((prev.memberCount ?? 0) - 1, 0);
+          return { ...prev, memberCount: nextCount };
+        });
+        setClubDetailCache((prev) => {
+          const existing = prev[clubId];
+          if (!existing) return prev;
+          const nextCount = Math.max((existing.memberCount ?? 0) - 1, 0);
+          return { ...prev, [clubId]: { ...existing, memberCount: nextCount } };
+        });
+        setClubs((prev) =>
+          prev.map((club) => {
+            if (club.id !== clubId) return club;
+            const nextCount = Math.max((club.memberCount ?? 0) - 1, 0);
+            return { ...club, memberCount: nextCount };
+          })
+        );
+        toast.success('Member removed from club.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Unable to remove member.');
+      } finally {
+        setMemberLoadingState([member.id], false);
+      }
+    },
+    [selectedClub, setMemberLoadingState, setMembersCache, setSelectedClub, setClubDetailCache, setClubs]
+  );
+
+  const handleLeaveClub = useCallback(async () => {
+    if (!selectedClub || !currentMemberRecord) {
+      toast.error('You are not part of this club.');
+      return;
+    }
+    const clubId = selectedClub.id;
+    if (isCurrentLeader) {
+      toast.error('Transfer leadership before leaving the club.');
+      return;
+    }
+    const confirmed = window.confirm('Leave this club? You will lose access to its resources.');
+    if (!confirmed) {
+      return;
+    }
+    setIsLeavingClub(true);
+    setMemberLoadingState([currentMemberRecord.id], true);
+    try {
+      await removeClubMemberAPI(currentMemberRecord.id);
+      setMembersCache((prev) => ({
+        ...prev,
+        [clubId]: (prev[clubId] ?? []).filter((member) => member.id !== currentMemberRecord.id),
+      }));
+      setSelectedClub((prev) => {
+        if (!prev || prev.id !== clubId) return prev;
+        const nextCount = Math.max((prev.memberCount ?? 0) - 1, 0);
+        return { ...prev, memberCount: nextCount };
+      });
+      setClubDetailCache((prev) => {
+        const existing = prev[clubId];
+        if (!existing) return prev;
+        const nextCount = Math.max((existing.memberCount ?? 0) - 1, 0);
+        return { ...prev, [clubId]: { ...existing, memberCount: nextCount } };
+      });
+      setClubs((prev) =>
+        prev.map((club) => {
+          if (club.id !== clubId) return club;
+          const nextCount = Math.max((club.memberCount ?? 0) - 1, 0);
+          return { ...club, memberCount: nextCount };
+        })
+      );
+      toast.success('You have left the club.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Unable to leave the club.');
+    } finally {
+      setIsLeavingClub(false);
+      setMemberLoadingState([currentMemberRecord.id], false);
+    }
+  }, [
+    selectedClub,
+    currentMemberRecord,
+    isCurrentLeader,
+    setMemberLoadingState,
+    setMembersCache,
+    setSelectedClub,
+    setClubDetailCache,
+    setClubs,
+  ]);
 
   const handleBankFormChange = useCallback(
     (field: keyof typeof bankForm, value: string) => {
@@ -1299,8 +1609,18 @@ const fetchJoinHistory = useCallback(
           isActivitiesLoading={isActivitiesLoading}
           activityForm={activityForm}
           onActivityFormChange={handleActivityFormChange}
-          onCreateActivity={handleCreateActivity}
+          onSubmitActivity={handleSubmitActivity}
+          onEditActivity={handleEditActivity}
+          onCancelActivityEdit={handleCancelActivityEdit}
+          editingActivityId={editingActivityId}
           isCreatingActivity={isCreatingActivity}
+          currentMember={currentMemberRecord}
+          isCurrentLeader={isCurrentLeader}
+          memberActionLoading={memberActionLoading}
+          isLeavingClub={isLeavingClub}
+          onTransferLeadership={handleTransferLeadership}
+          onKickMember={handleKickMember}
+          onLeaveClub={handleLeaveClub}
           onClose={() => setSelectedClub(null)}
         />
       )}
@@ -1334,8 +1654,18 @@ interface ClubDetailDrawerProps {
   isActivitiesLoading: boolean;
   activityForm: ActivityFormState;
   onActivityFormChange: (field: keyof ActivityFormState, value: string) => void;
-  onCreateActivity: () => void;
+  onSubmitActivity: () => void;
+  onEditActivity: (activity: ClubActivity) => void;
+  onCancelActivityEdit: () => void;
+  editingActivityId: number | null;
   isCreatingActivity: boolean;
+  currentMember: ClubMember | null;
+  isCurrentLeader: boolean;
+  memberActionLoading: Record<number, boolean>;
+  isLeavingClub: boolean;
+  onTransferLeadership: (member: ClubMember) => void;
+  onKickMember: (member: ClubMember) => void;
+  onLeaveClub: () => void;
   onClose: () => void;
 }
 
@@ -1365,10 +1695,22 @@ const ClubDetailDrawer = ({
   isActivitiesLoading,
   activityForm,
   onActivityFormChange,
-  onCreateActivity,
+  onSubmitActivity,
+  onEditActivity,
+  onCancelActivityEdit,
+  editingActivityId,
   isCreatingActivity,
+  currentMember,
+  isCurrentLeader,
+  memberActionLoading,
+  isLeavingClub,
+  onTransferLeadership,
+  onKickMember,
+  onLeaveClub,
   onClose,
 }: ClubDetailDrawerProps) => {
+  const isEditingActivity = Boolean(editingActivityId);
+  const showMemberActions = canManage || Boolean(currentMember);
   const handleCopyInviteCode = async () => {
     if (!club.inviteCode) {
       toast.error('Invite code not available.');
@@ -1451,29 +1793,112 @@ const ClubDetailDrawer = ({
               ) : members.length === 0 ? (
                 <p className="py-6 text-sm text-slate-500">No members to display.</p>
               ) : (
-                <div className="overflow-x-auto rounded-2xl border border-slate-100">
-                  <table className="min-w-full divide-y divide-slate-100 text-sm">
-                    <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
-                      <tr>
-                        <th className="px-4 py-3 text-left">Member</th>
-                        <th className="px-4 py-3 text-left">Role</th>
-                        <th className="px-4 py-3 text-left">Status</th>
-                        <th className="px-4 py-3 text-left">Joined</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {members.map((member) => (
-                        <tr key={member.id} className="text-slate-700">
-                          <td className="px-4 py-3 font-medium text-slate-900">
-                            {member.memberName ?? 'Unknown'}
-                          </td>
-                          <td className="px-4 py-3 text-slate-500">{member.role}</td>
-                          <td className="px-4 py-3 text-slate-500">{member.status}</td>
-                          <td className="px-4 py-3 text-slate-500">{formatDate(member.joinedAt)}</td>
+                <div className="space-y-4">
+                  {currentMember && (
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">Your membership</p>
+                          <p className="text-xs text-slate-500">
+                            Role:{' '}
+                            <span className="font-semibold text-slate-800">{currentMember.role}</span>
+                            {currentMember.joinedAt && (
+                              <span className="ml-2">
+                                • Joined {formatDate(currentMember.joinedAt)}
+                              </span>
+                            )}
+                          </p>
+                          {isCurrentLeader && (
+                            <p className="text-xs text-amber-600">
+                              Transfer leadership to another member before leaving this club.
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={onLeaveClub}
+                          disabled={isCurrentLeader || isLeavingClub}
+                          className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                            isCurrentLeader
+                              ? 'cursor-not-allowed border-amber-200 text-amber-500'
+                              : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
+                          }`}
+                        >
+                          <LogOut className="h-4 w-4" />
+                          {isCurrentLeader ? 'Transfer leadership to leave' : isLeavingClub ? 'Leaving...' : 'Leave club'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                    <table className="min-w-full divide-y divide-slate-100 text-sm">
+                      <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
+                        <tr>
+                          <th className="px-4 py-3 text-left">Member</th>
+                          <th className="px-4 py-3 text-left">Role</th>
+                          <th className="px-4 py-3 text-left">Status</th>
+                          <th className="px-4 py-3 text-left">Joined</th>
+                          {showMemberActions && <th className="px-4 py-3 text-right">Actions</th>}
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {members.map((member) => {
+                          const rowLoading = Boolean(memberActionLoading[member.id]);
+                          const isSelf = currentMember && member.id === currentMember.id;
+                          const isLeader = club.presidentId === member.memberId;
+                          return (
+                            <tr key={member.id} className="text-slate-700">
+                              <td className="px-4 py-3 font-medium text-slate-900">
+                                {member.memberName ?? 'Unknown'}
+                              </td>
+                              <td className="px-4 py-3 text-slate-500">{member.role}</td>
+                              <td className="px-4 py-3 text-slate-500">{member.status}</td>
+                              <td className="px-4 py-3 text-slate-500">{formatDate(member.joinedAt)}</td>
+                              {showMemberActions && (
+                                <td className="px-4 py-3">
+                                  <div className="flex flex-wrap justify-end gap-2">
+                                    {canManage && !isLeader && (
+                                      <button
+                                        type="button"
+                                        onClick={() => onTransferLeadership(member)}
+                                        disabled={rowLoading}
+                                        className="inline-flex items-center gap-1 rounded-2xl border border-orange-200 px-3 py-1 text-xs font-semibold text-orange-500 transition hover:bg-orange-50 disabled:opacity-50"
+                                      >
+                                        <Crown className="h-3.5 w-3.5" />
+                                        Leader
+                                      </button>
+                                    )}
+                                    {canManage && !isSelf && (
+                                      <button
+                                        type="button"
+                                        onClick={() => onKickMember(member)}
+                                        disabled={rowLoading || isLeader}
+                                        className="inline-flex items-center gap-1 rounded-2xl border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-500 transition hover:bg-rose-50 disabled:opacity-50"
+                                      >
+                                        <UserMinus className="h-3.5 w-3.5" />
+                                        Remove
+                                      </button>
+                                    )}
+                                    {isSelf && (
+                                      <button
+                                        type="button"
+                                        onClick={onLeaveClub}
+                                        disabled={rowLoading || isCurrentLeader || isLeavingClub}
+                                        className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-50"
+                                      >
+                                        <LogOut className="h-3.5 w-3.5" />
+                                        {isCurrentLeader ? 'Transfer first' : isLeavingClub ? 'Leaving...' : 'Leave'}
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              )}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
@@ -1483,20 +1908,37 @@ const ClubDetailDrawer = ({
             <div className="mt-6 space-y-4">
               {canManage && (
                 <div className="rounded-2xl border border-slate-100 bg-white p-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Create activity</p>
-                      <p className="text-xs text-slate-500">Only leaders can add new club activities.</p>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {isEditingActivity ? 'Update activity' : 'Create activity'}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {isEditingActivity
+                          ? 'Adjust the selected activity details and publish the changes.'
+                          : 'Only leaders can add new club activities.'}
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={onCreateActivity}
-                      disabled={isCreatingActivity}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
-                    >
-                      {isCreatingActivity && <Loader2 className="h-4 w-4 animate-spin" />}
-                      Publish
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {isEditingActivity && (
+                        <button
+                          type="button"
+                          onClick={onCancelActivityEdit}
+                          className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-amber-200 hover:text-amber-500"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={onSubmitActivity}
+                        disabled={isCreatingActivity}
+                        className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
+                      >
+                        {isCreatingActivity && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {isEditingActivity ? 'Save changes' : 'Publish'}
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -1524,7 +1966,7 @@ const ClubDetailDrawer = ({
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Start date
                       <input
-                        type="date"
+                        type="datetime-local"
                         value={activityForm.startDate}
                         onChange={(event) => onActivityFormChange('startDate', event.target.value)}
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
@@ -1533,7 +1975,7 @@ const ClubDetailDrawer = ({
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       End date
                       <input
-                        type="date"
+                        type="datetime-local"
                         value={activityForm.endDate}
                         onChange={(event) => onActivityFormChange('endDate', event.target.value)}
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
@@ -1588,14 +2030,16 @@ const ClubDetailDrawer = ({
                 <div className="flex items-center justify-center py-10 text-slate-400">
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
-              ) : selectedClubActivities.length === 0 ? (
+              ) : activities.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-500">No activities published yet.</p>
               ) : (
                 <div className="space-y-3">
-                  {selectedClubActivities.map((activity) => (
+                  {activities.map((activity) => (
                     <div
                       key={activity.id}
-                      className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+                      className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${
+                        editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
+                      }`}
                     >
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
@@ -1604,23 +2048,40 @@ const ClubDetailDrawer = ({
                             <p className="text-xs text-slate-500">{activity.description}</p>
                           )}
                         </div>
-                        <span
-                          className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${
-                            activityStatusMeta[activity.status].className
-                          }`}
-                        >
-                          {activityStatusMeta[activity.status].label}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${
+                              activityStatusMeta[activity.status].className
+                            }`}
+                          >
+                            {activityStatusMeta[activity.status].label}
+                          </span>
+                          {canManage && (
+                            <button
+                              type="button"
+                              onClick={() => onEditActivity(activity)}
+                              className="rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
                         {activity.startDate && (
                           <span>
-                            Starts <strong className="text-slate-900">{formatDate(activity.startDate)}</strong>
+                            Starts{' '}
+                            <strong className="text-slate-900">
+                              {formatDateTime(activity.startDate)}
+                            </strong>
                           </span>
                         )}
                         {activity.endDate && (
                           <span>
-                            Ends <strong className="text-slate-900">{formatDate(activity.endDate)}</strong>
+                            Ends{' '}
+                            <strong className="text-slate-900">
+                              {formatDateTime(activity.endDate)}
+                            </strong>
                           </span>
                         )}
                         {activity.location && (
