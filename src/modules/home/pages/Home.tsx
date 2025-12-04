@@ -1,5 +1,8 @@
 ﻿import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ClubImage from "../../../assets/img/home/CLB-FPTU.png";
+import ClubImage1 from "../../../assets/img/home/CLB-FPTU1.png";
+import ClubImage2 from "../../../assets/img/home/CLB-FPTU2.png";
 
 const ClubHubHome = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -8,7 +11,7 @@ const ClubHubHome = () => {
 
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedClubs, setSelectedClubs] = useState<{
-    [group: string]: any | null;
+    [group: string]: unknown | null;
   }>({});
 
   // ==== MOCK DATA 4 NHÓM CLB ====
@@ -137,8 +140,7 @@ const ClubHubHome = () => {
           id: 8,
           name: "Mây Mưa Club - FPT Japan Club",
           details: {
-            intro:
-              "FPT 日本 クラブ - CLB Nhật Đại học FPT.",
+            intro: "FPT 日本 クラブ - CLB Nhật Đại học FPT.",
             contact: {
               leader: "Hoàng Mỹ Dung",
               phone: "0916 555 444",
@@ -150,6 +152,8 @@ const ClubHubHome = () => {
       ],
     },
   ];
+
+  const images = [ClubImage, ClubImage1, ClubImage2];
 
   // === Scroll observer ===
   useEffect(() => {
@@ -239,6 +243,15 @@ const ClubHubHome = () => {
       description: "KPI, tỉ lệ tham gia, doanh thu cuối kỳ.",
     },
   ];
+
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [images.length]);
 
   return (
     <div className="min-h-screen bg-white text-slate-900 relative overflow-hidden">
@@ -351,12 +364,18 @@ const ClubHubHome = () => {
           </div>
 
           {/* Right: Image */}
-          <div className="flex justify-center items-start">
-            <img
-              src={ClubImage}
-              alt="CLB"
-              className="rounded-xl shadow-lg w-full"
-            />
+          <div className="relative w-full h-64 overflow-hidden rounded-2xl">
+            <AnimatePresence>
+              <motion.img
+                key={index}
+                src={images[index]}
+                className="absolute w-full h-full object-cover"
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -100, opacity: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              />
+            </AnimatePresence>
           </div>
         </div>
       </section>
