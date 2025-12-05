@@ -5,6 +5,7 @@ export { default as UserManagement } from './pages/user-management/UserManagemen
 export { default as PermissionManagement } from './pages/permission-management/PermissionManagement';
 export { default as ClubCreationQueue } from './pages/club-queue/ClubCreationQueue';
 export { default as MyClubs } from './pages/my-club/MyClubs';
+export { default as ClubManagement } from './pages/club-management/ClubManagement';
 
 
 export { default as NotificationManagement } from './pages/notification/NotificationPage'
