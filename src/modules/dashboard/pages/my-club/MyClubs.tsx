@@ -1669,6 +1669,8 @@ interface ClubDetailDrawerProps {
   onClose: () => void;
 }
 
+type DrawerClubMember = ClubMember & { __virtual?: boolean };
+
 const ClubDetailDrawer = ({
   club,
   members,
@@ -1711,6 +1713,50 @@ const ClubDetailDrawer = ({
 }: ClubDetailDrawerProps) => {
   const isEditingActivity = Boolean(editingActivityId);
   const showMemberActions = canManage || Boolean(currentMember);
+  const selfMember = useMemo<DrawerClubMember | null>(() => {
+    if (currentMember) {
+      return currentMember as DrawerClubMember;
+    }
+    if (isCurrentLeader && club.presidentId) {
+      return {
+        id: -Math.abs(club.presidentId),
+        clubId: club.id,
+        memberId: club.presidentId,
+        memberName: club.presidentName ?? 'Club leader',
+        role: 'PRESIDENT',
+        status: 'ACTIVE',
+        joinedAt: club.createdAt ?? club.updatedAt ?? null,
+        notes: null,
+        __virtual: true,
+      };
+    }
+    return null;
+  }, [club, currentMember, isCurrentLeader]);
+  const displayedMembers = useMemo<DrawerClubMember[]>(() => {
+    const unique = [...members] as DrawerClubMember[];
+    const addMember = (memberToAdd?: DrawerClubMember | null) => {
+      if (!memberToAdd) return;
+      const exists = unique.some((member) => member.memberId === memberToAdd.memberId);
+      if (!exists) {
+        unique.push(memberToAdd);
+      }
+    };
+    addMember(selfMember);
+    if (club.presidentId) {
+      addMember({
+        id: -Math.abs(club.presidentId),
+        clubId: club.id,
+        memberId: club.presidentId,
+        memberName: club.presidentName ?? 'Club leader',
+        role: 'PRESIDENT',
+        status: 'ACTIVE',
+        joinedAt: club.createdAt ?? club.updatedAt ?? null,
+        notes: null,
+        __virtual: true,
+      });
+    }
+    return unique;
+  }, [club, members, selfMember]);
   const handleCopyInviteCode = async () => {
     if (!club.inviteCode) {
       toast.error('Invite code not available.');
@@ -1781,7 +1827,45 @@ const ClubDetailDrawer = ({
           )}
 
           {activeTab === 'members' && (
-            <div className="mt-6">
+            <div className="mt-6 space-y-4">
+              {selfMember && (
+                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">Your membership</p>
+                      <p className="text-xs text-slate-500">
+                        Role:{' '}
+                        <span className="font-semibold text-slate-800">{selfMember.role}</span>
+                        {selfMember.joinedAt && (
+                          <span className="ml-2">Joined {formatDate(selfMember.joinedAt)}</span>
+                        )}
+                      </p>
+                      {isCurrentLeader && (
+                        <p className="text-xs text-amber-600">
+                          Transfer leadership to another member before leaving this club.
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={onLeaveClub}
+                      disabled={isCurrentLeader || isLeavingClub || !currentMember}
+                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                        isCurrentLeader || !currentMember
+                          ? 'cursor-not-allowed border-amber-200 text-amber-500'
+                          : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
+                      }`}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      {isCurrentLeader
+                        ? 'Transfer leadership to leave'
+                        : isLeavingClub
+                          ? 'Leaving...'
+                          : 'Leave club'}
+                    </button>
+                  </div>
+                </div>
+              )}
               {!membersVisible ? (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-700">
                   Member list is hidden by the club leader.
@@ -1790,120 +1874,84 @@ const ClubDetailDrawer = ({
                 <div className="flex items-center justify-center py-10 text-slate-400">
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
-              ) : members.length === 0 ? (
+              ) : displayedMembers.length === 0 ? (
                 <p className="py-6 text-sm text-slate-500">No members to display.</p>
               ) : (
-                <div className="space-y-4">
-                  {currentMember && (
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">Your membership</p>
-                          <p className="text-xs text-slate-500">
-                            Role:{' '}
-                            <span className="font-semibold text-slate-800">{currentMember.role}</span>
-                            {currentMember.joinedAt && (
-                              <span className="ml-2">
-                                • Joined {formatDate(currentMember.joinedAt)}
-                              </span>
-                            )}
-                          </p>
-                          {isCurrentLeader && (
-                            <p className="text-xs text-amber-600">
-                              Transfer leadership to another member before leaving this club.
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={onLeaveClub}
-                          disabled={isCurrentLeader || isLeavingClub}
-                          className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                            isCurrentLeader
-                              ? 'cursor-not-allowed border-amber-200 text-amber-500'
-                              : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
-                          }`}
-                        >
-                          <LogOut className="h-4 w-4" />
-                          {isCurrentLeader ? 'Transfer leadership to leave' : isLeavingClub ? 'Leaving...' : 'Leave club'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <div className="overflow-x-auto rounded-2xl border border-slate-100">
-                    <table className="min-w-full divide-y divide-slate-100 text-sm">
-                      <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
-                        <tr>
-                          <th className="px-4 py-3 text-left">Member</th>
-                          <th className="px-4 py-3 text-left">Role</th>
-                          <th className="px-4 py-3 text-left">Status</th>
-                          <th className="px-4 py-3 text-left">Joined</th>
-                          {showMemberActions && <th className="px-4 py-3 text-right">Actions</th>}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {members.map((member) => {
-                          const rowLoading = Boolean(memberActionLoading[member.id]);
-                          const isSelf = currentMember && member.id === currentMember.id;
-                          const isLeader = club.presidentId === member.memberId;
-                          return (
-                            <tr key={member.id} className="text-slate-700">
-                              <td className="px-4 py-3 font-medium text-slate-900">
-                                {member.memberName ?? 'Unknown'}
+                <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                  <table className="min-w-full divide-y divide-slate-100 text-sm">
+                    <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
+                      <tr>
+                        <th className="px-4 py-3 text-left">Member</th>
+                        <th className="px-4 py-3 text-left">Role</th>
+                        <th className="px-4 py-3 text-left">Status</th>
+                        <th className="px-4 py-3 text-left">Joined</th>
+                        {showMemberActions && <th className="px-4 py-3 text-right">Actions</th>}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {displayedMembers.map((member) => {
+                        const rowLoading = Boolean(memberActionLoading[member.id]);
+                        const isSelf = Boolean(selfMember) && member.memberId === selfMember?.memberId;
+                        const isSelfActual =
+                          Boolean(currentMember) && member.memberId === currentMember?.memberId;
+                        const isLeader = club.presidentId === member.memberId;
+                        const isVirtual = Boolean((member as DrawerClubMember).__virtual);
+                        return (
+                          <tr key={member.id} className="text-slate-700">
+                            <td className="px-4 py-3 font-medium text-slate-900">
+                              {member.memberName ?? 'Unknown'}
+                            </td>
+                            <td className="px-4 py-3 text-slate-500">{member.role}</td>
+                            <td className="px-4 py-3 text-slate-500">{member.status}</td>
+                            <td className="px-4 py-3 text-slate-500">{formatDate(member.joinedAt)}</td>
+                            {showMemberActions && (
+                              <td className="px-4 py-3">
+                                <div className="flex flex-wrap justify-end gap-2">
+                                  {canManage && !isLeader && !isVirtual && (
+                                    <button
+                                      type="button"
+                                      onClick={() => onTransferLeadership(member)}
+                                      disabled={rowLoading}
+                                      className="inline-flex items-center gap-1 rounded-2xl border border-orange-200 px-3 py-1 text-xs font-semibold text-orange-500 transition hover:bg-orange-50 disabled:opacity-50"
+                                    >
+                                      <Crown className="h-3.5 w-3.5" />
+                                      Leader
+                                    </button>
+                                  )}
+                                  {canManage && !isSelf && !isVirtual && (
+                                    <button
+                                      type="button"
+                                      onClick={() => onKickMember(member)}
+                                      disabled={rowLoading || isLeader}
+                                      className="inline-flex items-center gap-1 rounded-2xl border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-500 transition hover:bg-rose-50 disabled:opacity-50"
+                                    >
+                                      <UserMinus className="h-3.5 w-3.5" />
+                                      Remove
+                                    </button>
+                                  )}
+                                  {isSelf && (
+                                    <button
+                                      type="button"
+                                      onClick={onLeaveClub}
+                                      disabled={rowLoading || isCurrentLeader || isLeavingClub || !isSelfActual}
+                                      className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-50"
+                                    >
+                                      <LogOut className="h-3.5 w-3.5" />
+                                      {isCurrentLeader ? 'Transfer first' : isLeavingClub ? 'Leaving...' : 'Leave'}
+                                    </button>
+                                  )}
+                                </div>
                               </td>
-                              <td className="px-4 py-3 text-slate-500">{member.role}</td>
-                              <td className="px-4 py-3 text-slate-500">{member.status}</td>
-                              <td className="px-4 py-3 text-slate-500">{formatDate(member.joinedAt)}</td>
-                              {showMemberActions && (
-                                <td className="px-4 py-3">
-                                  <div className="flex flex-wrap justify-end gap-2">
-                                    {canManage && !isLeader && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onTransferLeadership(member)}
-                                        disabled={rowLoading}
-                                        className="inline-flex items-center gap-1 rounded-2xl border border-orange-200 px-3 py-1 text-xs font-semibold text-orange-500 transition hover:bg-orange-50 disabled:opacity-50"
-                                      >
-                                        <Crown className="h-3.5 w-3.5" />
-                                        Leader
-                                      </button>
-                                    )}
-                                    {canManage && !isSelf && (
-                                      <button
-                                        type="button"
-                                        onClick={() => onKickMember(member)}
-                                        disabled={rowLoading || isLeader}
-                                        className="inline-flex items-center gap-1 rounded-2xl border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-500 transition hover:bg-rose-50 disabled:opacity-50"
-                                      >
-                                        <UserMinus className="h-3.5 w-3.5" />
-                                        Remove
-                                      </button>
-                                    )}
-                                    {isSelf && (
-                                      <button
-                                        type="button"
-                                        onClick={onLeaveClub}
-                                        disabled={rowLoading || isCurrentLeader || isLeavingClub}
-                                        className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-50"
-                                      >
-                                        <LogOut className="h-3.5 w-3.5" />
-                                        {isCurrentLeader ? 'Transfer first' : isLeavingClub ? 'Leaving...' : 'Leave'}
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                              )}
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
           )}
-
           {activeTab === 'activities' && (
             <div className="mt-6 space-y-4">
               {canManage && (
