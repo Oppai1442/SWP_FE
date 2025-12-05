@@ -14,13 +14,7 @@ export interface ClubCreationRequest {
   reviewedByName: string | null;
   note: string | null;
   submittedAt: string | null;
-  updatedAt: string | null;
-}
-
-interface ApiResponse<T> {
-  status: string;
-  message: string;
-  data: T;
+  reviewedAt: string | null;
 }
 
 export interface ClubCreationQueueDecisionPayload {
@@ -39,10 +33,10 @@ export const getClubCreationRequestsAPI = async (status: ClubCreationRequestStat
   return response.data ?? response;
 };
 
-export const decideClubCreationRequestAPI = async (requestId: number, payload: ClubCreationQueueDecisionPayload) => {
-  const response = await postData<ApiResponse<ClubCreationRequest>>(
-    `/club-queue/creation/${requestId}/decision`,
-    payload
-  );
+export const decideClubCreationRequestAPI = async (
+  requestId: number,
+  payload: ClubCreationQueueDecisionPayload
+) => {
+  const response = await postData<ClubCreationRequest>(`/club-queue/creation/${requestId}/decision`, payload);
   return response.data ?? response;
 };
