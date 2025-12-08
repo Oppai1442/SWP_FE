@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { Navbar, Sidebar } from "./components";
-import { Settings, Users, Key, FileText, FlaskConical, Workflow, Bell } from 'lucide-react';
+import { Settings, Users, Key, FileText, FlaskConical, Workflow, Bell, Building2, Compass } from 'lucide-react';
 import { useEffect, useMemo, useState } from "react";
 import { ROUTES } from "@/constant/routes";
 import { useAuth } from "@/context/AuthContext";
@@ -55,9 +55,23 @@ const DashboardLayout = () => {
       roles: ["ROLE_ADMIN"]
     },
     {
+      id: ROUTES.DASHBOARD.child.CLUB_MANAGEMENT.path,
+      label: ROUTES.DASHBOARD.child.CLUB_MANAGEMENT.label,
+      icon: Building2,
+      submenu: null,
+      roles: ["ROLE_ADMIN"]
+    },
+    {
       id: ROUTES.DASHBOARD.child.MY_CLUB.path,
       label: ROUTES.DASHBOARD.child.MY_CLUB.label,
       icon: FlaskConical,
+      submenu: null,
+      roles: ["ROLE_USER", "ROLE_ADMIN", "ROLE_STAFF"]
+    },
+    {
+      id: ROUTES.DASHBOARD.child.CLUB_BROWSER.path,
+      label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
+      icon: Compass,
       submenu: null,
       roles: ["ROLE_USER", "ROLE_ADMIN", "ROLE_STAFF"]
     },

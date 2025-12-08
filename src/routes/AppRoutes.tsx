@@ -15,7 +15,10 @@ const DashboardLayout = lazy(() => import('@/modules/dashboard/DashboardLayout')
 const AccountSettings = lazy(() => import('@/modules/dashboard/pages/settings/AccountSettings'));
 const PermissionManagement = lazy(() => import('@/modules/dashboard/pages/permission-management/PermissionManagement'));
 const ClubCreationQueue = lazy(() => import('@/modules/dashboard/pages/club-queue/ClubCreationQueue'));
+const ClubManagement = lazy(() => import('@/modules/dashboard/pages/club-management/ClubManagement'));
 const MyClubs = lazy(() => import('@/modules/dashboard/pages/my-club/MyClubs'));
+
+const ClubBrowser = lazy(() => import('@/modules/dashboard/pages/club-browser/ClubBrowser'));
 // const NotificationManagement = lazy(() => import('@/modules/dashboard/pages/notification/notification-management/NotificationManagement'));
 const UserManagement = lazy(() => import('@/modules/dashboard/pages/user-management/UserManagement'));
 
@@ -53,7 +56,9 @@ const routes: AppRoute[] = [
     children: [
       { path: ROUTES.DASHBOARD.child.USER_MANAGEMENT.path, element: <UserManagement />},
       { path: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.path, element: <PermissionManagement /> },
-      { path: ROUTES.DASHBOARD.child.MY_CLUB.path, element: <MyClubs /> },
+      { path: ROUTES.DASHBOARD.child.MY_CLUB.path, element: <MyClubs /> },
+      { path: ROUTES.DASHBOARD.child.CLUB_BROWSER.path, element: <ClubBrowser /> },
+      { path: ROUTES.DASHBOARD.child.CLUB_MANAGEMENT.path, element: <ClubManagement /> },
       { path: ROUTES.DASHBOARD.child.CLUB_QUEUE.path, element: <ClubCreationQueue /> },
       //Notification
       { path: ROUTES.DASHBOARD.child.NOTIFICATION_MANAGEMENT.path, element: <NotificationManagement /> },
