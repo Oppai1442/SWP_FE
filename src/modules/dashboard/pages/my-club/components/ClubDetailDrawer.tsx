@@ -208,11 +208,10 @@ const ClubDetailDrawer = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === tab.id
-                    ? 'bg-white text-orange-600 shadow'
-                    : 'text-slate-500 hover:text-orange-500'
-                }`}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${activeTab === tab.id
+                  ? 'bg-white text-orange-600 shadow'
+                  : 'text-slate-500 hover:text-orange-500'
+                  }`}
               >
                 {tab.label}
               </button>
@@ -254,17 +253,16 @@ const ClubDetailDrawer = ({
                       type="button"
                       onClick={onLeaveClub}
                       disabled={isCurrentLeader || isLeavingClub || !currentMember}
-                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                        isCurrentLeader || !currentMember
-                          ? 'cursor-not-allowed border-amber-200 text-amber-500'
-                          : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
-                      }`}
+                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${isCurrentLeader || !currentMember
+                        ? 'cursor-not-allowed border-amber-200 text-amber-500'
+                        : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
+                        }`}
                     >
                       <LogOut className="h-4 w-4" />
                       {isCurrentLeader
                         ? 'Chuyển giao quyền lãnh đạo để rời đi'
-                                                  : isLeavingClub
-                                                    ? 'Đang rời đi...'                            : 'Rời câu lạc bộ'}
+                        : isLeavingClub
+                          ? 'Đang rời đi...' : 'Rời câu lạc bộ'}
                     </button>
                   </div>
                 </div>
@@ -377,7 +375,7 @@ const ClubDetailDrawer = ({
                           onClick={onCancelActivityEdit}
                           className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-amber-200 hover:text-amber-500"
                         >
-Hủy bỏ
+                          Hủy bỏ
                         </button>
                       )}
                       <button
@@ -455,7 +453,7 @@ Hủy bỏ
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       >
                         <option value="PLANNING">Lập kế hoạch</option>
-<option value="APPROVED">Đã phê duyệt</option>
+                        <option value="APPROVED">Đã phê duyệt</option>
                         <option value="COMPLETED">Đã hoàn thành</option>
                         <option value="CANCELLED">Đã hủy</option>
                       </select>
@@ -488,9 +486,8 @@ Hủy bỏ
                   {activities.map((activity) => (
                     <div
                       key={activity.id}
-                      className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${
-                        editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
-                      }`}
+                      className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
+                        }`}
                     >
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
@@ -501,9 +498,8 @@ Hủy bỏ
                         </div>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${
-                              activityStatusMeta[activity.status].className
-                            }`}
+                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${activityStatusMeta[activity.status].className
+                              }`}
                           >
                             {activityStatusMeta[activity.status].label}
                           </span>
@@ -513,7 +509,8 @@ Hủy bỏ
                               onClick={() => onEditActivity(activity)}
                               className="rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
                             >
-                    Sửa                          )}
+                              Sửa
+                            </button>)}
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
@@ -625,23 +622,22 @@ Hủy bỏ
                           </div>
                           <div className="flex flex-col justify-between">
                             Bằng chứng thanh toán                              <p className="text-sm font-semibold text-slate-900">
-                                {request.applicantName ?? 'Người nộp đơn'}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                Đảm bảo thông tin chuyển khoản khớp trước khi phê duyệt.
-                              </p>
-                            </div>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <a
-                                href={request.paymentProofUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
-                              >
-                                <Image className="h-3.5 w-3.5" />
-                                Xem toàn bộ kích thước
-                              </a>
-                            </div>
+                              {request.applicantName ?? 'Người nộp đơn'}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Đảm bảo thông tin chuyển khoản khớp trước khi phê duyệt.
+                            </p>
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <a
+                              href={request.paymentProofUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
+                            >
+                              <Image className="h-3.5 w-3.5" />
+                              Xem toàn bộ kích thước
+                            </a>
                           </div>
                         </div>
                       ) : (
@@ -750,7 +746,7 @@ Hủy bỏ
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 interface DetailItemProps {
@@ -774,9 +770,8 @@ interface SettingItemProps {
 const SettingItem = ({ icon: Icon, label, value }: SettingItemProps) => (
   <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3">
     <span
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${
-        value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-      }`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+        }`}
     >
       <Icon className="h-4 w-4" />
     </span>
@@ -785,9 +780,8 @@ const SettingItem = ({ icon: Icon, label, value }: SettingItemProps) => (
       <p className="text-xs text-slate-500">{value ? 'Đã bật' : 'Đã tắt'}</p>
     </div>
     <span
-      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-        value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-      }`}
+      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+        }`}
     >
       {value ? 'BẬT' : 'TẮT'}
     </span>
@@ -880,12 +874,12 @@ const BankInstructionCard = ({
                 placeholder="NGUYEN VAN A"
               />
             </label>
-                          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Ghi chú chuyển khoản                <input
-                  type="text"
-                  value={bankForm.bankTransferNote}
-                  onChange={(event) => onChange('bankTransferNote', event.target.value)}
-                  className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Ghi chú chuyển khoản                <input
+                type="text"
+                value={bankForm.bankTransferNote}
+                onChange={(event) => onChange('bankTransferNote', event.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder={`THAM GIA-${club.code ?? 'CAULACBO'}`}
               />
             </label>
@@ -921,8 +915,8 @@ const BankInstructionCard = ({
                 <span className="font-semibold text-slate-900">{bankId}</span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
-                <span className="text-slate-500">Tài khoản
-                <span className="font-semibold text-slate-900">{accountNo}</span>
+                <span className="text-slate-500">Tài khoản</span>
+                  <span className="font-semibold text-slate-900">{accountNo}</span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Tên tài khoản</span>

@@ -355,7 +355,6 @@ const ClubBrowser = () => {
           disabled={isLoadingClubs}
         >
 Refresh</button>
-        </button>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -443,33 +442,35 @@ Refresh</button>
         />
       </section>
 
-      {isJoinModalOpen && selectedClub && (
-        <JoinClubModal
-          form={joinForm}
-          isSubmitting={isJoining}
-          preview={joinPreview}
-          isPreviewLoading={isPreviewLoading}
-          previewError={previewError}
-          paymentProofUrl={paymentProof.url}
-          paymentProofFileName={paymentProof.fileName}
-          isUploadingProof={isUploadingProof}
-          proofError={paymentProofError}
-          allowUpload={Boolean(selectedClub)}
-          onUploadProof={handlePaymentProofUpload}
-          onRemoveProof={handleRemovePaymentProof}
-          onChange={(field, value) => setJoinForm((prev) => ({ ...prev, [field]: value }))}
-          onSubmit={handleJoinClub}
-          onClose={closeJoinModal}
-          modalTitle={`Tham gia ${selectedClub.name}`}
-          showInviteCodeInput={isManualInviteFlow}
-          inviteCodeHint={
-            isManualInviteFlow
-              ? 'Cung cấp mã mời bạn nhận được từ trưởng nhóm câu lạc bộ.'
-              : 'Mã mời được xử lý tự động cho yêu cầu này.'
-          }
-        />
-      )}
-    </div>
+      {
+    isJoinModalOpen && selectedClub && (
+      <JoinClubModal
+        form={joinForm}
+        isSubmitting={isJoining}
+        preview={joinPreview}
+        isPreviewLoading={isPreviewLoading}
+        previewError={previewError}
+        paymentProofUrl={paymentProof.url}
+        paymentProofFileName={paymentProof.fileName}
+        isUploadingProof={isUploadingProof}
+        proofError={paymentProofError}
+        allowUpload={Boolean(selectedClub)}
+        onUploadProof={handlePaymentProofUpload}
+        onRemoveProof={handleRemovePaymentProof}
+        onChange={(field, value) => setJoinForm((prev) => ({ ...prev, [field]: value }))}
+        onSubmit={handleJoinClub}
+        onClose={closeJoinModal}
+        modalTitle={`Tham gia ${selectedClub.name}`}
+        showInviteCodeInput={isManualInviteFlow}
+        inviteCodeHint={
+          isManualInviteFlow
+            ? 'Cung cấp mã mời bạn nhận được từ trưởng nhóm câu lạc bộ.'
+            : 'Mã mời được xử lý tự động cho yêu cầu này.'
+        }
+      />
+    )
+  }
+    </div >
   );
 };
 
