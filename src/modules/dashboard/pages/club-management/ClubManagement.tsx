@@ -467,7 +467,7 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <DetailItem label="Category" value={club.category ?? 'N/A'} />
         <DetailItem label="Status" value={club.status} />
-        <DetailItem label="President" value={club.presidentName ?? 'N/A'} />
+        <DetailItem label="President" value={club.leaderName ?? club.presidentName ?? 'N/A'} />
         <DetailItem label="Advisor" value={club.advisorName ?? 'N/A'} />
         <DetailItem label="Members" value={String(club.memberCount ?? 0)} />
         <DetailItem label="Founded" value={formatDate(club.foundedDate)} />
@@ -478,19 +478,21 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
   }
 
   if (tab === 'members') {
+    const leaderId = club.leaderId ?? club.presidentId;
+    const leaderName = club.leaderName ?? club.presidentName ?? 'Club leader';
     const shouldInjectLeader =
-      Boolean(club.presidentId && club.presidentName) &&
-      !members.some((member) => member.memberId === club.presidentId || member.role === 'PRESIDENT');
+      Boolean(leaderId && leaderName) &&
+      !members.some((member) => member.memberId === leaderId || member.role === 'PRESIDENT');
 
     const resolvedMembers: ClubMember[] = shouldInjectLeader
       ? [
           ...members,
           {
-            id: -(club.presidentId ?? club.id ?? Date.now()),
+            id: -(leaderId ?? club.id ?? Date.now()),
             clubId: club.id,
             clubName: club.name,
-            memberId: club.presidentId ?? 0,
-            memberName: club.presidentName ?? 'Club leader',
+            memberId: leaderId ?? 0,
+            memberName: leaderName,
             role: 'PRESIDENT',
             status: 'ACTIVE' as ClubMemberStatus,
             joinedAt: club.createdAt ?? club.foundedDate ?? null,
