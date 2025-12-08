@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, Menu, X, Bell, Check } from "lucide-react";
+import { User, Settings, LogOut, Menu, X, Bell, Check, Compass } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Assets } from "@/assets";
 import { useNotifications } from "@/context/NotificationContext";
@@ -72,20 +72,28 @@ const Navbar = () => {
     { path: ROUTES.CONTACT.getPath(), label: "Hỗ trợ" },
   ];
 
+  const primaryClubLink = user?.role?.name === "ROLE_ADMIN"
+    ? {
+        icon: User,
+        label: ROUTES.DASHBOARD.child.CLUB_QUEUE.label,
+        onClick: () => handleItemClick(),
+        href: ROUTES.DASHBOARD.child.CLUB_QUEUE.getPath(),
+      }
+    : {
+        icon: User,
+        label: ROUTES.DASHBOARD.child.MY_CLUB.label,
+        onClick: () => handleItemClick(),
+        href: ROUTES.DASHBOARD.child.MY_CLUB.getPath(),
+      };
+
   const menuItems = [
-    user?.role?.name === "ROLE_ADMIN"
-      ? {
-          icon: User,
-          label: ROUTES.DASHBOARD.child.CLUB_QUEUE.label,
-          onClick: () => handleItemClick(),
-          href: ROUTES.DASHBOARD.child.CLUB_QUEUE.getPath(),
-        }
-      : {
-          icon: User,
-          label: ROUTES.DASHBOARD.child.MY_CLUB.label,
-          onClick: () => handleItemClick(),
-          href: ROUTES.DASHBOARD.child.MY_CLUB.getPath(),
-        },
+    {
+      icon: Compass,
+      label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
+      onClick: () => handleItemClick(),
+      href: ROUTES.DASHBOARD.child.CLUB_BROWSER.getPath(),
+    },
+    primaryClubLink,
     {
       icon: Settings,
       label: "Cài đặt",
@@ -99,6 +107,7 @@ const Navbar = () => {
       isButton: true,
     },
   ];
+
 
   const avatarUrl =
     user?.avatarUrl && user.avatarUrl.trim().length > 0
