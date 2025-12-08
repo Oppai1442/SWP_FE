@@ -66,7 +66,7 @@ const DashboardLayout = () => {
       label: ROUTES.DASHBOARD.child.MY_CLUB.label,
       icon: FlaskConical,
       submenu: null,
-      roles: ["ROLE_USER", "ROLE_ADMIN", "ROLE_STAFF"]
+      roles: ["ROLE_USER"]
     },
     {
       id: ROUTES.DASHBOARD.child.CLUB_BROWSER.path,
