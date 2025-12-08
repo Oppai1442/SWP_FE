@@ -41,13 +41,6 @@ const DashboardLayout = () => {
       roles: ["ROLE_ADMIN"]
     },
     {
-      id: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.path,
-      label: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.label,
-      icon: Key,
-      submenu: null,
-      roles: ["ROLE_ADMIN"]
-    },
-    {
       id: ROUTES.DASHBOARD.child.CLUB_QUEUE.path,
       label: ROUTES.DASHBOARD.child.CLUB_QUEUE.label,
       icon: Workflow,
