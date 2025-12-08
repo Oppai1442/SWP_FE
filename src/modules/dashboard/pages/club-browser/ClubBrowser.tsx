@@ -94,7 +94,7 @@ const ClubBrowser = () => {
       setClubs(normalized);
     } catch (error) {
       console.error(error);
-      toast.error('Unable to load clubs.');
+      toast.error('Không thể tải câu lạc bộ.');
     } finally {
       setIsLoadingClubs(false);
     }
@@ -149,14 +149,14 @@ const ClubBrowser = () => {
   const handleManualInviteJoin = async () => {
     const code = manualInviteCode.trim();
     if (!code) {
-      toast.error('Enter an invite code to continue.');
+      toast.error('Nhập mã mời để tiếp tục.');
       return;
     }
     try {
       setIsResolvingInviteCode(true);
       const settings = await getClubSettingsByInviteCodeAPI(code);
       if (!settings?.clubId) {
-        toast.error('Unable to resolve this invite code.');
+        toast.error('Không thể giải quyết mã mời này.');
         return;
       }
       const existing = clubs.find((club) => club.id === settings.clubId);
@@ -186,8 +186,8 @@ const ClubBrowser = () => {
       if (isJoinStatusBlocked(status)) {
         toast.error(
           status === 'PENDING'
-            ? 'You already have a pending request for this club.'
-            : 'You are already a member of this club.'
+            ? 'Bạn đã có yêu cầu đang chờ xử lý cho câu lạc bộ này.'
+            : 'Bạn đã là thành viên của câu lạc bộ này.'
         );
         return;
       }
@@ -198,7 +198,7 @@ const ClubBrowser = () => {
       setManualInviteCode('');
     } catch (error) {
       console.error(error);
-      toast.error('Invite code not found.');
+      toast.error('Không tìm thấy mã mời.');
     } finally {
       setIsResolvingInviteCode(false);
     }
@@ -206,7 +206,7 @@ const ClubBrowser = () => {
 
   const openJoinModal = (club: ClubSummary, manual = false) => {
     if (!manual && !club.inviteCode) {
-      toast.error('This club has not enabled invite code joins.');
+      toast.error('Câu lạc bộ này chưa kích hoạt tính năng tham gia bằng mã mời.');
       return;
     }
     const status = getJoinStatus(club.id);
@@ -259,7 +259,7 @@ const ClubBrowser = () => {
         console.error(error);
         if (!cancelled) {
           setJoinPreview(null);
-          setPreviewError('Unable to load payment instructions.');
+          setPreviewError('Không thể tải hướng dẫn thanh toán.');
         }
       })
       .finally(() => {
@@ -275,16 +275,16 @@ const ClubBrowser = () => {
   const handlePaymentProofUpload = useCallback(
     async (file: File) => {
       if (!selectedClub?.id) {
-        toast.error('Select a club before uploading payment evidence.');
+        toast.error('Chọn một câu lạc bộ trước khi tải lên bằng chứng thanh toán.');
         return;
       }
       if (!file.type?.startsWith('image/')) {
-        toast.error('Payment evidence must be an image.');
+        toast.error('Bằng chứng thanh toán phải là một hình ảnh.');
         return;
       }
       const MAX_SIZE = 10 * 1024 * 1024;
       if (file.size > MAX_SIZE) {
-        toast.error('Payment evidence must be under 10MB.');
+        toast.error('Bằng chứng thanh toán phải dưới 10MB.');
         return;
       }
       try {
@@ -292,11 +292,11 @@ const ClubBrowser = () => {
         setPaymentProofError(null);
         const uploaded = await uploadPaymentProofAPI(selectedClub.id, file);
         setPaymentProof({ url: uploaded.url, fileName: file.name });
-        toast.success('Payment evidence uploaded.');
+        toast.success('Bằng chứng thanh toán đã được tải lên.');
       } catch (error) {
         console.error(error);
-        setPaymentProofError('Unable to upload payment evidence.');
-        toast.error('Unable to upload payment evidence.');
+        setPaymentProofError('Không thể tải lên bằng chứng thanh toán.');
+        toast.error('Không thể tải lên bằng chứng thanh toán.');
       } finally {
         setIsUploadingProof(false);
       }
@@ -313,11 +313,11 @@ const ClubBrowser = () => {
     event.preventDefault();
     const inviteCode = (isManualInviteFlow ? joinForm.inviteCode : selectedClub?.inviteCode)?.trim();
     if (!inviteCode) {
-      toast.error('This club does not have an invite code.');
+      toast.error('Câu lạc bộ này không có mã mời.');
       return;
     }
     if (!paymentProof.url) {
-      toast.error('Upload your payment evidence before submitting.');
+      toast.error('Tải lên bằng chứng thanh toán của bạn trước khi gửi.');
       return;
     }
     try {
@@ -327,14 +327,14 @@ const ClubBrowser = () => {
         motivation: joinForm.motivation.trim() || undefined,
         paymentProofUrl: paymentProof.url,
       });
-      toast.success('Join request submitted.');
+      toast.success('Yêu cầu tham gia đã được gửi.');
       if (selectedClub?.id) {
         setJoinStatusMap((prev) => ({ ...prev, [selectedClub.id]: 'PENDING' }));
       }
       closeJoinModal();
     } catch (error) {
       console.error(error);
-      toast.error('Unable to submit join request.');
+      toast.error('Không thể gửi yêu cầu tham gia.');
     } finally {
       setIsJoining(false);
     }
@@ -344,11 +344,9 @@ const ClubBrowser = () => {
     <div className="min-h-screen bg-white px-4 py-6 sm:px-6 lg:px-10">
       <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Discover clubs</p>
-          <h1 className="text-2xl font-semibold text-slate-900">Browse all student clubs</h1>
-          <p className="text-sm text-slate-500">
-            Filter clubs, view their stats, and submit join requests directly from this list.
-          </p>
+          <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Khám phá câu lạc bộ</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Duyệt tất cả các câu lạc bộ sinh viên</h1>
+          <p className="text-sm text-slate-500">Lọc câu lạc bộ, xem số liệu thống kê và gửi yêu cầu tham gia trực tiếp từ danh sách này.</p>
         </div>
         <button
           type="button"
@@ -356,21 +354,20 @@ const ClubBrowser = () => {
           className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-orange-200 hover:text-orange-500"
           disabled={isLoadingClubs}
         >
-          <RefreshCcw className={`h-4 w-4 ${isLoadingClubs ? 'animate-spin' : ''}`} />
-          Refresh
+Refresh</button>
         </button>
       </header>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-3xl border border-slate-100 bg-white/80 p-5 shadow-sm">
-          <div className="text-sm text-slate-500">Total clubs</div>
+          <div className="text-sm text-slate-500">Tổng số câu lạc bộ</div>
           <p className="mt-1 flex items-center gap-2 text-2xl font-semibold text-slate-900">
             <Layers className="h-5 w-5 text-orange-400" />
             {clubs.length}
           </p>
         </div>
         <div className="rounded-3xl border border-slate-100 bg-white/80 p-5 shadow-sm">
-          <div className="text-sm text-slate-500">Active clubs</div>
+          <div className="text-sm text-slate-500">Câu lạc bộ đang hoạt động</div>
           <p className="mt-1 flex items-center gap-2 text-2xl font-semibold text-emerald-600">
             <Users className="h-5 w-5 text-emerald-400" />
             {clubs.filter((club) => club.status === 'ACTIVE').length}
@@ -382,17 +379,15 @@ const ClubBrowser = () => {
         <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/40 p-6 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm font-semibold text-slate-900">Already have an invite code?</p>
-              <p className="text-xs text-slate-500">
-                Paste the code here to submit a join request even if the club is not listed above.
-              </p>
+              <p className="text-sm font-semibold text-slate-900">Bạn đã có mã mời?</p>
+              <p className="text-xs text-slate-500">Dán mã vào đây để gửi yêu cầu tham gia ngay cả khi câu lạc bộ không được liệt kê ở trên.</p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <input
                 type="text"
                 value={manualInviteCode}
                 onChange={(event) => setManualInviteCode(event.target.value)}
-                placeholder="Enter invite code"
+                placeholder="Nhập mã mời"
                 className="flex-1 rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
                 disabled={isResolvingInviteCode}
               />
@@ -402,7 +397,7 @@ const ClubBrowser = () => {
                 disabled={isResolvingInviteCode}
                 className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-orange-500/20 transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isResolvingInviteCode ? 'Checking...' : 'Join with code'}
+                {isResolvingInviteCode ? 'Đang kiểm tra...' : 'Tham gia bằng mã'}
               </button>
             </div>
           </div>
@@ -428,7 +423,7 @@ const ClubBrowser = () => {
               const isBlocked = isJoinStatusBlocked(status);
               const disabled = !club.inviteCode || isBlocked;
               const label =
-                status === 'PENDING' ? 'Pending' : status === 'APPROVED' ? 'Joined' : 'Join';
+                status === 'PENDING' ? 'Đang chờ' : status === 'APPROVED' ? 'Đã tham gia' : 'Tham gia';
               return (
                 <button
                   type="button"
@@ -465,12 +460,12 @@ const ClubBrowser = () => {
           onChange={(field, value) => setJoinForm((prev) => ({ ...prev, [field]: value }))}
           onSubmit={handleJoinClub}
           onClose={closeJoinModal}
-          modalTitle={`Join ${selectedClub.name}`}
+          modalTitle={`Tham gia ${selectedClub.name}`}
           showInviteCodeInput={isManualInviteFlow}
           inviteCodeHint={
             isManualInviteFlow
-              ? 'Provide the invite code you received from the club leader.'
-              : 'Invite code is handled automatically for this request.'
+              ? 'Cung cấp mã mời bạn nhận được từ trưởng nhóm câu lạc bộ.'
+              : 'Mã mời được xử lý tự động cho yêu cầu này.'
           }
         />
       )}

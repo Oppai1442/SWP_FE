@@ -45,7 +45,7 @@ const routes: AppRoute[] = [
   { path: ROUTES.HOME.path, element: withSuspense(Home) },
   { path: ROUTES.CONTACT.path, element: withSuspense(ContactUs) },
 
-  //Nằm ở footer
+  //Nằm ở cuối trang
   { path: ROUTES.POLICY.path, element: <Policy /> },
   { path: ROUTES.TOS.path, element: <ToSPage /> },
 
@@ -76,7 +76,7 @@ const routes: AppRoute[] = [
     ]
   },
 
-  //2 cái này sẽ luôn nằm ở cuối cùng
+  //Hai mục này sẽ luôn nằm ở cuối cùng
   { path: '*', element: <Navigate to={ROUTES.NOT_FOUND.path} replace /> },
   { path: ROUTES.NOT_FOUND.path, element: <NotFound /> },
 ];

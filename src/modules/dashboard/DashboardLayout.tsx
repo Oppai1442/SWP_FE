@@ -17,7 +17,7 @@ const getInitialSidebarState = () => {
 };
 
 const DashboardLayout = () => {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [activeMenu, setActiveMenu] = useState('bảng điều khiển');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(getInitialSidebarState);
   const { user } = useAuth();
 
@@ -106,13 +106,13 @@ const DashboardLayout = () => {
       icon: Settings,
       submenu: null,
     },
-    {
-      id: ROUTES.DASHBOARD.child.LOG.path,
-      label: ROUTES.DASHBOARD.child.LOG.label,
-      icon: FileText,
-      submenu: null,
-      roles: ["ROLE_ADMIN"]
-    },
+    // {
+    //   id: ROUTES.DASHBOARD.child.LOG.path,
+    //   label: ROUTES.DASHBOARD.child.LOG.label,
+    //   icon: FileText,
+    //   submenu: null,
+    //   roles: ["ROLE_ADMIN"]
+    // },
   ];
 
 
