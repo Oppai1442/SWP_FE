@@ -19,6 +19,8 @@ export interface ClubSummary {
   advisorName?: string | null;
   presidentId?: number | null;
   presidentName?: string | null;
+  leaderId?: number | null;
+  leaderName?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
@@ -34,7 +36,6 @@ export interface CreateClubPayload {
   mission?: string;
   foundedDate?: string | null;
   advisorId?: number | null;
-  presidentId?: number | null;
 }
 
 export type ClubMemberRole = 'PRESIDENT' | 'VICE_PRESIDENT' | 'TREASURER' | 'SECRETARY' | 'LEAD' | 'MEMBER';
