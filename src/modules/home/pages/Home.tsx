@@ -11,7 +11,7 @@ const ClubHubHome = () => {
 
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [selectedClubs, setSelectedClubs] = useState<{
-    [group: string]: unknown | null;
+    [group: string]: { id: number; name: string; details: any } | null;
   }>({});
 
   // ==== MOCK DATA 4 NHÓM CLB ====
