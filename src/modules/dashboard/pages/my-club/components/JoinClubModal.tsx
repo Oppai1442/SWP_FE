@@ -29,6 +29,9 @@ export interface JoinClubModalProps {
   onChange: (field: keyof JoinClubForm, value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
+  modalTitle?: string;
+  showInviteCodeInput?: boolean;
+  inviteCodeHint?: string;
 }
 
 const JoinClubModal = ({
@@ -47,6 +50,9 @@ const JoinClubModal = ({
   onChange,
   onSubmit,
   onClose,
+  modalTitle = 'Enter your invite code',
+  showInviteCodeInput = true,
+  inviteCodeHint,
 }: JoinClubModalProps) => {
   const [modalTab, setModalTab] = useState<'details' | 'payment'>('details');
   const qrUrl = preview
@@ -87,7 +93,7 @@ const JoinClubModal = ({
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Join club</p>
-            <h3 className="text-lg font-semibold text-slate-900">Enter your invite code</h3>
+            <h3 className="text-lg font-semibold text-slate-900">{modalTitle}</h3>
           </div>
           <button
             type="button"
@@ -131,19 +137,25 @@ const JoinClubModal = ({
                   </p>
                 </div>
                 <div className="mt-4 space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Invite code
-                    </label>
-                    <input
-                      type="text"
-                      value={form.inviteCode}
-                      onChange={(event) => onChange('inviteCode', event.target.value)}
-                      required
-                      className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm uppercase tracking-wide outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                      placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                    />
-                  </div>
+                  {showInviteCodeInput ? (
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Invite code
+                      </label>
+                      <input
+                        type="text"
+                        value={form.inviteCode}
+                        onChange={(event) => onChange('inviteCode', event.target.value)}
+                        required
+                        className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm uppercase tracking-wide outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                      />
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      {inviteCodeHint ?? 'Invite code is provided automatically for this club.'}
+                    </div>
+                  )}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Motivation (optional)
@@ -215,7 +227,7 @@ const JoinClubModal = ({
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500">
-                      Enter a valid invite code to fetch the club&apos;s payment instructions.
+                      Payment instructions will appear once the club provides them.
                     </p>
                   )}
                 </div>
@@ -286,7 +298,9 @@ const JoinClubModal = ({
                         {allowUpload ? 'Drop your image here' : 'Enter invite code to enable upload'}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {allowUpload ? 'or click to browse files' : 'Payment evidence upload unlocks after code is validated.'}
+                        {allowUpload
+                          ? 'or click to browse files'
+                          : 'Upload unlocks after instructions are available.'}
                       </p>
                     </label>
                     {isUploadingProof && (
