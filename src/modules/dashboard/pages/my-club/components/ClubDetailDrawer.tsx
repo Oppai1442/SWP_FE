@@ -1,4 +1,5 @@
-import { Fragment, useMemo } from 'react';
+import { Fragment, useMemo, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import {
   type ClubActivity,
@@ -7,11 +8,10 @@ import {
   type ClubJoinRequestStatus,
   type ClubMember,
   type ClubSettingInfo,
-  type ClubActivityStatus,
 } from '../services/myClubService';
 import { formatDate, formatDateTime, buildVietQrUrl, formatJoinFeeValue } from '../utils';
 import type { ActivityFormState, BankInstructionForm } from '../types';
-import { activityStatusMeta, detailTabs, joinRequestStatusMeta, type DetailTab } from '../constants';
+import { detailTabs, joinRequestStatusMeta, type DetailTab } from '../constants';
 import {
   Crown,
   Image,
@@ -24,6 +24,8 @@ import {
   Users2,
   X,
 } from 'lucide-react';
+import { showToast } from "@/utils";
+
 interface ClubDetailDrawerProps {
   club: ClubDetail;
   members: ClubMember[];
@@ -62,6 +64,8 @@ interface ClubDetailDrawerProps {
   onTransferLeadership: (member: ClubMember) => void;
   onKickMember: (member: ClubMember) => void;
   onLeaveClub: () => void;
+  onUpdateClubImage: (clubId: number, file: File) => void;
+  isImageUpdating: boolean;
   onClose: () => void;
 }
 
@@ -72,6 +76,62 @@ const resolveLeaderId = (club?: Pick<ClubDetail, 'leaderId' | 'presidentId'>) =>
 
 const resolveLeaderName = (club?: Pick<ClubDetail, 'leaderName' | 'presidentName'>) =>
   club?.leaderName ?? club?.presidentName ?? 'Trưởng nhóm câu lạc bộ';
+
+const GMT7_OFFSET_MS = 7 * 60 * 60 * 1000;
+const MIN_ACTIVITY_DURATION_MS = 2 * 60 * 60 * 1000;
+
+const runtimeStatusMeta = {
+  upcoming: {
+    label: 'Sắp diễn ra',
+    className: 'border-amber-200 bg-amber-50 text-amber-600',
+  },
+  ongoing: {
+    label: 'Đang diễn ra',
+    className: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+  },
+  past: {
+    label: 'Đã qua',
+    className: 'border-slate-200 bg-slate-50 text-slate-500',
+  },
+} as const;
+
+const toGmt7Millis = (value?: string | null) => {
+  if (!value) return null;
+  const timestamp = new Date(value).getTime();
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+  return timestamp + GMT7_OFFSET_MS;
+};
+
+const getRuntimeStatusMeta = (activity: ClubActivity) => {
+  const now = Date.now() + GMT7_OFFSET_MS;
+  const start = toGmt7Millis(activity.startDate);
+  const end = toGmt7Millis(activity.endDate);
+
+  if (start && now < start) {
+    return runtimeStatusMeta.upcoming;
+  }
+
+  if (start && end) {
+    if (now >= start && now <= end) {
+      return runtimeStatusMeta.ongoing;
+    }
+    if (now > end) {
+      return runtimeStatusMeta.past;
+    }
+  }
+
+  if (start && !end) {
+    return now >= start ? runtimeStatusMeta.past : runtimeStatusMeta.upcoming;
+  }
+
+  if (!start && end) {
+    return now <= end ? runtimeStatusMeta.ongoing : runtimeStatusMeta.past;
+  }
+
+  return runtimeStatusMeta.upcoming;
+};
 
 const ClubDetailDrawer = ({
   club,
@@ -111,6 +171,8 @@ const ClubDetailDrawer = ({
   onTransferLeadership,
   onKickMember,
   onLeaveClub,
+  onUpdateClubImage,
+  isImageUpdating,
   onClose,
 }: ClubDetailDrawerProps) => {
   const memberTabs = useMemo<DetailTab[]>(() => ['overview', 'members', 'activities'], []);
@@ -172,19 +234,101 @@ const ClubDetailDrawer = ({
     }
     return unique;
   }, [club, members, selfMember, leaderId, leaderName]);
-  const handleCopyInviteCode = async () => {
-    if (!club.inviteCode) {
-      toast.error('Mã mời không có sẵn.');
-      return;
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleClubImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      onUpdateClubImage(club.id, file);
     }
-    try {
-      await navigator.clipboard.writeText(club.inviteCode);
-      toast.success('Đã sao chép mã mời.');
-    } catch (error) {
-      console.error(error);
-      toast.error('Không thể sao chép mã mời.');
+    if (event.target) {
+      event.target.value = '';
     }
   };
+
+  const handleActivitySubmit = () => {
+    const { startDate, endDate } = activityForm;
+
+    // 1. Kiểm tra thiếu
+    if (!startDate || !endDate) {
+      showToast('error', 'Vui lòng chọn đầy đủ thời gian bắt đầu và kết thúc.');
+      return;
+    }
+
+    // 2. Chuẩn hóa timezone (tránh việc new Date parse lệch múi giờ)
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const startTime = start.getTime();
+    const endTime = end.getTime();
+
+    // 3. Kiểm tra parse lỗi
+    if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
+      showToast('error', 'Thời gian hoạt động không hợp lệ.');
+      return;
+    }
+
+    // 4. Kiểm tra start >= end
+    if (startTime >= endTime) {
+      showToast('error', 'Ngày bắt đầu phải đứng trước ngày kết thúc.');
+      return;
+    }
+
+    // 5. Kiểm tra duration tối thiểu
+    if (endTime - startTime < MIN_ACTIVITY_DURATION_MS) {
+      showToast('error', 'Mỗi hoạt động cần kéo dài ít nhất 2 giờ.');
+      return;
+    }
+
+    // 6. (Optional) Kiểm tra không được chọn trước thời điểm hiện tại
+    const now = Date.now();
+    if (startTime < now) {
+      showToast('error', 'Thời gian bắt đầu không được ở quá khứ.');
+      return;
+    }
+
+    // 7. (Optional) Giới hạn duration tối đa (VD: không quá 24h)
+    const MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+    if (endTime - startTime > MAX_DURATION_MS) {
+      showToast('error', 'Thời lượng hoạt động không được vượt quá 24 giờ.');
+      return;
+    }
+
+    // 8. (Optional) Kiểm tra sai format giờ (nếu UI tách ngày + giờ)
+    // Ví dụ người dùng nhập 32:70 → vẫn parse được nhưng sai
+    if (start.toString() === 'Invalid Date' || end.toString() === 'Invalid Date') {
+      showToast('error', 'Định dạng thời gian không hợp lệ.');
+      return;
+    }
+
+    // 9. (Optional) Kiểm tra năm/tháng nằm ngoài phạm vi hợp lý
+    const startYear = start.getFullYear();
+    const endYear = end.getFullYear();
+    if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
+      showToast('error', 'Thời gian nằm ngoài phạm vi cho phép.');
+      return;
+    }
+
+    // Nếu mọi thứ OK
+    onSubmitActivity();
+  };
+
+
+  const handleCopyInviteCode = async () => {
+    if (!club.inviteCode) {
+      showToast('error', 'Mã mời không có sẵn.');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(club.inviteCode);
+      showToast('success', 'Đã sao chép mã mời.');
+    } catch (error) {
+      console.error(error);
+      showToast('error', 'Không thể sao chép mã mời.');
+    }
+  };
+
 
   const handleDecision = (requestId: number, status: ClubJoinRequestStatus) => {
     const note =
@@ -391,7 +535,7 @@ const ClubDetailDrawer = ({
                       )}
                       <button
                         type="button"
-                        onClick={onSubmitActivity}
+                        onClick={handleActivitySubmit}
                         disabled={isCreatingActivity}
                         className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
                       >
@@ -429,6 +573,7 @@ const ClubDetailDrawer = ({
                         type="datetime-local"
                         value={activityForm.startDate}
                         onChange={(event) => onActivityFormChange('startDate', event.target.value)}
+                        required
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
                     </label>
@@ -438,6 +583,7 @@ const ClubDetailDrawer = ({
                         type="datetime-local"
                         value={activityForm.endDate}
                         onChange={(event) => onActivityFormChange('endDate', event.target.value)}
+                        required
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
                     </label>
@@ -454,21 +600,7 @@ const ClubDetailDrawer = ({
                         placeholder="500000"
                       />
                     </label>
-                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Trạng thái
-                      <select
-                        value={activityForm.status}
-                        onChange={(event) =>
-                          onActivityFormChange('status', event.target.value as ClubActivityStatus)
-                        }
-                        className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                      >
-                        <option value="PLANNING">Lập kế hoạch</option>
-                        <option value="APPROVED">Đã phê duyệt</option>
-                        <option value="COMPLETED">Đã hoàn thành</option>
-                        <option value="CANCELLED">Đã hủy</option>
-                      </select>
-                    </label>
+                    <div />
                   </div>
                   <div className="mt-3">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -494,61 +626,63 @@ const ClubDetailDrawer = ({
                 <p className="py-8 text-center text-sm text-slate-500">Chưa có hoạt động nào được xuất bản.</p>
               ) : (
                 <div className="space-y-3">
-                  {activities.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
-                        }`}
-                    >
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">{activity.title}</p>
-                          {activity.description && (
-                            <p className="text-xs text-slate-500">{activity.description}</p>
+                  {activities.map((activity) => {
+                    const statusMeta = getRuntimeStatusMeta(activity);
+                    return (
+                      <div
+                        key={activity.id}
+                        className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
+                          }`}
+                      >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">{activity.title}</p>
+                            {activity.description && (
+                              <p className="text-xs text-slate-500">{activity.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${statusMeta.className}`}
+                            >
+                              {statusMeta.label}
+                            </span>
+                            {canManage && (
+                              <button
+                                type="button"
+                                onClick={() => onEditActivity(activity)}
+                                className="rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
+                              >
+                                Sửa
+                              </button>)}
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
+                          {activity.startDate && (
+                            <span>
+                              Bắt đầu{' '}
+                              <strong className="text-slate-900">
+                                {formatDateTime(activity.startDate)}
+                              </strong>
+                            </span>
+                          )}
+                          {activity.endDate && (
+                            <span>
+                              Kết thúc{' '}
+                              <strong className="text-slate-900">
+                                {formatDateTime(activity.endDate)}
+                              </strong>
+                            </span>
+                          )}
+                          {activity.location && (
+                            <span>
+                              Địa điểm <strong className="text-slate-900">{activity.location}</strong>
+                            </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${activityStatusMeta[activity.status].className
-                              }`}
-                          >
-                            {activityStatusMeta[activity.status].label}
-                          </span>
-                          {canManage && (
-                            <button
-                              type="button"
-                              onClick={() => onEditActivity(activity)}
-                              className="rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
-                            >
-                              Sửa
-                            </button>)}
-                        </div>
                       </div>
-                      <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-                        {activity.startDate && (
-                          <span>
-                            Bắt đầu{' '}
-                            <strong className="text-slate-900">
-                              {formatDateTime(activity.startDate)}
-                            </strong>
-                          </span>
-                        )}
-                        {activity.endDate && (
-                          <span>
-                            Kết thúc{' '}
-                            <strong className="text-slate-900">
-                              {formatDateTime(activity.endDate)}
-                            </strong>
-                          </span>
-                        )}
-                        {activity.location && (
-                          <span>
-                            Địa điểm <strong className="text-slate-900">{activity.location}</strong>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -696,6 +830,48 @@ const ClubDetailDrawer = ({
                 </div>
               ) : (
                 <Fragment>
+                  <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1fr)]">
+                    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
+                      {club.imageUrl ? (
+                        <img src={club.imageUrl} alt={club.name} className="h-60 w-full object-cover" />
+                      ) : (
+                        <div className="flex h-60 flex-col items-center justify-center gap-2 text-slate-400">
+                          <Image className="h-8 w-8 text-orange-400" />
+                          <p className="text-sm font-semibold text-slate-500">Chưa có ảnh câu lạc bộ</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="rounded-2xl border border-slate-100 bg-white p-4">
+                      <p className="text-sm font-semibold text-slate-900">Ảnh câu lạc bộ</p>
+                      <p className="text-xs text-slate-500">
+                        {canManage
+                          ? 'Cập nhật ảnh bìa để thể hiện bản sắc câu lạc bộ.'
+                          : 'Chỉ trưởng nhóm mới có thể thay đổi ảnh này.'}
+                      </p>
+                      {canManage && (
+                        <button
+                          type="button"
+                          onClick={() => imageInputRef.current?.click()}
+                          disabled={isImageUpdating}
+                          className="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 py-2 text-sm font-semibold text-orange-500 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isImageUpdating ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Image className="h-4 w-4" />
+                          )}
+                          {isImageUpdating ? 'Đang cập nhật...' : 'Cập nhật ảnh'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleClubImageChange}
+                  />
                   <SettingItem
                     icon={Users}
                     label="Yêu cầu phê duyệt"
@@ -927,7 +1103,7 @@ const BankInstructionCard = ({
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Tài khoản</span>
-                  <span className="font-semibold text-slate-900">{accountNo}</span>
+                <span className="font-semibold text-slate-900">{accountNo}</span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Tên tài khoản</span>
