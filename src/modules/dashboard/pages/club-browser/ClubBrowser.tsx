@@ -480,9 +480,15 @@ const ClubBrowser = () => {
               {paginatedClubs.map((club) => {
                 const status = getJoinStatus(club.id);
                 const isBlocked = isJoinStatusBlocked(status);
-                const disabled = !club.inviteCode || isBlocked;
-                const label =
-                  status === 'PENDING' ? 'Đang chờ' : status === 'APPROVED' ? 'Đã tham gia' : 'Tham gia câu lạc bộ';
+                const isLeader = isLeaderOfClub(club);
+                const disabled = !club.inviteCode || isBlocked || isLeader;
+                const label = isLeader
+                  ? 'Bạn là leader'
+                  : status === 'PENDING'
+                    ? 'Đang chờ'
+                    : status === 'APPROVED'
+                      ? 'Đã tham gia'
+                      : 'Tham gia câu lạc bộ';
                 return (
                   <div
                     key={club.id}
