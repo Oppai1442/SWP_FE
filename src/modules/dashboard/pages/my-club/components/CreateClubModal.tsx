@@ -1,10 +1,12 @@
-import { type FormEvent } from 'react';
-import { Loader2, MapPin, X } from 'lucide-react';
+import { type ChangeEvent, type FormEvent, useRef } from 'react';
+import { Loader2, MapPin, UploadCloud, X } from 'lucide-react';
 
 interface CreateClubForm {
   name: string;
   description: string;
   category: string;
+  imageUrl: string;
+  imageFileName?: string;
   meetingLocation: string;
   mission: string;
   foundedDate: string;
@@ -14,12 +16,37 @@ interface CreateClubModalProps {
   form: CreateClubForm;
   isSubmitting: boolean;
   onChange: (field: keyof CreateClubForm, value: string) => void;
+  onUploadImage: (file: File) => void;
+  onRemoveImage: () => void;
+  isUploadingImage: boolean;
+  imageError?: string | null;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }
 
-const CreateClubModal = ({ form, isSubmitting, onChange, onSubmit, onClose }: CreateClubModalProps) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
+const CreateClubModal = ({
+  form,
+  isSubmitting,
+  onChange,
+  onUploadImage,
+  onRemoveImage,
+  isUploadingImage,
+  imageError,
+  onSubmit,
+  onClose,
+}: CreateClubModalProps) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      onUploadImage(file);
+    }
+    event.target.value = '';
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
     <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl">
       <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
         <div>
@@ -50,10 +77,10 @@ const CreateClubModal = ({ form, isSubmitting, onChange, onSubmit, onClose }: Cr
               placeholder="e.g. Green Horizon"
             />
           </div>
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Category
-            </label>
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Category
+          </label>
             <input
               type="text"
               value={form.category}
@@ -116,6 +143,69 @@ const CreateClubModal = ({ form, isSubmitting, onChange, onSubmit, onClose }: Cr
           />
         </div>
 
+        <div>
+          <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Club image
+          </label>
+          <div className="mt-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-500">
+            {form.imageUrl ? (
+              <>
+                <div className="overflow-hidden rounded-2xl border border-white shadow-sm">
+                  <img
+                    src={form.imageUrl}
+                    alt="Club cover"
+                    className="h-48 w-full object-cover"
+                  />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                  <span className="rounded-full bg-white px-3 py-1 font-semibold text-slate-600 shadow-sm">
+                    {form.imageFileName ?? 'Uploaded image'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-2xl border border-slate-200 px-3 py-1 font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
+                    disabled={isUploadingImage}
+                  >
+                    Change
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onRemoveImage}
+                    className="rounded-2xl border border-transparent px-3 py-1 font-semibold text-red-500 transition hover:text-red-600"
+                    disabled={isUploadingImage}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingImage}
+                className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white/80 px-4 py-10 text-sm font-semibold text-slate-500 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-60"
+              >
+                {isUploadingImage ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-orange-500" />
+                ) : (
+                  <UploadCloud className="h-6 w-6 text-orange-500" />
+                )}
+                {isUploadingImage ? 'Uploading image...' : 'Upload club cover'}
+                <span className="text-xs font-normal text-slate-400">PNG, JPG up to 5MB.</span>
+              </button>
+            )}
+            {imageError && <p className="mt-2 text-xs text-red-500">{imageError}</p>}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+        </div>
+
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="button"
@@ -137,6 +227,7 @@ const CreateClubModal = ({ form, isSubmitting, onChange, onSubmit, onClose }: Cr
     </div>
   </div>
 );
+};
 
 export type { CreateClubForm, CreateClubModalProps };
 export default CreateClubModal;

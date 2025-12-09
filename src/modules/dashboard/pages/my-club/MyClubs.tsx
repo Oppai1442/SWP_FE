@@ -1,5 +1,4 @@
 import {
-  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -30,6 +29,7 @@ import {
   updateClubMemberAPI,
   updateClubSettingsAPI,
   updateClubActivityAPI,
+  uploadClubImageAPI,
   type ClubDetail,
   type ClubJoinRequest,
   type ClubJoinRequestStatus,
@@ -176,11 +176,15 @@ const MyClubs = () => {
     name: '',
     description: '',
     category: '',
+    imageUrl: '',
+    imageFileName: '',
     meetingLocation: '',
     mission: '',
     foundedDate: '',
   });
   const [isCreating, setIsCreating] = useState(false);
+  const [isUploadingClubImage, setIsUploadingClubImage] = useState(false);
+  const [clubImageError, setClubImageError] = useState<string | null>(null);
   const [bankForm, setBankForm] = useState<BankInstructionForm>({
     bankId: '',
     bankAccountNumber: '',
@@ -510,10 +514,13 @@ const MyClubs = () => {
       name: '',
       description: '',
       category: '',
+      imageUrl: '',
+      imageFileName: '',
       meetingLocation: '',
       mission: '',
       foundedDate: '',
     });
+    setClubImageError(null);
     setIsCreateModalOpen(true);
   };
 
@@ -521,27 +528,67 @@ const MyClubs = () => {
   const handleCreateClub = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!createForm.name.trim()) {
-      toast.error('Tên câu lạc bộ là bắt buộc.');
+      toast.error('T?n c?u l?c b? l? b?t bu?c.');
       return;
     }
 
-
     try {
       setIsCreating(true);
+      const { imageFileName: _imageFileName, ...payload } = createForm;
       await createClubAPI({
-        ...createForm,
-        foundedDate: createForm.foundedDate || null,
+        ...payload,
+        imageUrl: payload.imageUrl || undefined,
+        foundedDate: payload.foundedDate || null,
       });
-      toast.success('Yêu cầu tạo câu lạc bộ đã được gửi thành công.');
+      toast.success('Y?u c?u t?o c?u l?c b? ?? ???c g?i th?nh c?ng.');
       setIsCreateModalOpen(false);
       await refreshAll();
     } catch (error) {
       console.error(error);
-      toast.error('Không thể gửi yêu cầu câu lạc bộ.');
+      toast.error('Kh?ng th? g?i y?u c?u c?u l?c b?.');
     } finally {
       setIsCreating(false);
     }
   };
+
+  const handleClubImageUpload = async (file: File) => {
+    if (!file.type?.startsWith('image/')) {
+      toast.error('H?y ch?n h?nh ?nh cho c?u l?c b?.');
+      return;
+    }
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast.error('H?nh ?nh kh?ng ???c v??t qu? 5MB.');
+      return;
+    }
+    try {
+      setIsUploadingClubImage(true);
+      setClubImageError(null);
+      const uploaded = await uploadClubImageAPI(file);
+      setCreateForm((prev) => ({
+        ...prev,
+        imageUrl: uploaded.url ?? '',
+        imageFileName: file.name,
+      }));
+      toast.success('T?i h?nh ?nh c?u l?c b? th?nh c?ng.');
+    } catch (error) {
+      console.error(error);
+      setClubImageError('Kh?ng th? t?i h?nh ?nh.');
+      toast.error('Kh?ng th? t?i h?nh ?nh.');
+    } finally {
+      setIsUploadingClubImage(false);
+    }
+  };
+
+  const handleRemoveClubImage = () => {
+    setCreateForm((prev) => ({
+      ...prev,
+      imageUrl: '',
+      imageFileName: '',
+    }));
+    setClubImageError(null);
+  };
+
   const openClubDetails = async (club: Pick<ClubSummary, 'id'> & Partial<ClubSummary>) => {
     if (!club?.id) return;
     try {
@@ -1052,6 +1099,10 @@ const MyClubs = () => {
         <CreateClubModal
           form={createForm}
           isSubmitting={isCreating}
+          onUploadImage={handleClubImageUpload}
+          onRemoveImage={handleRemoveClubImage}
+          isUploadingImage={isUploadingClubImage}
+          imageError={clubImageError}
           onClose={() => setIsCreateModalOpen(false)}
           onChange={(field, value) => setCreateForm((prev) => ({ ...prev, [field]: value }))}
           onSubmit={handleCreateClub}

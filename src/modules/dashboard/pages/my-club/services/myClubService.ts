@@ -9,6 +9,7 @@ export interface ClubSummary {
   inviteCode?: string | null;
   name: string;
   description?: string | null;
+  imageUrl?: string | null;
   category?: string | null;
   status: ClubStatus;
   meetingLocation?: string | null;
@@ -32,6 +33,7 @@ export interface CreateClubPayload {
   name: string;
   description?: string;
   category?: string;
+  imageUrl?: string | null;
   meetingLocation?: string;
   mission?: string;
   foundedDate?: string | null;
@@ -135,6 +137,7 @@ export interface UpdateClubPayload {
   name?: string;
   description?: string | null;
   category?: string | null;
+  imageUrl?: string | null;
   status?: ClubStatus;
   meetingLocation?: string | null;
   mission?: string | null;
@@ -212,6 +215,18 @@ export const getClubSettingsByInviteCodeAPI = async (inviteCode: string) => {
 export const refreshInviteCodeAPI = async (clubId: number) => {
   const response = await postData<ClubDetail>(`/clubs/${clubId}/invite-code/refresh`, {});
   return unwrap<ClubDetail>(response);
+};
+
+export const uploadClubImageAPI = async (file: File, clubId?: number) => {
+  const formData = new FormData();
+  if (clubId) {
+    formData.append('clubId', String(clubId));
+  }
+  formData.append('file', file);
+  const response = await postData<StorageObjectInfo>(`/storage/club-image`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return unwrap<StorageObjectInfo>(response);
 };
 
 export const uploadPaymentProofAPI = async (clubId: number, file: File) => {

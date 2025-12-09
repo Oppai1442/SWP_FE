@@ -113,6 +113,17 @@ const ClubDetailDrawer = ({
   onLeaveClub,
   onClose,
 }: ClubDetailDrawerProps) => {
+  const memberTabs = useMemo<DetailTab[]>(() => ['overview', 'members', 'activities'], []);
+  const visibleTabs = useMemo(
+    () => (canManage ? detailTabs : detailTabs.filter((tab) => memberTabs.includes(tab.id))),
+    [canManage, memberTabs]
+  );
+  const resolvedTab = useMemo<DetailTab>(() => {
+    if (canManage || memberTabs.includes(activeTab)) {
+      return activeTab;
+    }
+    return 'overview';
+  }, [activeTab, canManage, memberTabs]);
   const isEditingActivity = Boolean(editingActivityId);
   const showMemberActions = canManage || Boolean(currentMember);
   const leaderId = resolveLeaderId(club);
@@ -203,12 +214,12 @@ const ClubDetailDrawer = ({
 
         <div className="px-6 py-5">
           <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
-            {detailTabs.map((tab) => (
+            {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${activeTab === tab.id
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${resolvedTab === tab.id
                   ? 'bg-white text-orange-600 shadow'
                   : 'text-slate-500 hover:text-orange-500'
                   }`}
@@ -218,7 +229,7 @@ const ClubDetailDrawer = ({
             ))}
           </div>
 
-          {activeTab === 'overview' && (
+          {resolvedTab === 'overview' && (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <DetailItem label="Status" value={club.status} />
               <DetailItem label="Category" value={club.category ?? 'N/A'} />
@@ -229,7 +240,7 @@ const ClubDetailDrawer = ({
             </div>
           )}
 
-          {activeTab === 'members' && (
+          {resolvedTab === 'members' && (
             <div className="mt-6 space-y-4">
               {selfMember && (
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
@@ -353,7 +364,7 @@ const ClubDetailDrawer = ({
               )}
             </div>
           )}
-          {activeTab === 'activities' && (
+          {resolvedTab === 'activities' && (
             <div className="mt-6 space-y-4">
               {canManage && (
                 <div className="rounded-2xl border border-slate-100 bg-white p-4">
@@ -543,7 +554,7 @@ const ClubDetailDrawer = ({
             </div>
           )}
 
-          {activeTab === 'requests' && (
+          {resolvedTab === 'requests' && (
             <div className="mt-6 space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -677,7 +688,7 @@ const ClubDetailDrawer = ({
             </div>
           )}
 
-          {activeTab === 'settings' && (
+          {resolvedTab === 'settings' && (
             <div className="mt-6 space-y-3">
               {isSettingsLoading ? (
                 <div className="flex items-center justify-center py-10 text-slate-400">
