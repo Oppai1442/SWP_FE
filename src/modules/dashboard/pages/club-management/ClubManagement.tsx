@@ -711,4 +711,3 @@ const DetailItem = ({ label, value }: DetailItemProps) => (
 export default ClubManagement;
 
 
-

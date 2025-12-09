@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Settings, LogOut, Menu, X, Bell, Check } from "lucide-react";
+import { User, Settings, LogOut, Menu, X, Bell, Check, Compass } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Assets } from "@/assets";
 import { useNotifications } from "@/context/NotificationContext";
@@ -12,12 +12,7 @@ const DEFAULT_AVATAR_URL =
 
 const Navbar = () => {
   const { loading, user, logOut, renderAuth, showAuthModal } = useAuth();
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markManyAsRead,
-  } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markManyAsRead } = useNotifications();
 
   const dropdownRef = useRef(null);
   const notificationRef = useRef<HTMLDivElement | null>(null);
@@ -29,21 +24,14 @@ const Navbar = () => {
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleMenu = () => setMenuOpen((prev) => !prev);
-  const toggleNotification = () =>
-    setNotificationOpen((prev) => !prev);
+  const toggleNotification = () => setNotificationOpen((prev) => !prev);
 
   const handleClickOutside = useCallback((event) => {
     const target = event.target;
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(target)
-    ) {
+    if (dropdownRef.current && !dropdownRef.current.contains(target)) {
       setDropdownOpen(false);
     }
-    if (
-      notificationRef.current &&
-      !notificationRef.current.contains(target)
-    ) {
+    if (notificationRef.current && !notificationRef.current.contains(target)) {
       setNotificationOpen(false);
     }
   }, []);
@@ -78,33 +66,48 @@ const Navbar = () => {
   const latestNotifications = notifications.slice(0, 5);
 
   const navLinks = [
-    { path: ROUTES.HOME.getPath(), label: "Overview" },
-    { path: ROUTES.TOS.getPath(), label: "ToS" },
-    { path: ROUTES.POLICY.getPath(), label: "Policies" },
-    { path: ROUTES.CONTACT.getPath(), label: "Support" },
+    { path: ROUTES.HOME.getPath(), label: "Tổng quan" },
+    { path: ROUTES.TOS.getPath(), label: "Điều khoản" },
+    { path: ROUTES.POLICY.getPath(), label: "Chính sách" },
+    { path: ROUTES.CONTACT.getPath(), label: "Hỗ trợ" },
   ];
 
+  const primaryClubLink = user?.role?.name === "ROLE_ADMIN"
+    ? {
+        icon: User,
+        label: ROUTES.DASHBOARD.child.CLUB_QUEUE.label,
+        onClick: () => handleItemClick(),
+        href: ROUTES.DASHBOARD.child.CLUB_QUEUE.getPath(),
+      }
+    : {
+        icon: User,
+        label: ROUTES.DASHBOARD.child.MY_CLUB.label,
+        onClick: () => handleItemClick(),
+        href: ROUTES.DASHBOARD.child.MY_CLUB.getPath(),
+      };
+
   const menuItems = [
-    // Primary entry depends on role
     {
-      icon: User,
-      label: "Dashboard",
+      icon: Compass,
+      label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
       onClick: () => handleItemClick(),
-      href: ROUTES.DASHBOARD.getPath(),
+      href: ROUTES.DASHBOARD.child.CLUB_BROWSER.getPath(),
     },
+    primaryClubLink,
     {
       icon: Settings,
-      label: "Settings",
+      label: "Cài đặt",
       onClick: () => handleItemClick(),
       href: ROUTES.DASHBOARD.child.ACCOUNT_SETTINGS.getPath(),
     },
     {
       icon: LogOut,
-      label: "Logout",
+      label: "Đăng xuất",
       onClick: () => handleItemClick("logout"),
       isButton: true,
     },
   ];
+
 
   const avatarUrl =
     user?.avatarUrl && user.avatarUrl.trim().length > 0
@@ -115,7 +118,6 @@ const Navbar = () => {
     <>
       <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-b border-slate-200 text-slate-900 py-4 z-[100] shadow-sm">
         <div className="container mx-auto px-4 md:px-12 flex items-center justify-between relative">
-
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3">
             <img
@@ -125,7 +127,7 @@ const Navbar = () => {
             />
             <div className="leading-tight hidden sm:block">
               <p className="text-lg font-semibold tracking-wide">ClubHub</p>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-orange-300">FPT University</p>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-orange-300">Đại học FPT</p>
             </div>
           </Link>
 
@@ -133,7 +135,7 @@ const Navbar = () => {
           <button
             className="md:hidden text-slate-900 p-2 hover:bg-slate-100 rounded-xl transition-colors"
             onClick={toggleMenu}
-            aria-label="Toggle Menu"
+            aria-label="Chuyển đổi menu"
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -180,23 +182,23 @@ const Navbar = () => {
                     <div className="absolute right-0 mt-3 w-80 bg-white backdrop-blur-xl rounded-2xl shadow-2xl shadow-orange-500/10 border border-slate-200 z-50">
                       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                         <div>
-                          <p className="text-sm text-slate-900 font-medium">Notifications</p>
+                          <p className="text-sm text-slate-900 font-medium">Thông báo</p>
                           <p className="text-xs text-slate-500 font-light">
-                            You have {unreadCount} unread notifications
+                            Bạn có {unreadCount} thông báo chưa đọc
                           </p>
                         </div>
                         <button
                           onClick={handleMarkAllAsRead}
                           className="text-xs text-orange-500 hover:text-orange-400 font-medium"
                         >
-                          Mark all as read
+                          Đánh dấu tất cả đã đọc
                         </button>
                       </div>
 
                       <div className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 hover:scrollbar-thumb-orange-200">
                         {latestNotifications.length === 0 ? (
                           <div className="px-4 py-6 text-center text-slate-400 font-light text-sm">
-                            No notifications yet
+                            Chưa có thông báo
                           </div>
                         ) : (
                           latestNotifications.map((item) => (
@@ -235,7 +237,7 @@ const Navbar = () => {
                           }}
                           className="w-full text-sm font-medium text-orange-500 hover:text-orange-400"
                         >
-                          View all notifications
+                          Xem tất cả thông báo
                         </button>
                       </div>
                     </div>
@@ -249,7 +251,7 @@ const Navbar = () => {
                   >
                     <img
                       src={avatarUrl}
-                      alt="Avatar"
+                      alt="Ảnh đại diện"
                       className="w-8 h-8 rounded-full ring-2 ring-slate-200 group-hover:ring-orange-400 transition-all"
                     />
                     <span className="font-light hidden lg:block">{user.username}</span>
@@ -267,8 +269,8 @@ const Navbar = () => {
                     <div className="absolute right-0 top-full mt-2 w-64 bg-white backdrop-blur-xl rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden">
                       {/* Menu Header */}
                       <div className="px-4 py-4 border-b border-slate-100 bg-gradient-to-br from-orange-50 to-white">
-                        <p className="text-sm font-medium text-slate-900">Welcome back</p>
-                        <p className="text-xs text-slate-500 mt-1 font-light">Manage your account</p>
+                        <p className="text-sm font-medium text-slate-900">Chào mừng trở lại</p>
+                        <p className="text-xs text-slate-500 mt-1 font-light">Quản lý tài khoản của bạn</p>
                       </div>
 
                       {/* Menu Items */}
@@ -309,30 +311,28 @@ const Navbar = () => {
 
                       {/* Menu Footer */}
                       <div className="px-4 py-3 border-t border-slate-100 bg-slate-50">
-                        <p className="text-xs text-slate-500 text-center font-light">Version 1.0.0</p>
+                        <p className="text-xs text-slate-500 text-center font-light">Phiên bản 1.0.0</p>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
-
             ) : (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => showAuthModal("signIn")}
                   className="px-6 py-2 rounded-xl border border-slate-200 font-medium text-slate-700 bg-white hover:border-orange-400 hover:text-orange-500 hover:bg-orange-50 transition-all duration-300"
                 >
-                  Sign In
+                  Đăng nhập
                 </button>
                 <button
                   onClick={() => showAuthModal("signUp")}
                   className="px-6 py-2 rounded-xl bg-orange-500 font-medium text-white hover:bg-orange-600 hover:scale-105 hover:shadow-lg hover:shadow-orange-200 transition-all duration-300"
                 >
-                  Sign Up
+                  Đăng ký
                 </button>
               </div>
             )}
-
           </div>
         </div>
       </nav>

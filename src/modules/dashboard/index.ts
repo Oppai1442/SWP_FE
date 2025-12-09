@@ -1,13 +1,12 @@
 export { default as DashboardLayout } from './DashboardLayout';
 
-export { default as Dashboard } from './pages/Dashboard';
-
 //child
 export { default as UserManagement } from './pages/user-management/UserManagement';
 export { default as PermissionManagement } from './pages/permission-management/PermissionManagement';
-export { default as TransactionManagement } from './pages/transaction-management/TransactionManagement';
 export { default as ClubCreationQueue } from './pages/club-queue/ClubCreationQueue';
 export { default as MyClubs } from './pages/my-club/MyClubs';
+export { default as ClubBrowser } from './pages/club-browser/ClubBrowser';
+export { default as ClubManagement } from './pages/club-management/ClubManagement';
 
 
 export { default as NotificationManagement } from './pages/notification/NotificationPage'

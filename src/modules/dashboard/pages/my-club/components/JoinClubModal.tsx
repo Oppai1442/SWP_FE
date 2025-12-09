@@ -50,7 +50,7 @@ const JoinClubModal = ({
   onChange,
   onSubmit,
   onClose,
-  modalTitle = 'Enter your invite code',
+  modalTitle = 'Nhập mã mời của bạn',
   showInviteCodeInput = true,
   inviteCodeHint,
 }: JoinClubModalProps) => {
@@ -92,7 +92,7 @@ const JoinClubModal = ({
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Join club</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Tham gia câu lạc bộ</p>
             <h3 className="text-lg font-semibold text-slate-900">{modalTitle}</h3>
           </div>
           <button
@@ -108,8 +108,8 @@ const JoinClubModal = ({
           <div className="md:hidden">
             <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
               {[
-                { id: 'details', label: 'Join details' },
-                { id: 'payment', label: 'Payment & proof' },
+                { id: 'details', label: 'Chi tiết tham gia' },
+                { id: 'payment', label: 'Thanh toán & bằng chứng' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -131,16 +131,16 @@ const JoinClubModal = ({
             <div className={`space-y-4 ${modalTab === 'details' ? 'block' : 'hidden'} md:block`}>
               <div className="rounded-2xl border border-slate-100 bg-white p-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Join details</p>
+                  <p className="text-sm font-semibold text-slate-900">Chi tiết tham gia</p>
                   <p className="text-xs text-slate-500">
-                    Provide your invite code and a brief motivation.
+                    Cung cấp mã mời và một động lực ngắn gọn.
                   </p>
                 </div>
                 <div className="mt-4 space-y-4">
                   {showInviteCodeInput ? (
                     <div>
                       <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        Invite code
+                        Mã mời
                       </label>
                       <input
                         type="text"
@@ -153,19 +153,19 @@ const JoinClubModal = ({
                     </div>
                   ) : (
                     <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      {inviteCodeHint ?? 'Invite code is provided automatically for this club.'}
+                      {inviteCodeHint ?? 'Mã mời được cung cấp tự động cho câu lạc bộ này.'}
                     </div>
                   )}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Motivation (optional)
+                      Động lực (tùy chọn)
                     </label>
                     <textarea
                       value={form.motivation}
                       onChange={(event) => onChange('motivation', event.target.value)}
                       rows={5}
                       className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                      placeholder="Share why you want to join..."
+                      placeholder="Chia sẻ lý do bạn muốn tham gia..."
                     />
                   </div>
                 </div>
@@ -174,10 +174,9 @@ const JoinClubModal = ({
 
             <div className={`space-y-4 ${modalTab === 'payment' ? 'block' : 'hidden'} md:block`}>
               <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-                <p className="text-sm font-semibold text-slate-900">Payment instructions</p>
+                <p className="text-sm font-semibold text-slate-900">Hướng dẫn thanh toán</p>
                 <p className="text-xs text-slate-500">
-                  Pay the join fee with the QR generated below, then submit your request. Leaders review
-                  every submission manually.
+                  Thanh toán phí tham gia bằng mã QR được tạo bên dưới, sau đó gửi yêu cầu của bạn. Trưởng nhóm xem xét mọi hồ sơ theo cách thủ công.
                 </p>
                 <div className="mt-3 rounded-2xl border border-slate-100 bg-white p-3">
                   {isPreviewLoading ? (
@@ -189,24 +188,24 @@ const JoinClubModal = ({
                   ) : hasBankInstructions ? (
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                        <span className="text-slate-500">Bank</span>
+                        <span className="text-slate-500">Ngân hàng</span>
                         <span className="font-semibold text-slate-900">{preview?.bankId}</span>
                       </div>
                       <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                        <span className="text-slate-500">Account</span>
+                        <span className="text-slate-500">Tài khoản</span>
                         <span className="font-semibold text-slate-900">
                           {preview?.bankAccountNumber}
                         </span>
                       </div>
                       <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                        <span className="text-slate-500">Join fee</span>
+                        <span className="text-slate-500">Phí tham gia</span>
                         <span className="font-semibold text-slate-900">
                           {formatJoinFeeValue(preview?.joinFee)}
                         </span>
                       </div>
                       {preview?.bankTransferNote && (
                         <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                          <span className="text-slate-500">Transfer note</span>
+                          <span className="text-slate-500">Ghi chú chuyển khoản</span>
                           <span className="font-semibold text-slate-900">
                             {preview.bankTransferNote}
                           </span>
@@ -220,14 +219,14 @@ const JoinClubModal = ({
                             className="mx-auto h-36 w-36 rounded-2xl border border-white bg-white object-contain p-3 shadow-inner"
                           />
                           <p className="mt-2 text-[11px] uppercase tracking-wide text-slate-500">
-                            Scan to pay before submitting
+                            Quét để thanh toán trước khi gửi
                           </p>
                         </div>
                       )}
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500">
-                      Payment instructions will appear once the club provides them.
+                      Hướng dẫn thanh toán sẽ xuất hiện khi câu lạc bộ cung cấp.
                     </p>
                   )}
                 </div>
@@ -235,9 +234,9 @@ const JoinClubModal = ({
 
               <div className="rounded-2xl border border-slate-100 bg-white p-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-slate-900">Payment evidence</p>
+                  <p className="text-sm font-semibold text-slate-900">Bằng chứng thanh toán</p>
                   <p className="text-xs text-slate-500">
-                    Upload the receipt screenshot. Drag & drop or choose a file. Supported files: images, up to 10MB.
+                    Tải lên ảnh chụp màn hình biên lai. Kéo & thả hoặc chọn tệp. Các tệp được hỗ trợ: hình ảnh, tối đa 10MB.
                   </p>
                 </div>
                 {paymentProofUrl ? (
@@ -250,15 +249,15 @@ const JoinClubModal = ({
                       />
                     </div>
                     <div className="flex-1 text-sm">
-                      <p className="font-semibold text-slate-900">{paymentProofFileName ?? 'payment-proof.jpg'}</p>
-                      <p className="text-xs text-slate-500">Uploaded successfully.</p>
+                      <p className="font-semibold text-slate-900">{paymentProofFileName ?? 'bang-chung-thanh-toan.jpg'}</p>
+                      <p className="text-xs text-slate-500">Tải lên thành công.</p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <button
                           type="button"
                           onClick={onRemoveProof}
                           className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500"
                         >
-                          Remove
+                          Xóa
                         </button>
                         <a
                           href={paymentProofUrl}
@@ -266,7 +265,7 @@ const JoinClubModal = ({
                           rel="noopener noreferrer"
                           className="rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
                         >
-                          View full
+                          Xem đầy đủ
                         </a>
                       </div>
                     </div>
@@ -295,18 +294,18 @@ const JoinClubModal = ({
                     >
                       <UploadCloud className="h-8 w-8 text-orange-400" />
                       <p className="text-sm font-semibold text-slate-900">
-                        {allowUpload ? 'Drop your image here' : 'Enter invite code to enable upload'}
+                        {allowUpload ? 'Thả hình ảnh của bạn vào đây' : 'Nhập mã mời để kích hoạt tải lên'}
                       </p>
                       <p className="text-xs text-slate-500">
                         {allowUpload
-                          ? 'or click to browse files'
-                          : 'Upload unlocks after instructions are available.'}
+                          ? 'hoặc nhấp để duyệt tệp'
+                          : 'Tải lên sẽ mở khóa sau khi có hướng dẫn.'}
                       </p>
                     </label>
                     {isUploadingProof && (
                       <div className="mt-3 flex items-center justify-center gap-2 text-xs text-slate-500">
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Uploading evidence...
+                        Đang tải bằng chứng lên...
                       </div>
                     )}
                   </div>
@@ -322,7 +321,7 @@ const JoinClubModal = ({
               onClick={onClose}
               className="rounded-2xl border border-transparent px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
             >
-              Cancel
+              Hủy bỏ
             </button>
             <button
               type="submit"
@@ -330,7 +329,7 @@ const JoinClubModal = ({
               className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition hover:bg-orange-600 disabled:opacity-60"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              Submit request
+              Gửi yêu cầu
             </button>
           </div>
         </form>
