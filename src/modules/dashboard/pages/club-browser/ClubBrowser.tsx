@@ -16,6 +16,8 @@ import {
   getJoinRequestHistoryAPI,
   type ClubJoinRequest,
   type ClubJoinRequestStatus,
+  getClubActivitiesAPI,
+  type ClubActivity,
 } from '../my-club/services/myClubService';
 
 const CLUBS_PER_PAGE = 8;
@@ -71,6 +73,7 @@ const ClubBrowser = () => {
   const [manualInviteCode, setManualInviteCode] = useState('');
   const [isResolvingInviteCode, setIsResolvingInviteCode] = useState(false);
   const [joinStatusMap, setJoinStatusMap] = useState<Record<number, ClubJoinRequestStatus>>({});
+  const [activitiesMap, setActivitiesMap] = useState<Record<number, ClubActivity[]>>({});
 
   const isJoinStatusBlocked = (status?: ClubJoinRequestStatus) =>
     status === 'PENDING' || status === 'APPROVED';
@@ -91,6 +94,18 @@ const ClubBrowser = () => {
       const data = await getClubsAPI('all');
       const normalized = extractArrayResponse<ClubSummary>(data);
       setClubs(normalized);
+      // Fetch activities for all clubs
+      const newActivitiesMap: Record<number, ClubActivity[]> = {};
+      for (const club of normalized) {
+        try {
+          const activities = await getClubActivitiesAPI(club.id);
+          newActivitiesMap[club.id] = extractArrayResponse<ClubActivity>(activities);
+        } catch (err) {
+          console.warn(`Failed to load activities for club ${club.id}:`, err);
+          newActivitiesMap[club.id] = [];
+        }
+      }
+      setActivitiesMap(newActivitiesMap);
     } catch (error) {
       console.error(error);
       toast.error('Không thể tải câu lạc bộ.');
@@ -511,6 +526,33 @@ const ClubBrowser = () => {
                           {club.category ?? 'General'}
                         </span>
                       </div>
+                      <div className="mt-3">
+                        <p className="text-[11px] font-semibold text-slate-700">Club Activities</p>
+                        {(() => {
+                          const activities = activitiesMap[club.id] ?? [];
+                          if (activities.length > 0) {
+                            return (
+                              <ul className="mt-2 flex flex-wrap gap-2">
+                                {activities.slice(0, 3).map((activity, idx) => (
+                                  <li
+                                    key={`${activity.id ?? idx}`}
+                                    className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700"
+                                  >
+                                    {activity.title}
+                                  </li>
+                                ))}
+                                {activities.length > 3 && (
+                                  <li className="rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-500">
+                                    +{activities.length - 3} more
+                                  </li>
+                                )}
+                              </ul>
+                            );
+                          }
+                          return <div className="mt-2 text-xs text-slate-400">No activities yet</div>;
+                        })()}
+                      </div>
+
                       <button
                         type="button"
                         onClick={() => openJoinModal(club)}
