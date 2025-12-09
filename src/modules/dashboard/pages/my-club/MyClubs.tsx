@@ -29,6 +29,7 @@ import {
   updateClubMemberAPI,
   updateClubSettingsAPI,
   updateClubActivityAPI,
+  updateClubAPI,
   uploadClubImageAPI,
   type ClubDetail,
   type ClubJoinRequest,
@@ -207,6 +208,7 @@ const MyClubs = () => {
   const [memberActionLoading, setMemberActionLoading] = useState<Record<number, boolean>>({});
   const [isLeavingClub, setIsLeavingClub] = useState(false);
   const [editingActivityId, setEditingActivityId] = useState<number | null>(null);
+  const [isUpdatingClubImage, setIsUpdatingClubImage] = useState(false);
 
 
   useEffect(() => {
@@ -577,6 +579,35 @@ const MyClubs = () => {
       toast.error('Kh?ng th? t?i h?nh ?nh.');
     } finally {
       setIsUploadingClubImage(false);
+    }
+  };
+
+  const handleUpdateClubImage = async (clubId: number, file: File) => {
+    if (!file.type?.startsWith('image/')) {
+      toast.error('Hãy chọn hình ảnh hợp lệ.');
+      return;
+    }
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast.error('Hình ảnh không được vượt quá 5MB.');
+      return;
+    }
+    try {
+      setIsUpdatingClubImage(true);
+      const uploaded = await uploadClubImageAPI(file, clubId);
+      const newUrl = uploaded.url ?? '';
+      await updateClubAPI(clubId, { imageUrl: newUrl });
+      setClubs((prev) => prev.map((club) => (club.id === clubId ? { ...club, imageUrl: newUrl } : club)));
+      setSelectedClub((prev) => (prev?.id === clubId ? { ...prev, imageUrl: newUrl } : prev));
+      setClubDetailCache((prev) =>
+        prev[clubId] ? { ...prev, [clubId]: { ...prev[clubId], imageUrl: newUrl } } : prev
+      );
+      toast.success('Đã cập nhật ảnh câu lạc bộ.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Không thể cập nhật ảnh câu lạc bộ.');
+    } finally {
+      setIsUpdatingClubImage(false);
     }
   };
 
@@ -1149,6 +1180,8 @@ const MyClubs = () => {
           onTransferLeadership={handleTransferLeadership}
           onKickMember={handleKickMember}
           onLeaveClub={handleLeaveClub}
+          onUpdateClubImage={handleUpdateClubImage}
+          isImageUpdating={isUpdatingClubImage}
           onClose={() => setSelectedClub(null)}
         />
       )}
