@@ -22,8 +22,8 @@ export const ROUTES = {
             USER_MANAGEMENT: { path: 'user-list', label: 'Quản lý người dùng', getPath: () => '/dashboard/user-list' },
             PERMISSION_MANAGEMENT: { path: 'permissions', label: 'Quản lý quyền', getPath: () => '/dashboard/permissions' },
             MY_CLUB: { path: 'clubs/my', label: 'Club của tôi', getPath: () => '/dashboard/clubs/my' },
-            CLUB_BROWSER: { path: 'clubs/browse', label: 'Explore clubs', getPath: () => '/dashboard/clubs/browse' },
-            CLUB_MANAGEMENT: { path: 'clubs/manage', label: 'Quan ly club', getPath: () => '/dashboard/clubs/manage' },
+            CLUB_BROWSER: { path: 'clubs/browse', label: 'Khám phá club', getPath: () => '/dashboard/clubs/browse' },
+            CLUB_MANAGEMENT: { path: 'clubs/manage', label: 'Quản lý club', getPath: () => '/dashboard/clubs/manage' },
             // Notification
             NOTIFICATION_MANAGEMENT: {
                 path: 'notification/notification-management', label: 'Quản lý thông báo',
