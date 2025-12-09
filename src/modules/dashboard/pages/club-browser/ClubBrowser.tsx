@@ -74,6 +74,7 @@ const ClubBrowser = () => {
   const [isResolvingInviteCode, setIsResolvingInviteCode] = useState(false);
   const [joinStatusMap, setJoinStatusMap] = useState<Record<number, ClubJoinRequestStatus>>({});
   const [activitiesMap, setActivitiesMap] = useState<Record<number, ClubActivity[]>>({});
+  const [activitiesModalClubId, setActivitiesModalClubId] = useState<number | null>(null);
 
   const isJoinStatusBlocked = (status?: ClubJoinRequestStatus) =>
     status === 'PENDING' || status === 'APPROVED';
@@ -526,44 +527,43 @@ const ClubBrowser = () => {
                           {club.category ?? 'General'}
                         </span>
                       </div>
-                      <div className="mt-3">
-                        <p className="text-[11px] font-semibold text-slate-700">Club Activities</p>
-                        {(() => {
-                          const activities = activitiesMap[club.id] ?? [];
-                          if (activities.length > 0) {
-                            return (
-                              <ul className="mt-2 flex flex-wrap gap-2">
-                                {activities.slice(0, 3).map((activity, idx) => (
-                                  <li
-                                    key={`${activity.id ?? idx}`}
-                                    className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700"
-                                  >
-                                    {activity.title}
-                                  </li>
-                                ))}
-                                {activities.length > 3 && (
-                                  <li className="rounded-full bg-slate-50 px-3 py-1 text-xs text-slate-500">
-                                    +{activities.length - 3} more
-                                  </li>
-                                )}
-                              </ul>
-                            );
-                          }
-                          return <div className="mt-2 text-xs text-slate-400">No activities yet</div>;
-                        })()}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => openJoinModal(club)}
-                        disabled={disabled}
-                        className={`mt-auto inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${disabled
-                            ? 'cursor-not-allowed border border-slate-200 bg-slate-50 text-slate-400'
-                            : 'border border-orange-200 bg-white text-orange-500 hover:bg-orange-50'
-                          }`}
-                      >
-                        {label}
-                      </button>
+                      {(() => {
+                        const now = new Date();
+                        const currentActivities = (activitiesMap[club.id] ?? []).filter((activity) => {
+                          const startDate = activity.startDate ? new Date(activity.startDate) : null;
+                          const endDate = activity.endDate ? new Date(activity.endDate) : null;
+                          const hasStarted = !startDate || startDate <= now;
+                          const hasNotEnded = !endDate || endDate >= now;
+                          return hasStarted && hasNotEnded;
+                        });
+                        const hasCurrent = currentActivities.length > 0;
+                        return (
+                          <div className="mt-4 flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setActivitiesModalClubId(club.id)}
+                              disabled={!hasCurrent}
+                              className={`inline-flex items-center justify-center rounded-2xl px-3 py-2 text-sm font-semibold transition ${!hasCurrent
+                                ? 'cursor-not-allowed border border-slate-200 bg-slate-50 text-slate-400'
+                                : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                              }`}
+                            >
+                              Activities
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => openJoinModal(club)}
+                              disabled={disabled}
+                              className={`ml-auto inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${disabled
+                                ? 'cursor-not-allowed border border-slate-200 bg-slate-50 text-slate-400'
+                                : 'border border-orange-200 bg-white text-orange-500 hover:bg-orange-50'
+                              }`}
+                            >
+                              {label}
+                            </button>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 );
@@ -635,6 +635,69 @@ const ClubBrowser = () => {
           />
         )
       }
+      {activitiesModalClubId !== null && (
+        (() => {
+          const club = clubs.find((c) => c.id === activitiesModalClubId) ?? null;
+          const now = new Date();
+          const activities = club ? (activitiesMap[club.id] ?? []).filter((activity) => {
+            const startDate = activity.startDate ? new Date(activity.startDate) : null;
+            const endDate = activity.endDate ? new Date(activity.endDate) : null;
+            const hasStarted = !startDate || startDate <= now;
+            const hasNotEnded = !endDate || endDate >= now;
+            return hasStarted && hasNotEnded;
+          }) : [];
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center">
+              <div className="absolute inset-0 bg-black/40" onClick={() => setActivitiesModalClubId(null)} />
+              <div className="relative z-10 w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">Activities for {club?.name ?? 'Club'}</h3>
+                    <p className="mt-1 text-sm text-slate-500">Currently happening activities</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActivitiesModalClubId(null)}
+                    className="ml-auto rounded-full bg-slate-100 px-3 py-1 text-sm"
+                  >
+                    Close
+                  </button>
+                </div>
+                <div className="mt-4 space-y-3">
+                  {activities.length === 0 ? (
+                    <div className="text-sm text-slate-500">No activities are happening right now.</div>
+                  ) : (
+                    activities.map((activity) => (
+                      <div key={activity.id} className="rounded-lg border border-slate-100 p-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">{activity.title}</div>
+                            {activity.description && (
+                              <div className="mt-1 text-xs text-slate-500">{activity.description}</div>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-500">
+                            {activity.startDate && (
+                              <div>Start: {new Date(activity.startDate).toLocaleString()}</div>
+                            )}
+                            {activity.endDate && (
+                              <div>End: {new Date(activity.endDate).toLocaleString()}</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+                          <div>{activity.location ?? 'No location'}</div>
+                          <div className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">{activity.status}</div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()
+      )}
     </div >
   );
 };
