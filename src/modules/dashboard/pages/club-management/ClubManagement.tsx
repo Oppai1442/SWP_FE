@@ -1,14 +1,16 @@
-import type { ComponentType } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent, ComponentType } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import {
   AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Eye,
+  Image as ImageIcon,
   Loader2,
   RefreshCcw,
   Search,
+  UploadCloud,
   Users,
   X,
 } from 'lucide-react';
@@ -19,6 +21,8 @@ import {
   getClubActivitiesAPI,
   getClubSettingsAPI,
   getClubJoinRequestsAPI,
+  updateClubAPI,
+  uploadClubImageAPI,
   type ClubSummary,
   type ClubDetail,
   type ClubStatus,
@@ -75,6 +79,7 @@ const ClubManagement = () => {
   const [activities, setActivities] = useState<ClubActivity[]>([]);
   const [settings, setSettings] = useState<ClubSettingInfo | null>(null);
   const [joinHistory, setJoinHistory] = useState<ClubJoinRequest[]>([]);
+  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 350);
@@ -176,6 +181,36 @@ const ClubManagement = () => {
     setSettings(null);
     setJoinHistory([]);
   };
+
+  const handleUpdateClubImage = useCallback(
+    async (clubId: number, file: File) => {
+      if (!file?.type?.startsWith('image/')) {
+        toast.error('Please upload an image file.');
+        return;
+      }
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        toast.error('Image must be under 5MB.');
+        return;
+      }
+      try {
+        setIsUpdatingImage(true);
+        const uploaded = await uploadClubImageAPI(file, clubId);
+        const newUrl = uploaded.url ?? '';
+        await updateClubAPI(clubId, { imageUrl: newUrl });
+        setClubDetail((prev) => (prev?.id === clubId ? { ...prev, imageUrl: newUrl } : prev));
+        setSelectedClub((prev) => (prev?.id === clubId ? { ...prev, imageUrl: newUrl } : prev));
+        setClubs((prev) => prev.map((club) => (club.id === clubId ? { ...club, imageUrl: newUrl } : club)));
+        toast.success('Club picture updated.');
+      } catch (error) {
+        console.error(error);
+        toast.error('Unable to update club picture.');
+      } finally {
+        setIsUpdatingImage(false);
+      }
+    },
+    [setClubs]
+  );
 
   return (
     <div className="min-h-screen bg-white px-4 py-6 sm:px-6 lg:px-10">
@@ -327,6 +362,8 @@ const ClubManagement = () => {
           activeTab={detailTab}
           onTabChange={setDetailTab}
           isLoading={isDetailLoading}
+          onUploadImage={handleUpdateClubImage}
+          isImageUploading={isUpdatingImage}
           onClose={closeDetail}
         />
       )}
@@ -384,6 +421,8 @@ interface ClubDetailDrawerProps {
   activeTab: DetailTab;
   onTabChange: (tab: DetailTab) => void;
   isLoading: boolean;
+  onUploadImage: (clubId: number, file: File) => void;
+  isImageUploading: boolean;
   onClose: () => void;
 }
 
@@ -397,9 +436,20 @@ const ClubDetailDrawer = ({
   activeTab,
   onTabChange,
   isLoading,
+  onUploadImage,
+  isImageUploading,
   onClose,
 }: ClubDetailDrawerProps) => {
   const resolved = club ?? (clubSummary as ClubDetail);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && resolved.id) {
+      onUploadImage(resolved.id, file);
+    }
+    event.target.value = '';
+  };
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-end bg-slate-900/40">
       <div className="h-full w-full max-w-4xl overflow-y-auto bg-white shadow-2xl">
@@ -417,7 +467,40 @@ const ClubDetailDrawer = ({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="px-6 py-5">
+        <div className="px-6 py-5 space-y-6">
+          <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(200px,1fr)]">
+            <div className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50">
+              {resolved.imageUrl ? (
+                <img src={resolved.imageUrl} alt={resolved.name} className="h-64 w-full object-cover" />
+              ) : (
+                <div className="flex h-64 flex-col items-center justify-center gap-2 text-slate-400">
+                  <ImageIcon className="h-8 w-8 text-orange-400" />
+                  <p className="text-sm font-semibold text-slate-500">No image uploaded</p>
+                </div>
+              )}
+            </div>
+            <div className="rounded-3xl border border-slate-100 bg-slate-50/70 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Club picture</p>
+              <p className="mt-1 text-sm text-slate-500">Upload a new cover image to refresh how this club appears.</p>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isImageUploading}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-orange-200 bg-white px-4 py-2 text-sm font-semibold text-orange-500 shadow-sm transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isImageUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}
+                {isImageUploading ? 'Uploading...' : 'Update picture'}
+              </button>
+              <p className="mt-2 text-xs text-slate-400">PNG or JPG, up to 5MB.</p>
+            </div>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
           <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
             {detailTabs.map((tab) => (
               <button
@@ -626,6 +709,5 @@ const DetailItem = ({ label, value }: DetailItemProps) => (
 );
 
 export default ClubManagement;
-
 
 
