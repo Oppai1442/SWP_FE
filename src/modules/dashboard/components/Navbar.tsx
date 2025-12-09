@@ -119,10 +119,10 @@ const Navbar: FC<NavbarProps> = ({ sidebarOpen, setSidebarOpen }) => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 sm:flex sm:gap-2">
+          {/* <div className="hidden items-center rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 sm:flex sm:gap-2">
             <ArrowLeftRight className="h-4 w-4 text-orange-500" />
             Đang đăng nhập dưới vai trò {user?.role?.name?.replace("ROLE_", "") ?? "USER"}
-          </div>
+          </div> */}
 
           <div className="relative" ref={notificationRef}>
             <button
