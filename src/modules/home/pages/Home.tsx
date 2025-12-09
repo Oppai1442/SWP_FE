@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ClubImage from "../../../assets/img/home/CLB-FPTU.png";
 import ClubImage1 from "../../../assets/img/home/CLB-FPTU1.png";
@@ -192,10 +192,6 @@ const ClubHubHome = () => {
         "Theo dõi thông tin sinh viên, nhóm chức năng và quá trình hoạt động.",
     },
     {
-      title: "Theo dõi phí hoạt động",
-      description: "Lên lịch thu phí và đối chiếu công nợ dễ dàng.",
-    },
-    {
       title: "Yêu cầu tham gia",
       description:
         "Sinh viên đăng ký trực tuyến, theo dõi tiến trình phê duyệt.",
@@ -203,44 +199,6 @@ const ClubHubHome = () => {
     {
       title: "Phê duyệt yêu cầu",
       description: "Xử lý đăng ký, rời nhóm và các thay đổi vai trò.",
-    },
-    {
-      title: "Báo cáo CLB",
-      description: "Xuất báo cáo thành viên, ngân sách và kết quả hoạt động.",
-    },
-  ];
-
-  const PROCESS_STEPS = [
-    {
-      number: "01",
-      label: "Thiết lập",
-      title: "Bản đồ câu lạc bộ",
-      description: "Chuẩn hóa dữ liệu và cơ cấu ngay từ đầu.",
-    },
-    {
-      number: "02",
-      label: "Thiết lập",
-      title: "Hồ sơ thành viên",
-      description: "Ghi nhận thông tin, kỹ năng và quyền lãnh đạo.",
-    },
-    {
-      number: "03",
-      label: "Xử lý",
-      title: "Đăng ký & Phí",
-      description:
-        "Sinh viên đăng ký, được duyệt và hoàn tất thanh toán tự động.",
-    },
-    {
-      number: "04",
-      label: "Xử lý",
-      title: "Xử lý ngoại lệ",
-      description: "Theo dõi lỗi, cảnh báo, phí chưa thanh toán.",
-    },
-    {
-      number: "05",
-      label: "Báo cáo",
-      title: "Kết quả hoạt động",
-      description: "KPI, tỉ lệ tham gia, doanh thu cuối kỳ.",
     },
   ];
 
@@ -382,22 +340,23 @@ const ClubHubHome = () => {
 
       {/* === OPERATIONS === */}
       <section id="operations" className="py-24" data-animate>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* CẬP NHẬT 1: Giảm max-width xuống 5xl để layout 2 cột gọn hơn */}
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-light mb-12 text-center">
             Các thao tác chính
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* CẬP NHẬT 2: Xóa 'lg:grid-cols-3', giữ 'md:grid-cols-2' để tạo layout 2x2 */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {OPERATIONS.map((op, idx) => {
               const isVisible = visibleSections.has("operations");
               return (
                 <div
                   key={idx}
-                  className={`p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-500 ${
-                    isVisible
+                  className={`p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-500 ${isVisible
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-8"
-                  }`}
+                    }`}
                   style={{ transitionDelay: `${idx * 100}ms` }}
                 >
                   <h3 className="text-xl font-semibold mb-2">{op.title}</h3>
@@ -405,39 +364,6 @@ const ClubHubHome = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-      </section>
-
-      {/* === PROCESS === */}
-      <section id="process" className="py-24 bg-orange-50" data-animate>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-light mb-12 text-center">
-            Quy trình vận hành
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {PROCESS_STEPS.map((step, idx) => (
-              <div
-                key={idx}
-                className={`p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col items-center text-center transition-all duration-700 ${
-                  visibleSections.has("process")
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-8"
-                }`}
-                style={{ transitionDelay: `${idx * 150}ms` }}
-              >
-                <div className="w-16 h-16 bg-orange-100 rounded-2xl flex flex-col items-center justify-center text-slate-900 border border-orange-200 mb-3">
-                  <span className="text-[10px] tracking-widest text-orange-400 uppercase">
-                    {step.label}
-                  </span>
-                  <span className="text-xl font-semibold">{step.number}</span>
-                </div>
-
-                <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
-                <p className="text-slate-600 font-light">{step.description}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
