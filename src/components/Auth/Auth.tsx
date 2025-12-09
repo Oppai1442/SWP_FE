@@ -349,19 +349,27 @@ const Auth: React.FC<AuthProps> = ({ mode: initialMode, onClose }) => {
             </div>
 
             {isSignIn() && (
-              <div className="flex items-center justify-between pt-2">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    className="w-4 h-4 rounded border-slate-300 bg-white text-orange-500 focus:ring-2 focus:ring-orange-200 cursor-pointer"
-                    checked={rememberMe}
-                    onChange={handleCheckboxChange}
-                  />
-                  <span className="text-slate-500 text-sm font-light group-hover:text-slate-700 transition-colors">
-                    Remember me
-                  </span>
-                </label>
+              <div className="flex flex-col gap-2 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      id="rememberMe"
+                      className="w-4 h-4 rounded border-slate-300 bg-white text-orange-500 focus:ring-2 focus:ring-orange-200 cursor-pointer"
+                      checked={rememberMe}
+                      onChange={handleCheckboxChange}
+                    />
+                    <span className="text-slate-500 text-sm font-light group-hover:text-slate-700 transition-colors">
+                      Remember me
+                    </span>
+                  </label>
+                  <a
+                    href="#"
+                    className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
               </div>
             )}
 
