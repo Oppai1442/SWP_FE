@@ -17,7 +17,7 @@ const getInitialSidebarState = () => {
 };
 
 const DashboardLayout = () => {
-  const [activeMenu, setActiveMenu] = useState('dashboard');
+  const [activeMenu, setActiveMenu] = useState('bảng điều khiển');
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(getInitialSidebarState);
   const { user } = useAuth();
 
@@ -41,13 +41,6 @@ const DashboardLayout = () => {
       roles: ["ROLE_ADMIN"]
     },
     {
-      id: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.path,
-      label: ROUTES.DASHBOARD.child.PERMISSION_MANAGEMENT.label,
-      icon: Key,
-      submenu: null,
-      roles: ["ROLE_ADMIN"]
-    },
-    {
       id: ROUTES.DASHBOARD.child.CLUB_QUEUE.path,
       label: ROUTES.DASHBOARD.child.CLUB_QUEUE.label,
       icon: Workflow,
@@ -66,7 +59,7 @@ const DashboardLayout = () => {
       label: ROUTES.DASHBOARD.child.MY_CLUB.label,
       icon: FlaskConical,
       submenu: null,
-      roles: ["ROLE_USER", "ROLE_ADMIN", "ROLE_STAFF"]
+      roles: ["ROLE_USER"]
     },
     {
       id: ROUTES.DASHBOARD.child.CLUB_BROWSER.path,
@@ -106,13 +99,13 @@ const DashboardLayout = () => {
       icon: Settings,
       submenu: null,
     },
-    {
-      id: ROUTES.DASHBOARD.child.LOG.path,
-      label: ROUTES.DASHBOARD.child.LOG.label,
-      icon: FileText,
-      submenu: null,
-      roles: ["ROLE_ADMIN"]
-    },
+    // {
+    //   id: ROUTES.DASHBOARD.child.LOG.path,
+    //   label: ROUTES.DASHBOARD.child.LOG.label,
+    //   icon: FileText,
+    //   submenu: null,
+    //   roles: ["ROLE_ADMIN"]
+    // },
   ];
 
 

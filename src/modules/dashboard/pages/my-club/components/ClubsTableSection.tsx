@@ -43,7 +43,7 @@ const ClubsTableSection = ({
           type="text"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search clubs..."
+          placeholder="Tìm kiếm câu lạc bộ..."
           className="w-full rounded-2xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
         />
       </div>
@@ -52,12 +52,12 @@ const ClubsTableSection = ({
         onChange={(event) => onStatusFilterChange(event.target.value as ClubStatus | 'all')}
         className="rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-48"
       >
-        <option value="all">All statuses</option>
-        <option value="ACTIVE">Active</option>
-        <option value="PENDING">Pending</option>
-        <option value="REJECTED">Rejected</option>
-        <option value="INACTIVE">Inactive</option>
-        <option value="ARCHIVED">Archived</option>
+        <option value="all">Tất cả trạng thái</option>
+        <option value="ACTIVE">Hoạt động</option>
+        <option value="PENDING">Đang chờ</option>
+        <option value="REJECTED">Bị từ chối</option>
+        <option value="INACTIVE">Không hoạt động</option>
+        <option value="ARCHIVED">Đã lưu trữ</option>
       </select>
     </div>
 
@@ -65,11 +65,11 @@ const ClubsTableSection = ({
       <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
         <thead>
           <tr className="text-xs uppercase tracking-wide text-slate-400">
-            <th className="py-3 pr-4">Club</th>
-            <th className="px-4 py-3">Category</th>
-            <th className="px-4 py-3">Members</th>
-            <th className="px-4 py-3">Status</th>
-            <th className="px-4 py-3 text-right">Action</th>
+            <th className="py-3 pr-4">Câu lạc bộ</th>
+            <th className="px-4 py-3">Danh mục</th>
+            <th className="px-4 py-3">Thành viên</th>
+            <th className="px-4 py-3">Trạng thái</th>
+            <th className="px-4 py-3 text-right">Hành động</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -78,7 +78,7 @@ const ClubsTableSection = ({
           ) : clubs.length === 0 ? (
             <tr>
               <td colSpan={5} className="py-10 text-center text-sm text-slate-500">
-                No clubs matched your filters. Try adjusting the search.
+                Không có câu lạc bộ nào phù hợp với bộ lọc của bạn. Hãy thử điều chỉnh tìm kiếm.
               </td>
             </tr>
           ) : (
@@ -86,9 +86,9 @@ const ClubsTableSection = ({
               <tr key={club.id} className="text-slate-700">
                 <td className="py-4 pr-4">
                   <div className="font-semibold text-slate-900">{club.name}</div>
-                  <div className="text-xs text-slate-400">#{club.code ?? 'N/A'}</div>
+                  <div className="text-xs text-slate-400">#{club.code ?? 'Không áp dụng'}</div>
                   <div className="text-xs text-slate-400">
-                    Leader: <span className="font-medium text-slate-600">{club.leaderName ?? 'Unassigned'}</span>
+                    Leader: <span className="font-medium text-slate-600">{club.leaderName ?? 'Chưa được phân công'}</span>
                   </div>
                 </td>
                 <td className="px-4 py-4 text-slate-500">{club.category ?? '-'}</td>
@@ -112,7 +112,7 @@ const ClubsTableSection = ({
                       className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
                     >
                       <Eye className="h-3.5 w-3.5" />
-                      View
+                      Xem
                     </button>
                   ) : null}
                 </td>
@@ -126,11 +126,11 @@ const ClubsTableSection = ({
     {!isLoading && clubs.length > 0 && (
       <div className="mt-4 flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <p>
-          Showing{' '}
+          Hiển thị{' '}
           <span className="font-semibold text-slate-900">
             {(currentPage - 1) * rowsPerPage + 1}-{Math.min(filteredCount, currentPage * rowsPerPage)}
           </span>{' '}
-          of <span className="font-semibold text-slate-900">{filteredCount}</span> clubs
+          của <span className="font-semibold text-slate-900">{filteredCount}</span> câu lạc bộ
         </p>
         <div className="flex items-center gap-2">
           <button
@@ -140,10 +140,10 @@ const ClubsTableSection = ({
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:text-orange-500 disabled:opacity-40"
           >
             <ChevronLeft className="mr-1 inline h-3.5 w-3.5" />
-            Prev
+            Trước
           </button>
           <div className="text-xs font-semibold text-slate-700">
-            Page {currentPage} / {pageCount}
+            Trang {currentPage} / {pageCount}
           </div>
           <button
             type="button"
@@ -151,7 +151,7 @@ const ClubsTableSection = ({
             disabled={currentPage === pageCount}
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:text-orange-500 disabled:opacity-40"
           >
-            Next
+            Tiếp theo
             <ChevronRight className="ml-1 inline h-3.5 w-3.5" />
           </button>
         </div>

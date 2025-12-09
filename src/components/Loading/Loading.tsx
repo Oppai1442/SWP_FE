@@ -40,7 +40,7 @@ const POSITION_MAP: Record<NonNullable<LoadingProps['position']>, string> = {
 
 const Loading: FC<LoadingProps> = ({
   isVisible,
-  message = 'Loading…',
+  message = 'Đang tải…',
   size = 'md',
   variant = 'default',
   position = 'center',

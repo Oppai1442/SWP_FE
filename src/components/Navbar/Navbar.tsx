@@ -251,7 +251,7 @@ const Navbar = () => {
                   >
                     <img
                       src={avatarUrl}
-                      alt="Avatar"
+                      alt="Ảnh đại diện"
                       className="w-8 h-8 rounded-full ring-2 ring-slate-200 group-hover:ring-orange-400 transition-all"
                     />
                     <span className="font-light hidden lg:block">{user.username}</span>

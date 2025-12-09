@@ -71,7 +71,7 @@ const resolveLeaderId = (club?: Pick<ClubDetail, 'leaderId' | 'presidentId'>) =>
   club?.leaderId ?? club?.presidentId ?? null;
 
 const resolveLeaderName = (club?: Pick<ClubDetail, 'leaderName' | 'presidentName'>) =>
-  club?.leaderName ?? club?.presidentName ?? 'Club leader';
+  club?.leaderName ?? club?.presidentName ?? 'Trưởng nhóm câu lạc bộ';
 
 const ClubDetailDrawer = ({
   club,
@@ -163,22 +163,22 @@ const ClubDetailDrawer = ({
   }, [club, members, selfMember, leaderId, leaderName]);
   const handleCopyInviteCode = async () => {
     if (!club.inviteCode) {
-      toast.error('Invite code not available.');
+      toast.error('Mã mời không có sẵn.');
       return;
     }
     try {
       await navigator.clipboard.writeText(club.inviteCode);
-      toast.success('Invite code copied.');
+      toast.success('Đã sao chép mã mời.');
     } catch (error) {
       console.error(error);
-      toast.error('Unable to copy invite code.');
+      toast.error('Không thể sao chép mã mời.');
     }
   };
 
   const handleDecision = (requestId: number, status: ClubJoinRequestStatus) => {
     const note =
       status === 'REJECTED'
-        ? window.prompt('Add a rejection note (optional)') ?? undefined
+        ? window.prompt('Thêm ghi chú từ chối (tùy chọn)') ?? undefined
         : undefined;
     onDecideJoinRequest(requestId, status, note);
   };
@@ -188,7 +188,7 @@ const ClubDetailDrawer = ({
       <div className="h-full w-full max-w-4xl overflow-y-auto bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Club</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Câu lạc bộ</p>
             <h3 className="text-xl font-semibold text-slate-900">{club.name}</h3>
             <p className="text-xs text-slate-500">#{club.code ?? 'N/A'}</p>
           </div>
@@ -208,11 +208,10 @@ const ClubDetailDrawer = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === tab.id
-                    ? 'bg-white text-orange-600 shadow'
-                    : 'text-slate-500 hover:text-orange-500'
-                }`}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${activeTab === tab.id
+                  ? 'bg-white text-orange-600 shadow'
+                  : 'text-slate-500 hover:text-orange-500'
+                  }`}
               >
                 {tab.label}
               </button>
@@ -236,17 +235,17 @@ const ClubDetailDrawer = ({
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Your membership</p>
+                      <p className="text-sm font-semibold text-slate-900">Tư cách thành viên của bạn</p>
                       <p className="text-xs text-slate-500">
-                        Role:{' '}
+                        Vai trò:{' '}
                         <span className="font-semibold text-slate-800">{selfMember.role}</span>
                         {selfMember.joinedAt && (
-                          <span className="ml-2">Joined {formatDate(selfMember.joinedAt)}</span>
+                          <span className="ml-2">Đã tham gia {formatDate(selfMember.joinedAt)}</span>
                         )}
                       </p>
                       {isCurrentLeader && (
                         <p className="text-xs text-amber-600">
-                          Transfer leadership to another member before leaving this club.
+                          Chuyển giao quyền lãnh đạo cho thành viên khác trước khi rời câu lạc bộ này.
                         </p>
                       )}
                     </div>
@@ -254,42 +253,40 @@ const ClubDetailDrawer = ({
                       type="button"
                       onClick={onLeaveClub}
                       disabled={isCurrentLeader || isLeavingClub || !currentMember}
-                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                        isCurrentLeader || !currentMember
-                          ? 'cursor-not-allowed border-amber-200 text-amber-500'
-                          : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
-                      }`}
+                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${isCurrentLeader || !currentMember
+                        ? 'cursor-not-allowed border-amber-200 text-amber-500'
+                        : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
+                        }`}
                     >
                       <LogOut className="h-4 w-4" />
                       {isCurrentLeader
-                        ? 'Transfer leadership to leave'
+                        ? 'Chuyển giao quyền lãnh đạo để rời đi'
                         : isLeavingClub
-                          ? 'Leaving...'
-                          : 'Leave club'}
+                          ? 'Đang rời đi...' : 'Rời câu lạc bộ'}
                     </button>
                   </div>
                 </div>
               )}
               {!membersVisible ? (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-sm text-amber-700">
-                  Member list is hidden by the club leader.
+                  Danh sách thành viên bị trưởng nhóm câu lạc bộ ẩn.
                 </div>
               ) : isMembersLoading ? (
                 <div className="flex items-center justify-center py-10 text-slate-400">
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
               ) : displayedMembers.length === 0 ? (
-                <p className="py-6 text-sm text-slate-500">No members to display.</p>
+                <p className="py-6 text-sm text-slate-500">Không có thành viên nào để hiển thị.</p>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-slate-100">
                   <table className="min-w-full divide-y divide-slate-100 text-sm">
                     <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
                       <tr>
-                        <th className="px-4 py-3 text-left">Member</th>
-                        <th className="px-4 py-3 text-left">Role</th>
-                        <th className="px-4 py-3 text-left">Status</th>
-                        <th className="px-4 py-3 text-left">Joined</th>
-                        {showMemberActions && <th className="px-4 py-3 text-right">Actions</th>}
+                        <th className="px-4 py-3 text-left">Thành viên</th>
+                        <th className="px-4 py-3 text-left">Vai trò</th>
+                        <th className="px-4 py-3 text-left">Trạng thái</th>
+                        <th className="px-4 py-3 text-left">Tham gia</th>
+                        {showMemberActions && <th className="px-4 py-3 text-right">Hành động</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -319,7 +316,7 @@ const ClubDetailDrawer = ({
                                       className="inline-flex items-center gap-1 rounded-2xl border border-orange-200 px-3 py-1 text-xs font-semibold text-orange-500 transition hover:bg-orange-50 disabled:opacity-50"
                                     >
                                       <Crown className="h-3.5 w-3.5" />
-                                      Leader
+                                      Trưởng nhóm
                                     </button>
                                   )}
                                   {canManage && !isSelf && !isVirtual && (
@@ -330,7 +327,7 @@ const ClubDetailDrawer = ({
                                       className="inline-flex items-center gap-1 rounded-2xl border border-rose-200 px-3 py-1 text-xs font-semibold text-rose-500 transition hover:bg-rose-50 disabled:opacity-50"
                                     >
                                       <UserMinus className="h-3.5 w-3.5" />
-                                      Remove
+                                      Xóa
                                     </button>
                                   )}
                                   {isSelf && (
@@ -341,7 +338,7 @@ const ClubDetailDrawer = ({
                                       className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-50"
                                     >
                                       <LogOut className="h-3.5 w-3.5" />
-                                      {isCurrentLeader ? 'Transfer first' : isLeavingClub ? 'Leaving...' : 'Leave'}
+                                      {isCurrentLeader ? 'Chuyển giao trước' : isLeavingClub ? 'Đang rời đi...' : 'Rời đi'}
                                     </button>
                                   )}
                                 </div>
@@ -363,12 +360,12 @@ const ClubDetailDrawer = ({
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
-                        {isEditingActivity ? 'Update activity' : 'Create activity'}
+                        {isEditingActivity ? 'Cập nhật hoạt động' : 'Tạo hoạt động'}
                       </p>
                       <p className="text-xs text-slate-500">
                         {isEditingActivity
-                          ? 'Adjust the selected activity details and publish the changes.'
-                          : 'Only leaders can add new club activities.'}
+                          ? 'Điều chỉnh chi tiết hoạt động đã chọn và xuất bản các thay đổi.'
+                          : 'Chỉ trưởng nhóm mới có thể thêm hoạt động câu lạc bộ mới.'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -378,7 +375,7 @@ const ClubDetailDrawer = ({
                           onClick={onCancelActivityEdit}
                           className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-amber-200 hover:text-amber-500"
                         >
-                          Cancel
+                          Hủy bỏ
                         </button>
                       )}
                       <button
@@ -388,35 +385,35 @@ const ClubDetailDrawer = ({
                         className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
                       >
                         {isCreatingActivity && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {isEditingActivity ? 'Save changes' : 'Publish'}
+                        {isEditingActivity ? 'Lưu thay đổi' : 'Xuất bản'}
                       </button>
                     </div>
                   </div>
                   <div className="mt-4 grid gap-4 md:grid-cols-2">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Title
+                      Tiêu đề
                       <input
                         type="text"
                         value={activityForm.title}
                         onChange={(event) => onActivityFormChange('title', event.target.value)}
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                        placeholder="Orientation day"
+                        placeholder="Ngày định hướng"
                       />
                     </label>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Location
+                      Địa điểm
                       <input
                         type="text"
                         value={activityForm.location}
                         onChange={(event) => onActivityFormChange('location', event.target.value)}
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                        placeholder="Auditorium A2"
+                        placeholder="Thính phòng A2"
                       />
                     </label>
                   </div>
                   <div className="mt-3 grid gap-4 md:grid-cols-2">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Start date
+                      Ngày bắt đầu
                       <input
                         type="datetime-local"
                         value={activityForm.startDate}
@@ -425,7 +422,7 @@ const ClubDetailDrawer = ({
                       />
                     </label>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      End date
+                      Ngày kết thúc
                       <input
                         type="datetime-local"
                         value={activityForm.endDate}
@@ -436,7 +433,7 @@ const ClubDetailDrawer = ({
                   </div>
                   <div className="mt-3 grid gap-4 md:grid-cols-2">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Budget
+                      Ngân sách
                       <input
                         type="number"
                         min="0"
@@ -447,7 +444,7 @@ const ClubDetailDrawer = ({
                       />
                     </label>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Status
+                      Trạng thái
                       <select
                         value={activityForm.status}
                         onChange={(event) =>
@@ -455,16 +452,16 @@ const ClubDetailDrawer = ({
                         }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       >
-                        <option value="PLANNING">Planning</option>
-                        <option value="APPROVED">Approved</option>
-                        <option value="COMPLETED">Completed</option>
-                        <option value="CANCELLED">Cancelled</option>
+                        <option value="PLANNING">Lập kế hoạch</option>
+                        <option value="APPROVED">Đã phê duyệt</option>
+                        <option value="COMPLETED">Đã hoàn thành</option>
+                        <option value="CANCELLED">Đã hủy</option>
                       </select>
                     </label>
                   </div>
                   <div className="mt-3">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Description
+                      Mô tả
                       <textarea
                         value={activityForm.description}
                         onChange={(event) =>
@@ -472,7 +469,7 @@ const ClubDetailDrawer = ({
                         }
                         rows={3}
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                        placeholder="Share agenda or expectations."
+                        placeholder="Chia sẻ chương trình hoặc mong đợi."
                       />
                     </label>
                   </div>
@@ -483,15 +480,14 @@ const ClubDetailDrawer = ({
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
               ) : activities.length === 0 ? (
-                <p className="py-8 text-center text-sm text-slate-500">No activities published yet.</p>
+                <p className="py-8 text-center text-sm text-slate-500">Chưa có hoạt động nào được xuất bản.</p>
               ) : (
                 <div className="space-y-3">
                   {activities.map((activity) => (
                     <div
                       key={activity.id}
-                      className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${
-                        editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
-                      }`}
+                      className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
+                        }`}
                     >
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
@@ -502,9 +498,8 @@ const ClubDetailDrawer = ({
                         </div>
                         <div className="flex items-center gap-2">
                           <span
-                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${
-                              activityStatusMeta[activity.status].className
-                            }`}
+                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${activityStatusMeta[activity.status].className
+                              }`}
                           >
                             {activityStatusMeta[activity.status].label}
                           </span>
@@ -514,15 +509,14 @@ const ClubDetailDrawer = ({
                               onClick={() => onEditActivity(activity)}
                               className="rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
                             >
-                              Edit
-                            </button>
-                          )}
+                              Sửa
+                            </button>)}
                         </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
                         {activity.startDate && (
                           <span>
-                            Starts{' '}
+                            Bắt đầu{' '}
                             <strong className="text-slate-900">
                               {formatDateTime(activity.startDate)}
                             </strong>
@@ -530,7 +524,7 @@ const ClubDetailDrawer = ({
                         )}
                         {activity.endDate && (
                           <span>
-                            Ends{' '}
+                            Kết thúc{' '}
                             <strong className="text-slate-900">
                               {formatDateTime(activity.endDate)}
                             </strong>
@@ -538,7 +532,7 @@ const ClubDetailDrawer = ({
                         )}
                         {activity.location && (
                           <span>
-                            Location <strong className="text-slate-900">{activity.location}</strong>
+                            Địa điểm <strong className="text-slate-900">{activity.location}</strong>
                           </span>
                         )}
                       </div>
@@ -553,10 +547,8 @@ const ClubDetailDrawer = ({
             <div className="mt-6 space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Join requests</p>
-                  <p className="text-xs text-slate-500">
-                    Review payment evidence before admitting new members.
-                  </p>
+                  <p className="text-sm font-semibold text-slate-900">Yêu cầu tham gia</p>
+                  <p className="text-xs text-slate-500">Xem xét bằng chứng thanh toán trước khi chấp nhận thành viên mới.</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <select
@@ -566,10 +558,10 @@ const ClubDetailDrawer = ({
                     }
                     className="rounded-2xl border border-slate-200 px-3 py-2 text-xs text-slate-600 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                   >
-                    <option value="PENDING">Pending</option>
-                    <option value="APPROVED">Approved</option>
-                    <option value="REJECTED">Rejected</option>
-                    <option value="all">All</option>
+                    <option value="PENDING">Đang chờ</option>
+                    <option value="APPROVED">Đã phê duyệt</option>
+                    <option value="REJECTED">Bị từ chối</option>
+                    <option value="all">Tất cả</option>
                   </select>
                   <button
                     type="button"
@@ -578,7 +570,7 @@ const ClubDetailDrawer = ({
                     className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-60"
                   >
                     <RefreshCcw className={`h-3.5 w-3.5 ${isJoinQueueLoading ? 'animate-spin' : ''}`} />
-                    Refresh
+                    Làm mới
                   </button>
                 </div>
               </div>
@@ -588,7 +580,7 @@ const ClubDetailDrawer = ({
                 </div>
               ) : joinRequests.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-500">
-                  No requests matched the selected status.
+                  Không có yêu cầu nào phù hợp với trạng thái đã chọn.
                 </p>
               ) : (
                 joinRequests.map((request) => {
@@ -602,10 +594,10 @@ const ClubDetailDrawer = ({
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-sm font-semibold text-slate-900">
-                            {request.applicantName ?? 'Unknown applicant'}
+                            {request.applicantName ?? 'Ứng viên không xác định'}
                           </p>
                           <p className="text-xs text-slate-500">
-                            Submitted {formatDateTime(request.createdAt)}
+                            Đã gửi {formatDateTime(request.createdAt)}
                           </p>
                         </div>
                         <span
@@ -629,33 +621,28 @@ const ClubDetailDrawer = ({
                             />
                           </div>
                           <div className="flex flex-col justify-between">
-                            <div>
-                              <p className="text-xs uppercase tracking-wide text-slate-400">
-                                Payment proof
-                              </p>
-                              <p className="text-sm font-semibold text-slate-900">
-                                {request.applicantName ?? 'Applicant'}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                Ensure the transfer details match before approving.
-                              </p>
-                            </div>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <a
-                                href={request.paymentProofUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
-                              >
-                                <Image className="h-3.5 w-3.5" />
-                                View full size
-                              </a>
-                            </div>
+                            Bằng chứng thanh toán                              <p className="text-sm font-semibold text-slate-900">
+                              {request.applicantName ?? 'Người nộp đơn'}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              Đảm bảo thông tin chuyển khoản khớp trước khi phê duyệt.
+                            </p>
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <a
+                              href={request.paymentProofUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
+                            >
+                              <Image className="h-3.5 w-3.5" />
+                              Xem toàn bộ kích thước
+                            </a>
                           </div>
                         </div>
                       ) : (
                         <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/60 px-3 py-2 text-xs text-amber-700">
-                          Applicant has not attached payment evidence.
+                          Người nộp đơn chưa đính kèm bằng chứng thanh toán.
                         </p>
                       )}
                       {request.status === 'PENDING' && (
@@ -666,7 +653,7 @@ const ClubDetailDrawer = ({
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500 disabled:opacity-50"
                           >
-                            {decisionLoading ? 'WorkingGǪ' : 'Reject'}
+                            {decisionLoading ? 'Đang xử lýGǪ' : 'Từ chối'}
                           </button>
                           <button
                             type="button"
@@ -674,13 +661,13 @@ const ClubDetailDrawer = ({
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-50"
                           >
-                            {decisionLoading ? 'WorkingGǪ' : 'Approve'}
+                            {decisionLoading ? 'Đang xử lýGǪ' : 'Phê duyệt'}
                           </button>
                         </div>
                       )}
                       {!canManage && request.status === 'PENDING' && (
                         <p className="mt-3 text-xs text-slate-500">
-                          Only club leaders can approve or reject requests.
+                          Chỉ trưởng nhóm câu lạc bộ mới có thể phê duyệt hoặc từ chối yêu cầu.
                         </p>
                       )}
                     </div>
@@ -700,17 +687,17 @@ const ClubDetailDrawer = ({
                 <Fragment>
                   <SettingItem
                     icon={Users}
-                    label="Require approval"
+                    label="Yêu cầu phê duyệt"
                     value={settings?.requireApproval ?? true}
                   />
                   <SettingItem
                     icon={Users2}
-                    label="Allow waitlist"
+                    label="Cho phép danh sách chờ"
                     value={settings?.allowWaitlist ?? true}
                   />
                   <SettingItem
                     icon={Settings2}
-                    label="Notifications"
+                    label="Thông báo"
                     value={settings?.enableNotifications ?? true}
                   />
                   <BankInstructionCard
@@ -736,7 +723,7 @@ const ClubDetailDrawer = ({
                           onClick={() => onRefreshInviteCode(club.id)}
                           className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
                         >
-                          Refresh
+                          Làm mới
                         </button>
                       )}
                     </div>
@@ -749,7 +736,7 @@ const ClubDetailDrawer = ({
                         onClick={handleCopyInviteCode}
                         className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
                       >
-                        Copy
+                        Sao chép
                       </button>
                     </div>
                   </div>
@@ -759,7 +746,7 @@ const ClubDetailDrawer = ({
           )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 interface DetailItemProps {
@@ -783,22 +770,20 @@ interface SettingItemProps {
 const SettingItem = ({ icon: Icon, label, value }: SettingItemProps) => (
   <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3">
     <span
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${
-        value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-      }`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+        }`}
     >
       <Icon className="h-4 w-4" />
     </span>
     <div className="flex-1">
       <p className="text-sm font-semibold text-slate-900">{label}</p>
-      <p className="text-xs text-slate-500">{value ? 'Enabled' : 'Disabled'}</p>
+      <p className="text-xs text-slate-500">{value ? 'Đã bật' : 'Đã tắt'}</p>
     </div>
     <span
-      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-        value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-      }`}
+      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+        }`}
     >
-      {value ? 'ON' : 'OFF'}
+      {value ? 'BẬT' : 'TẮT'}
     </span>
   </div>
 );
@@ -851,26 +836,24 @@ const BankInstructionCard = ({
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-4">
       <div>
-        <p className="text-sm font-semibold text-slate-900">Bank instructions</p>
-        <p className="text-xs text-slate-500">
-          Members pay via VietQR, then submit their join request for leader approval.
-        </p>
+        <p className="text-sm font-semibold text-slate-900">Hướng dẫn ngân hàng</p>
+        <p className="text-xs text-slate-500">Thành viên thanh toán qua VietQR, sau đó gửi yêu cầu tham gia để trưởng nhóm phê duyệt.</p>
       </div>
       {canManage ? (
         <div className="mt-4 space-y-3">
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Bank ID
+              Mã ngân hàng
               <input
                 type="text"
                 value={bankForm.bankId}
                 onChange={(event) => onChange('bankId', event.target.value)}
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                placeholder="e.g. ACB"
+                placeholder="ví dụ: ACB"
               />
             </label>
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Account number
+              Số tài khoản
               <input
                 type="text"
                 value={bankForm.bankAccountNumber}
@@ -882,7 +865,7 @@ const BankInstructionCard = ({
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Account name
+              Tên tài khoản
               <input
                 type="text"
                 value={bankForm.bankAccountName}
@@ -891,20 +874,19 @@ const BankInstructionCard = ({
                 placeholder="NGUYEN VAN A"
               />
             </label>
-              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Transfer note
-                <input
-                  type="text"
-                  value={bankForm.bankTransferNote}
-                  onChange={(event) => onChange('bankTransferNote', event.target.value)}
-                  className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                placeholder={`JOIN-${club.code ?? 'MYCLUB'}`}
+            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Ghi chú chuyển khoản                <input
+                type="text"
+                value={bankForm.bankTransferNote}
+                onChange={(event) => onChange('bankTransferNote', event.target.value)}
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                placeholder={`THAM GIA-${club.code ?? 'CAULACBO'}`}
               />
             </label>
           </div>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <label className="flex-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Join fee (VND)
+              Phí tham gia (VND)
               <input
                 type="number"
                 min="0"
@@ -920,7 +902,7 @@ const BankInstructionCard = ({
               disabled={isSaving}
               className="rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
             >
-              {isSaving ? 'SavingGǪ' : 'Save instructions'}
+              {isSaving ? 'Đang lưuGǪ' : 'Lưu hướng dẫn'}
             </button>
           </div>
         </div>
@@ -929,31 +911,31 @@ const BankInstructionCard = ({
           {isConfigured ? (
             <Fragment>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
-                <span className="text-slate-500">Bank</span>
+                <span className="text-slate-500">Ngân hàng</span>
                 <span className="font-semibold text-slate-900">{bankId}</span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
-                <span className="text-slate-500">Account</span>
-                <span className="font-semibold text-slate-900">{accountNo}</span>
+                <span className="text-slate-500">Tài khoản</span>
+                  <span className="font-semibold text-slate-900">{accountNo}</span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
-                <span className="text-slate-500">Account name</span>
+                <span className="text-slate-500">Tên tài khoản</span>
                 <span className="font-semibold text-slate-900">{accountName}</span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
-                <span className="text-slate-500">Join fee</span>
+                <span className="text-slate-500">Phí tham gia</span>
                 <span className="font-semibold text-slate-900">
                   {formatJoinFeeValue(amountForPreview)}
                 </span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
-                <span className="text-slate-500">Transfer note</span>
+                <span className="text-slate-500">Ghi chú chuyển khoản</span>
                 <span className="font-semibold text-slate-900">{transferNote}</span>
               </div>
             </Fragment>
           ) : (
             <p className="rounded-2xl border border-amber-200 bg-amber-50/70 px-4 py-3 text-amber-700">
-              Leaders have not configured bank instructions yet.
+              Trưởng nhóm chưa cấu hình hướng dẫn ngân hàng.
             </p>
           )}
         </div>
@@ -965,7 +947,7 @@ const BankInstructionCard = ({
             alt="VietQR"
             className="mx-auto h-36 w-36 rounded-2xl border border-white bg-white object-contain p-3 shadow-inner"
           />
-          <p className="mt-2 text-xs text-slate-500">Scan QR to pay {formatJoinFeeValue(amountForPreview)}</p>
+          <p className="mt-2 text-xs text-slate-500">Quét QR để thanh toán {formatJoinFeeValue(amountForPreview)}</p>
         </div>
       )}
     </div>

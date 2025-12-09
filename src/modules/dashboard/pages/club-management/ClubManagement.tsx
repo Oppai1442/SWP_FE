@@ -31,11 +31,11 @@ import {
 import { formatDate, formatDateTime } from '../my-club/utils';
 
 const statusLabels: Record<ClubStatus, string> = {
-  ACTIVE: 'Active',
-  PENDING: 'Pending',
-  REJECTED: 'Rejected',
-  INACTIVE: 'Inactive',
-  ARCHIVED: 'Archived',
+  ACTIVE: 'Hoạt động',
+  PENDING: 'Đang chờ',
+  REJECTED: 'Bị từ chối',
+  INACTIVE: 'Không hoạt động',
+  ARCHIVED: 'Đã lưu trữ',
 };
 
 const statusClasses: Record<ClubStatus, string> = {
@@ -47,11 +47,11 @@ const statusClasses: Record<ClubStatus, string> = {
 };
 
 const detailTabs = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'members', label: 'Members' },
-  { id: 'activities', label: 'Activities' },
-  { id: 'settings', label: 'Settings' },
-  { id: 'history', label: 'Join history' },
+  { id: 'overview', label: 'Tổng quan' },
+  { id: 'members', label: 'Thành viên' },
+  { id: 'activities', label: 'Hoạt động' },
+  { id: 'settings', label: 'Cài đặt' },
+  { id: 'history', label: 'Lịch sử tham gia' },
 ] as const;
 
 type DetailTab = (typeof detailTabs)[number]['id'];
@@ -181,9 +181,9 @@ const ClubManagement = () => {
     <div className="min-h-screen bg-white px-4 py-6 sm:px-6 lg:px-10">
       <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.35em] text-orange-400">Club management</p>
-          <h1 className="text-2xl font-semibold text-slate-900">System clubs</h1>
-          <p className="text-sm text-slate-500">Monitor every club, review their members and activity health.</p>
+          <p className="text-sm uppercase tracking-[0.35em] text-orange-400">Quản lý câu lạc bộ</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Câu lạc bộ hệ thống</h1>
+          <p className="text-sm text-slate-500">Giám sát mọi câu lạc bộ, xem xét thành viên và tình trạng hoạt động.</p>
         </div>
         <button
           type="button"
@@ -192,15 +192,15 @@ const ClubManagement = () => {
           disabled={isRefreshing || isLoading}
         >
           <RefreshCcw className="h-4 w-4" />
-          Refresh
+          Làm mới
         </button>
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard label="Total clubs" value={stats.total} icon={Users} accent="bg-slate-900 text-white" />
-        <SummaryCard label="Active" value={stats.ACTIVE} icon={Users} accent="bg-emerald-100 text-emerald-700" />
-        <SummaryCard label="Pending" value={stats.PENDING} icon={AlertTriangle} accent="bg-amber-100 text-amber-700" />
-        <SummaryCard label="Rejected" value={stats.REJECTED} icon={AlertTriangle} accent="bg-rose-100 text-rose-700" />
+        <SummaryCard label="Tổng số câu lạc bộ" value={stats.total} icon={Users} accent="bg-slate-900 text-white" />
+        <SummaryCard label="Hoạt động" value={stats.ACTIVE} icon={Users} accent="bg-emerald-100 text-emerald-700" />
+        <SummaryCard label="Đang chờ" value={stats.PENDING} icon={AlertTriangle} accent="bg-amber-100 text-amber-700" />
+        <SummaryCard label="Bị từ chối" value={stats.REJECTED} icon={AlertTriangle} accent="bg-rose-100 text-rose-700" />
       </section>
 
       <section className="mt-8 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -211,7 +211,7 @@ const ClubManagement = () => {
               type="text"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search by club name, code or category"
+              placeholder="Tìm kiếm theo tên, mã hoặc danh mục câu lạc bộ"
               className="w-full rounded-2xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             />
           </div>
@@ -220,12 +220,12 @@ const ClubManagement = () => {
             onChange={(event) => setStatusFilter(event.target.value as ClubStatus | 'all')}
             className="w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm text-slate-700 transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100 sm:w-48"
           >
-            <option value="all">All statuses</option>
-            <option value="ACTIVE">Active</option>
-            <option value="PENDING">Pending</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="INACTIVE">Inactive</option>
-            <option value="ARCHIVED">Archived</option>
+            <option value="all">Tất cả trạng thái</option>
+            <option value="ACTIVE">Hoạt động</option>
+            <option value="PENDING">Đang chờ</option>
+            <option value="REJECTED">Bị từ chối</option>
+            <option value="INACTIVE">Không hoạt động</option>
+            <option value="ARCHIVED">Đã lưu trữ</option>
           </select>
         </div>
 
@@ -233,11 +233,11 @@ const ClubManagement = () => {
           <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
             <thead>
               <tr className="text-xs uppercase tracking-wide text-slate-400">
-                <th className="py-3 pr-4">Club</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Members</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="py-3 pr-4">Câu lạc bộ</th>
+                <th className="px-4 py-3">Danh mục</th>
+                <th className="px-4 py-3">Thành viên</th>
+                <th className="px-4 py-3">Trạng thái</th>
+                <th className="px-4 py-3 text-right">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -246,7 +246,7 @@ const ClubManagement = () => {
               ) : currentItems.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-16 text-center text-sm text-slate-500">
-                    No clubs matched your filters.
+                    Không có câu lạc bộ nào phù hợp với bộ lọc của bạn.
                   </td>
                 </tr>
               ) : (
@@ -254,7 +254,7 @@ const ClubManagement = () => {
                   <tr key={club.id} className="text-slate-700">
                     <td className="py-4 pr-4">
                       <div className="font-semibold text-slate-900">{club.name}</div>
-                      <div className="text-xs text-slate-400">#{club.code ?? 'N/A'}</div>
+                      <div className="text-xs text-slate-400">#{club.code ?? 'Không áp dụng'}</div>
                     </td>
                     <td className="px-4 py-4 text-slate-500">{club.category ?? '—'}</td>
                     <td className="px-4 py-4 text-slate-500">{club.memberCount ?? 0}</td>
@@ -272,7 +272,7 @@ const ClubManagement = () => {
                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
                       >
                         <Eye className="h-3.5 w-3.5" />
-                        View
+                        Xem
                       </button>
                     </td>
                   </tr>
@@ -285,11 +285,11 @@ const ClubManagement = () => {
         {pageCount > 1 && !isLoading && currentItems.length > 0 && (
           <div className="mt-6 flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
             <p>
-              Showing{' '}
+              Hiển thị{' '}
               <span className="font-semibold text-slate-900">
                 {(safePage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(totalCount, safePage * ITEMS_PER_PAGE)}
               </span>{' '}
-              of <span className="font-semibold text-slate-900">{totalCount}</span> clubs
+              của <span className="font-semibold text-slate-900">{totalCount}</span> câu lạc bộ
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -298,10 +298,10 @@ const ClubManagement = () => {
                 disabled={safePage === 1}
                 className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:text-orange-500 disabled:opacity-40"
               >
-                <ChevronLeft className="mr-1 inline h-3.5 w-3.5" /> Prev
+                <ChevronLeft className="mr-1 inline h-3.5 w-3.5" /> Trước
               </button>
               <div className="text-xs font-semibold text-slate-700">
-                Page {safePage} / {pageCount}
+                Trang {safePage} / {pageCount}
               </div>
               <button
                 type="button"
@@ -309,7 +309,7 @@ const ClubManagement = () => {
                 disabled={safePage === pageCount}
                 className="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:text-orange-500 disabled:opacity-40"
               >
-                Next <ChevronRight className="ml-1 inline h-3.5 w-3.5" />
+                Tiếp theo <ChevronRight className="ml-1 inline h-3.5 w-3.5" />
               </button>
             </div>
           </div>
@@ -405,7 +405,7 @@ const ClubDetailDrawer = ({
       <div className="h-full w-full max-w-4xl overflow-y-auto bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Club</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Câu lạc bộ</p>
             <h3 className="text-xl font-semibold text-slate-900">{resolved.name}</h3>
             <p className="text-xs text-slate-500">#{resolved.code ?? 'N/A'}</p>
           </div>
@@ -465,21 +465,21 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
   if (tab === 'overview') {
     return (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <DetailItem label="Category" value={club.category ?? 'N/A'} />
+        <DetailItem label="Category" value={club.category ?? 'Không áp dụng'} />
         <DetailItem label="Status" value={club.status} />
-        <DetailItem label="President" value={club.leaderName ?? club.presidentName ?? 'N/A'} />
-        <DetailItem label="Advisor" value={club.advisorName ?? 'N/A'} />
+        <DetailItem label="President" value={club.leaderName ?? club.presidentName ?? 'Không áp dụng'} />
+        <DetailItem label="Advisor" value={club.advisorName ?? 'Không áp dụng'} />
         <DetailItem label="Members" value={String(club.memberCount ?? 0)} />
         <DetailItem label="Founded" value={formatDate(club.foundedDate)} />
-        <DetailItem label="Mission" value={club.mission ?? 'Not provided'} />
-        <DetailItem label="Meeting location" value={club.meetingLocation ?? 'Not provided'} />
+        <DetailItem label="Mission" value={club.mission ?? 'Chưa được cung cấp'} />
+        <DetailItem label="Meeting location" value={club.meetingLocation ?? 'Chưa được cung cấp'} />
       </div>
     );
   }
 
   if (tab === 'members') {
     const leaderId = club.leaderId ?? club.presidentId;
-    const leaderName = club.leaderName ?? club.presidentName ?? 'Club leader';
+    const leaderName = club.leaderName ?? club.presidentName ?? 'Trưởng nhóm câu lạc bộ';
     const shouldInjectLeader =
       Boolean(leaderId && leaderName) &&
       !members.some((member) => member.memberId === leaderId || member.role === 'PRESIDENT');
@@ -502,7 +502,7 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
       : members;
 
     return resolvedMembers.length === 0 ? (
-      <p className="py-6 text-sm text-slate-500">No members recorded.</p>
+      <p className="py-6 text-sm text-slate-500">Không có thành viên nào được ghi nhận.</p>
     ) : (
       <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100">
         <table className="min-w-full divide-y divide-slate-100 text-sm">
@@ -531,7 +531,7 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
 
   if (tab === 'activities') {
     return activities.length === 0 ? (
-      <p className="py-6 text-sm text-slate-500">No activities recorded.</p>
+      <p className="py-6 text-sm text-slate-500">Không có hoạt động nào được ghi nhận.</p>
     ) : (
       <div className="mt-6 space-y-3">
         {activities.map((activity) => (
@@ -546,19 +546,19 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
             <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
               {activity.startDate && (
                 <span>
-                  Starts{' '}
+                  Bắt đầu{' '}
                   <strong className="text-slate-900">{formatDate(activity.startDate)}</strong>
                 </span>
               )}
               {activity.endDate && (
                 <span>
-                  Ends{' '}
+                  Kết thúc{' '}
                   <strong className="text-slate-900">{formatDate(activity.endDate)}</strong>
                 </span>
               )}
               {activity.location && (
                 <span>
-                  Location <strong className="text-slate-900">{activity.location}</strong>
+                  Địa điểm <strong className="text-slate-900">{activity.location}</strong>
                 </span>
               )}
             </div>
@@ -570,38 +570,38 @@ const DetailContent = ({ tab, club, members, activities, settings, history }: De
 
   if (tab === 'settings') {
     if (!settings) {
-      return <p className="py-6 text-sm text-slate-500">Settings are not configured.</p>;
+      return <p className="py-6 text-sm text-slate-500">Cài đặt chưa được cấu hình.</p>;
     }
     return (
       <div className="mt-6 space-y-3">
-        <DetailItem label="Require approval" value={String(settings.requireApproval ?? true)} />
-        <DetailItem label="Allow waitlist" value={String(settings.allowWaitlist ?? true)} />
-        <DetailItem label="Notifications" value={String(settings.enableNotifications ?? true)} />
-        <DetailItem label="Bank" value={settings.bankId ?? '—'} />
-        <DetailItem label="Account" value={settings.bankAccountNumber ?? '—'} />
-        <DetailItem label="Account name" value={settings.bankAccountName ?? '—'} />
-        <DetailItem label="Transfer note" value={settings.bankTransferNote ?? '—'} />
+        <DetailItem label="Yêu cầu phê duyệt" value={String(settings.requireApproval ?? true)} />
+        <DetailItem label="Cho phép danh sách chờ" value={String(settings.allowWaitlist ?? true)} />
+        <DetailItem label="Thông báo" value={String(settings.enableNotifications ?? true)} />
+        <DetailItem label="Ngân hàng" value={settings.bankId ?? '—'} />
+        <DetailItem label="Tài khoản" value={settings.bankAccountNumber ?? '—'} />
+        <DetailItem label="Tên tài khoản" value={settings.bankAccountName ?? '—'} />
+        <DetailItem label="Ghi chú chuyển khoản" value={settings.bankTransferNote ?? '—'} />
       </div>
     );
   }
 
   return history.length === 0 ? (
-    <p className="py-6 text-sm text-slate-500">No join history found.</p>
+    <p className="py-6 text-sm text-slate-500">Không tìm thấy lịch sử tham gia.</p>
   ) : (
     <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-100">
       <table className="min-w-full divide-y divide-slate-100 text-sm">
         <thead className="bg-slate-50 text-[11px] uppercase tracking-wide text-slate-400">
           <tr>
-            <th className="px-4 py-3 text-left">Member</th>
-            <th className="px-4 py-3 text-left">Status</th>
-            <th className="px-4 py-3 text-left">Submitted</th>
-            <th className="px-4 py-3 text-left">Reviewed</th>
+            <th className="px-4 py-3 text-left">Thành viên</th>
+            <th className="px-4 py-3 text-left">Trạng thái</th>
+            <th className="px-4 py-3 text-left">Đã gửi</th>
+            <th className="px-4 py-3 text-left">Đã xem xét</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {history.map((request) => (
             <tr key={request.id} className="text-slate-700">
-              <td className="px-4 py-3 font-medium text-slate-900">{request.applicantName ?? 'Unknown'}</td>
+              <td className="px-4 py-3 font-medium text-slate-900">{request.applicantName ?? 'Không xác định'}</td>
               <td className="px-4 py-3 text-slate-500">{request.status}</td>
               <td className="px-4 py-3 text-slate-500">{formatDateTime(request.createdAt)}</td>
               <td className="px-4 py-3 text-slate-500">{formatDateTime(request.updatedAt)}</td>
