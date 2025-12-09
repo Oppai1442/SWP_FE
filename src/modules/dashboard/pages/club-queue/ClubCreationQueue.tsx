@@ -17,6 +17,7 @@ import {
   type ClubCreationRequest,
   type ClubCreationRequestStatus,
 } from './services/clubCreationQueueService';
+import { showToast } from '@/utils';
 
 type StatusFilter = ClubCreationRequestStatus | 'all';
 
@@ -66,7 +67,7 @@ const ClubCreationQueue = () => {
       setRequests(Array.isArray(normalized) ? normalized : []);
     } catch (error) {
       console.error(error);
-      toast.error('Không thể tải hàng đợi club. Vui lòng thử lại.');
+      showToast('error', 'Không thể tải hàng đợi club. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +121,7 @@ const ClubCreationQueue = () => {
     try {
       setIsRefreshing(true);
       await fetchRequests();
-      toast.success('Hàng đợi đã được cập nhật');
+      showToast('success', 'Hàng đợi đã được cập nhật');
     } finally {
       setIsRefreshing(false);
     }
@@ -154,7 +155,7 @@ const ClubCreationQueue = () => {
       setRequests((prev) =>
         prev.map((req) => (req.id === normalized.id ? { ...req, ...normalized } : req))
       );
-      toast.success(
+      showToast('success', 
         decisionMode === 'APPROVED'
           ? 'Yêu cầu club đã được duyệt thành công.'
           : 'Yêu cầu club đã bị từ chối.'
@@ -162,7 +163,7 @@ const ClubCreationQueue = () => {
       closeModal();
     } catch (error) {
       console.error(error);
-      toast.error('Không thể gửi quyết định. Vui lòng thử lại.');
+      showToast('error', 'Không thể gửi quyết định. Vui lòng thử lại.');
     } finally {
       setIsSubmittingDecision(false);
     }
