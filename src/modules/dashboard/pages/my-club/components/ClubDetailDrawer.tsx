@@ -1167,7 +1167,7 @@ const ClubDetailDrawer = ({
                     onSave={onSaveBankSettings}
                     isSaving={isBankSettingsSaving}
                   />
-                  <div className="rounded-2xl border border-slate-100 bg-white p-4">
+                  {/* <div className="rounded-2xl border border-slate-100 bg-white p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-slate-900">Invite code</p>
@@ -1197,7 +1197,7 @@ const ClubDetailDrawer = ({
                         Sao chép
                       </button>
                     </div>
-                  </div>
+                  </div> */}
                 </Fragment>
               )}
             </div>
