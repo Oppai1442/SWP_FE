@@ -13,6 +13,9 @@ export interface ClubSummary {
   category?: string | null;
   status: ClubStatus;
   meetingLocation?: string | null;
+  operatingDays?: string[] | null;
+  operatingStartTime?: string | null;
+  operatingEndTime?: string | null;
   mission?: string | null;
   foundedDate?: string | null;
   memberCount?: number | null;
@@ -35,6 +38,9 @@ export interface CreateClubPayload {
   category?: string;
   imageUrl?: string | null;
   meetingLocation?: string;
+  operatingDays?: string[];
+  operatingStartTime?: string;
+  operatingEndTime?: string;
   mission?: string;
   foundedDate?: string | null;
   advisorId?: number | null;
@@ -60,6 +66,8 @@ export interface ClubSettingInfo {
   clubId: number;
   clubName?: string | null;
   clubCode?: string | null;
+  clubStatus?: ClubStatus | null;
+  isSetupComplete?: boolean | null;
   requireApproval?: boolean | null;
   allowWaitlist?: boolean | null;
   enableNotifications?: boolean | null;
@@ -140,6 +148,9 @@ export interface UpdateClubPayload {
   imageUrl?: string | null;
   status?: ClubStatus;
   meetingLocation?: string | null;
+  operatingDays?: string[] | null;
+  operatingStartTime?: string | null;
+  operatingEndTime?: string | null;
   mission?: string | null;
   foundedDate?: string | null;
   advisorId?: number | null;

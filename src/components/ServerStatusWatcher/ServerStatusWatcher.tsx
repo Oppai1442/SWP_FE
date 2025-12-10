@@ -1,72 +1,85 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import styles from "./ServerStatusWatcher.module.css";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const REQUEST_TIMEOUT_MS = 5000;
-const CHECK_INTERVAL_MS = 30000;
-
-const buildStatusUrl = () => {
-  const base = (import.meta.env.VITE_API_URL?.trim() || "/api").replace(/\/$/, "");
-  return `${base}/status`;
-};
+const NORMAL_INTERVAL_MS = 600_000; // 10 phút
+const ERROR_INTERVAL_MS = 30_000; // 30 giây
 
 export const ServerStatusWatcher: React.FC = () => {
-  const statusUrl = useMemo(buildStatusUrl, []);
   const [isOffline, setIsOffline] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
-  const checkStatus = useCallback(async () => {
+  const intervalRef = useRef<number | null>(null);
+  const statusUrlRef = useRef(
+    `${(import.meta.env.VITE_API_URL?.trim() || "/api").replace(/\/$/, "")}/status`
+  );
+
+  const clearPingInterval = () => {
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const pingServer = useCallback(async () => {
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
-      const response = await fetch(statusUrl, {
+      const response = await fetch(statusUrlRef.current, {
         method: "GET",
         signal: controller.signal,
         headers: { Accept: "application/json" },
         cache: "no-store",
       });
 
-      if (!response.ok) {
-        throw new Error(`Unexpected status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error("Unexpected response");
       setIsOffline(false);
-    } catch (error) {
-      console.warn("Server status check failed", error);
+    } catch (_err) {
       setIsOffline(true);
     } finally {
       clearTimeout(timeoutId);
     }
-  }, [statusUrl]);
+  }, []);
+
+  const setupInterval = useCallback(
+    (ms: number) => {
+      clearPingInterval();
+      intervalRef.current = window.setInterval(() => {
+        if (!document.hidden) {
+          void pingServer();
+        }
+      }, ms);
+    },
+    [pingServer]
+  );
 
   useEffect(() => {
-    let isMounted = true;
+    void pingServer();
+    setupInterval(NORMAL_INTERVAL_MS);
 
-    const runCheck = () => {
-      if (!isMounted) {
-        return;
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        void pingServer();
       }
-      void checkStatus();
     };
 
-    runCheck();
-    const intervalId = window.setInterval(runCheck, CHECK_INTERVAL_MS);
-
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
-      isMounted = false;
-      clearInterval(intervalId);
+      clearPingInterval();
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [checkStatus]);
+  }, [pingServer, setupInterval]);
 
   useEffect(() => {
-    if (!isOffline) {
-      setDismissed((prev) => (prev ? false : prev));
+    if (isOffline) {
+      setupInterval(ERROR_INTERVAL_MS);
+    } else {
+      setDismissed(false);
+      setupInterval(NORMAL_INTERVAL_MS);
     }
-  }, [isOffline]);
+  }, [isOffline, setupInterval]);
 
-  if (!isOffline || dismissed) {
-    return null;
-  }
+  if (!isOffline || dismissed) return null;
 
   return (
     <></>

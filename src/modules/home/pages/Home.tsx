@@ -227,8 +227,7 @@ const ClubHubHome = () => {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-600 font-light mb-8 max-w-3xl mx-auto leading-relaxed">
-            Điều phối toàn bộ vòng đời câu lạc bộ – dữ liệu, thành viên, tài
-            chính và báo cáo.
+            Điều phối toàn bộ vòng đời câu lạc bộ – dữ liệu, thành viên và báo cáo.
           </p>
         </div>
       </section>
