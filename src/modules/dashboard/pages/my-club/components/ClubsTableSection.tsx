@@ -20,6 +20,17 @@ interface ClubsTableSectionProps {
   renderAction?: (club: ClubSummary) => ReactNode;
 }
 
+const STATUS_META: Record<ClubStatus, { label: string; className: string }> = {
+  ACTIVE: { label: 'Đang hoạt động', className: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
+  PENDING: { label: 'Chờ xác nhận', className: 'bg-amber-50 text-amber-600 border border-amber-100' },
+  REJECTED: { label: 'Đã bị từ chối', className: 'bg-rose-50 text-rose-600 border border-rose-100' },
+  INACTIVE: { label: 'Tạm dừng hoạt động', className: 'bg-slate-50 text-slate-600 border border-slate-200' },
+  ARCHIVED: { label: 'Đã lưu trữ', className: 'bg-slate-100 text-slate-500 border border-slate-200' },
+};
+
+const getStatusMeta = (status: ClubStatus) =>
+  STATUS_META[status] ?? { label: 'Không xác định', className: 'bg-slate-50 text-slate-600 border border-slate-200' };
+
 const ClubsTableSection = ({
   search,
   statusFilter,
@@ -99,7 +110,7 @@ const ClubsTableSection = ({
                       clubStatusClasses[club.status] ?? 'border-slate-200 text-slate-500 bg-slate-50'
                     }`}
                   >
-                    {club.status}
+                    {getStatusMeta(club.status).label}
                   </span>
                 </td>
                 <td className="px-4 py-4 text-right">

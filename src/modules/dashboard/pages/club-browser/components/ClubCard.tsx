@@ -24,8 +24,8 @@ const formatOperatingDays = (days?: string[] | null) => {
 };
 
 const STATUS_META: Record<ClubStatus, { label: string; className: string }> = {
-  ACTIVE: { label: 'Sẵn sàng đón thành viên', className: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
-  PENDING: { label: 'Chờ kiểm duyệt', className: 'bg-amber-50 text-amber-600 border border-amber-100' },
+  ACTIVE: { label: 'Đang hoạt động', className: 'bg-emerald-50 text-emerald-600 border border-emerald-100' },
+  PENDING: { label: 'Chờ xác nhận', className: 'bg-amber-50 text-amber-600 border border-amber-100' },
   REJECTED: { label: 'Đã bị từ chối', className: 'bg-rose-50 text-rose-600 border border-rose-100' },
   INACTIVE: { label: 'Tạm dừng hoạt động', className: 'bg-slate-50 text-slate-600 border border-slate-200' },
   ARCHIVED: { label: 'Đã lưu trữ', className: 'bg-slate-100 text-slate-500 border border-slate-200' },
