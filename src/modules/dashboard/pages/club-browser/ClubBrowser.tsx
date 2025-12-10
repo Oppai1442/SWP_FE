@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { toast } from 'react-hot-toast';
-import { Image as ImageIcon, Layers, MapPin, RefreshCcw, Search, Users } from 'lucide-react';
+import {
+  CalendarDays,
+  Clock3,
+  Image as ImageIcon,
+  Layers,
+  MapPin,
+  RefreshCcw,
+  Search,
+  Users,
+} from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 import JoinClubModal, { type JoinClubForm } from '../my-club/components/JoinClubModal';
@@ -22,6 +31,73 @@ import {
 import { showToast } from '@/utils';
 
 const CLUBS_PER_PAGE = 8;
+
+const STATUS_META: Record<ClubStatus, { label: string; className: string }> = {
+  ACTIVE: {
+    label: 'Sẵn sàng đón thành viên',
+    className: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+  },
+  PENDING: {
+    label: 'Chờ kiểm duyệt',
+    className: 'bg-amber-50 text-amber-600 border border-amber-100',
+  },
+  REJECTED: {
+    label: 'Đã bị từ chối',
+    className: 'bg-rose-50 text-rose-600 border border-rose-100',
+  },
+  INACTIVE: {
+    label: 'Tạm dừng hoạt động',
+    className: 'bg-slate-50 text-slate-600 border border-slate-200',
+  },
+  ARCHIVED: {
+    label: 'Đã lưu trữ',
+    className: 'bg-slate-100 text-slate-500 border border-slate-200',
+  },
+};
+
+const getStatusMeta = (status: ClubStatus) =>
+  STATUS_META[status] ?? {
+    label: 'Không xác định',
+    className: 'bg-slate-50 text-slate-600 border border-slate-200',
+  };
+
+const isSettingsComplete = (settings?: ClubSettingInfo | null) =>
+  Boolean(
+    settings &&
+    settings.bankId?.trim() &&
+    settings.bankAccountNumber?.trim() &&
+    settings.bankAccountName?.trim() &&
+    settings.bankTransferNote?.trim() &&
+    settings.joinFee !== undefined &&
+    settings.joinFee !== null
+  );
+
+const WEEKDAY_LABELS: Record<string, string> = {
+  MONDAY: 'Thứ 2',
+  TUESDAY: 'Thứ 3',
+  WEDNESDAY: 'Thứ 4',
+  THURSDAY: 'Thứ 5',
+  FRIDAY: 'Thứ 6',
+  SATURDAY: 'Thứ 7',
+  SUNDAY: 'Chủ nhật',
+};
+
+const formatOperatingDays = (days?: string[] | null) => {
+  if (!days || days.length === 0) {
+    return null;
+  }
+  if (days.length === 7) {
+    return 'Hoạt động cả tuần';
+  }
+  return days.map((day) => WEEKDAY_LABELS[day] ?? day).join(', ');
+};
+
+const formatOperatingHours = (start?: string | null, end?: string | null) => {
+  if (!start || !end) {
+    return null;
+  }
+  return `${start} - ${end}`;
+};
 
 const extractArrayResponse = <T,>(payload: unknown): T[] => {
   if (Array.isArray(payload)) {
@@ -74,6 +150,7 @@ const ClubBrowser = () => {
   const [manualInviteCode, setManualInviteCode] = useState('');
   const [isResolvingInviteCode, setIsResolvingInviteCode] = useState(false);
   const [joinStatusMap, setJoinStatusMap] = useState<Record<number, ClubJoinRequestStatus>>({});
+  const [clubSettingsMap, setClubSettingsMap] = useState<Record<number, ClubSettingInfo | null>>({});
   const [activitiesMap, setActivitiesMap] = useState<Record<number, ClubActivity[]>>({});
   const isLeaderOfClub = (club?: Pick<ClubSummary, 'leaderId'> | null) =>
     Boolean(club?.leaderId && user?.id && club.leaderId === user.id);
@@ -98,18 +175,49 @@ const ClubBrowser = () => {
       const data = await getClubsAPI('all');
       const normalized = extractArrayResponse<ClubSummary>(data);
       setClubs(normalized);
-      // Fetch activities for all clubs
-      const newActivitiesMap: Record<number, ClubActivity[]> = {};
-      for (const club of normalized) {
+
+      const activitiesPromises = normalized.map(async (club) => {
         try {
           const activities = await getClubActivitiesAPI(club.id);
-          newActivitiesMap[club.id] = extractArrayResponse<ClubActivity>(activities);
+          return {
+            clubId: club.id,
+            activities: extractArrayResponse<ClubActivity>(activities),
+          };
         } catch (err) {
           console.warn(`Failed to load activities for club ${club.id}:`, err);
-          newActivitiesMap[club.id] = [];
+          return { clubId: club.id, activities: [] as ClubActivity[] };
         }
-      }
+      });
+
+      const settingsPromises = normalized.map(async (club) => {
+        try {
+          const settings = await getClubSettingsAPI(club.id);
+          return {
+            clubId: club.id,
+            settings: extractValue<ClubSettingInfo>(settings) ?? null,
+          };
+        } catch (err) {
+          console.warn(`Failed to load settings for club ${club.id}:`, err);
+          return { clubId: club.id, settings: null };
+        }
+      });
+
+      const [activitiesResults, settingsResults] = await Promise.all([
+        Promise.all(activitiesPromises),
+        Promise.all(settingsPromises),
+      ]);
+
+      const newActivitiesMap: Record<number, ClubActivity[]> = {};
+      activitiesResults.forEach(({ clubId, activities }) => {
+        newActivitiesMap[clubId] = activities;
+      });
       setActivitiesMap(newActivitiesMap);
+
+      const newSettingsMap: Record<number, ClubSettingInfo | null> = {};
+      settingsResults.forEach(({ clubId, settings }) => {
+        newSettingsMap[clubId] = settings;
+      });
+      setClubSettingsMap(newSettingsMap);
     } catch (error) {
       console.error(error);
       showToast('error', 'Không thể tải câu lạc bộ.');
@@ -145,7 +253,17 @@ const ClubBrowser = () => {
   }, [fetchJoinStatuses]);
 
   const filteredClubs = useMemo(() => {
-    return clubs
+    const visibleClubs = clubs.filter((club) => {
+      if (club.status === 'PENDING') {
+        return false;
+      }
+      if (club.status === 'ACTIVE') {
+        return isSettingsComplete(clubSettingsMap[club.id]);
+      }
+      return true;
+    });
+
+    return visibleClubs
       .filter((club) => (statusFilter === 'all' ? true : club.status === statusFilter))
       .filter((club) => {
         if (!debouncedSearch) return true;
@@ -153,7 +271,7 @@ const ClubBrowser = () => {
         return haystack.includes(debouncedSearch);
       })
       .sort((a, b) => (b.updatedAt ?? '').localeCompare(a.updatedAt ?? ''));
-  }, [clubs, debouncedSearch, statusFilter]);
+  }, [clubSettingsMap, clubs, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -178,17 +296,30 @@ const ClubBrowser = () => {
         showToast('error', 'Không thể giải quyết mã mời này.');
         return;
       }
+      if (!isSettingsComplete(settings)) {
+        showToast('error', 'C?u l?c b? n?y ch?a ho?n t?t c?i ??t tham gia.');
+        return;
+      }
       const existing = clubs.find((club) => club.id === settings.clubId);
+      const fallbackStatus: ClubStatus =
+        existing?.status ?? (settings.clubStatus ?? 'ACTIVE');
+      if (fallbackStatus !== 'ACTIVE') {
+        showToast('error', 'CA›u l §­c b ¯T nAÿy ch’øa mA¼A tham gia.');
+        return;
+      }
       const fallback: ClubSummary =
         existing ?? {
           id: settings.clubId,
           code: settings.clubCode ?? null,
           inviteCode: code,
           name: settings.clubName ?? 'Club',
-          status: 'ACTIVE',
+          status: fallbackStatus,
           description: null,
           category: null,
           meetingLocation: null,
+          operatingDays: null,
+          operatingStartTime: null,
+          operatingEndTime: null,
           mission: null,
           foundedDate: null,
           memberCount: null,
@@ -203,7 +334,7 @@ const ClubBrowser = () => {
         };
       const status = getJoinStatus(fallback.id);
       if (isJoinStatusBlocked(status)) {
-        showToast('error', 
+        showToast('error',
           status === 'PENDING'
             ? 'Bạn đã có yêu cầu đang chờ xử lý cho câu lạc bộ này.'
             : 'Bạn đã là thành viên của câu lạc bộ này.'
@@ -214,6 +345,10 @@ const ClubBrowser = () => {
         showToast('error', 'Bạn đang là leader của câu lạc bộ này.');
         return;
       }
+      setClubSettingsMap((prev) => ({
+        ...prev,
+        [settings.clubId]: settings,
+      }));
       setJoinPreview(settings);
       setPreviewError(null);
       setIsPreviewLoading(false);
@@ -227,21 +362,33 @@ const ClubBrowser = () => {
     }
   };
 
+
   const openJoinModal = (club: ClubSummary, manual = false) => {
-    if (!manual && !club.inviteCode) {
-      showToast('error', 'Câu lạc bộ này chưa kích hoạt tính năng tham gia bằng mã mời.');
+    if (club.status !== 'ACTIVE') {
+      showToast('error', 'C?u l?c b? n?y ch?a m? tham gia.');
       return;
     }
+    if (!manual && !club.inviteCode) {
+      showToast('error', 'C?u l?c b? n?y ch?a k?ch ho?t t?nh n?ng tham gia b?ng m? m?i.');
+      return;
+    }
+    if (!manual) {
+      const clubSettings = clubSettingsMap[club.id];
+      if (!isSettingsComplete(clubSettings)) {
+        showToast('error', 'C?u l?c b? n?y ch?a ho?n t?t c?i ??t tham gia.');
+        return;
+      }
+    }
     if (isLeaderOfClub(club)) {
-      showToast('error', 'Bạn đang là leader của câu lạc bộ này.');
+      showToast('error', 'B?n ?ang l? leader c?a c?u l?c b? n?y.');
       return;
     }
     const status = getJoinStatus(club.id);
     if (isJoinStatusBlocked(status)) {
-      showToast('error', 
+      showToast('error',
         status === 'PENDING'
-          ? 'Bạn đã có yêu cầu đang chờ xử lý cho câu lạc bộ này.'
-          : 'Bạn đã là thành viên của câu lạc bộ này.'
+          ? 'B?n ?? c? y?u c?u ?ang ch? x? l? cho c?u l?c b? n?y.'
+          : 'B?n ?? l? th?nh vi?n c?a c?u l?c b? n?y.'
       );
       return;
     }
@@ -444,7 +591,6 @@ const ClubBrowser = () => {
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="ACTIVE">Hoạt động</option>
-                <option value="PENDING">Đang chờ</option>
                 <option value="REJECTED">Bị từ chối</option>
                 <option value="INACTIVE">Không hoạt động</option>
                 <option value="ARCHIVED">Đã lưu trữ</option>
@@ -473,22 +619,38 @@ const ClubBrowser = () => {
             </div>
           ) : paginatedClubs.length === 0 ? (
             <p className="mt-8 text-center text-sm text-slate-500">
-            Không có câu lạc bộ nào phù hợp với bộ lọc của bạn. Thử điều chỉnh tìm kiếm hoặc bộ lọc trạng thái.
+              Không có câu lạc bộ nào phù hợp với bộ lọc của bạn. Thử điều chỉnh tìm kiếm hoặc bộ lọc trạng thái.
             </p>
           ) : (
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {paginatedClubs.map((club) => {
-                const status = getJoinStatus(club.id);
-                const isBlocked = isJoinStatusBlocked(status);
+
+                const requestStatus = getJoinStatus(club.id);
+                const isBlocked = isJoinStatusBlocked(requestStatus);
                 const isLeader = isLeaderOfClub(club);
-                const disabled = !club.inviteCode || isBlocked || isLeader;
+                const clubSettings = clubSettingsMap[club.id];
+                const hasJoinSettings = isSettingsComplete(clubSettings);
+                const isJoinableStatus = club.status === 'ACTIVE';
+                const hasInvite = Boolean(club.inviteCode);
+                const disabled =
+                  !hasInvite || isBlocked || isLeader || !isJoinableStatus || (isJoinableStatus && !hasJoinSettings);
                 const label = isLeader
                   ? 'Bạn là leader'
-                  : status === 'PENDING'
+                  : requestStatus === 'PENDING'
                     ? 'Đang chờ'
-                    : status === 'APPROVED'
+                    : requestStatus === 'APPROVED'
                       ? 'Đã tham gia'
-                      : 'Tham gia câu lạc bộ';
+                      : !isJoinableStatus
+                        ? 'Chưa mở tham gia'
+                        : !hasInvite
+                          ? 'Chưa có mã mời'
+                          : !hasJoinSettings
+                            ? 'Chưa hoàn tất cài đặt'
+                            : 'Tham gia câu lạc bộ';
+                const statusMeta = getStatusMeta(club.status);
+                const scheduleDays = formatOperatingDays(club.operatingDays);
+                const scheduleHours = formatOperatingHours(club.operatingStartTime, club.operatingEndTime);
+
                 return (
                   <div
                     key={club.id}
@@ -507,8 +669,10 @@ const ClubBrowser = () => {
                           <span className="mt-2 text-xs font-semibold">Không có ảnh bìa</span>
                         </div>
                       )}
-                      <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-slate-600 shadow-sm">
-                        {club.status}
+                      <span
+                        className={`absolute left-4 top-4 rounded-full px-3 py-1 text-[11px] font-semibold shadow-sm ${statusMeta.className}`}
+                      >
+                        {statusMeta.label}
                       </span>
                     </div>
                     <div className="flex flex-1 flex-col gap-3 p-5">
@@ -533,6 +697,22 @@ const ClubBrowser = () => {
                           </span>
                         )}
                       </div>
+                      {(scheduleDays || scheduleHours) && (
+                        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500">
+                          {scheduleDays && (
+                            <span className="inline-flex items-center gap-1 text-slate-500">
+                              <CalendarDays className="h-4 w-4 text-orange-400" />
+                              {scheduleDays}
+                            </span>
+                          )}
+                          {scheduleHours && (
+                            <span className="inline-flex items-center gap-1 text-slate-500">
+                              <Clock3 className="h-4 w-4 text-orange-400" />
+                              {scheduleHours}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <div className="flex items-center justify-between text-xs text-slate-500">
                         <span>
                           Trưởng nhóm:{' '}
@@ -563,7 +743,7 @@ const ClubBrowser = () => {
                               className={`inline-flex items-center justify-center rounded-2xl px-3 py-2 text-sm font-semibold transition ${!hasCurrent
                                 ? 'cursor-not-allowed border border-slate-200 bg-slate-50 text-slate-400'
                                 : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-                              }`}
+                                }`}
                             >
                               Hoạt động
                             </button>
@@ -574,7 +754,7 @@ const ClubBrowser = () => {
                               className={`ml-auto inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${disabled
                                 ? 'cursor-not-allowed border border-slate-200 bg-slate-50 text-slate-400'
                                 : 'border border-orange-200 bg-white text-orange-500 hover:bg-orange-50'
-                              }`}
+                                }`}
                             >
                               {label}
                             </button>
@@ -682,18 +862,32 @@ const ClubBrowser = () => {
                 </div>
                 <div className="mt-4 space-y-3">
                   {activities.length === 0 ? (
-                    <div className="text-sm text-slate-500">Không có hoạt động nào đang diễn ra.</div>
+                    <div className="text-sm text-slate-500">
+                      Không có hoạt động nào đang diễn ra.
+                    </div>
                   ) : (
                     activities.map((activity) => (
-                      <div key={activity.id} className="rounded-lg border border-slate-100 p-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-semibold text-slate-900">{activity.title}</div>
+                      <div
+                        key={activity.id}
+                        className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            {/* Title */}
+                            <div className="text-base font-semibold text-slate-900">
+                              {activity.title}
+                            </div>
+
+                            {/* Description */}
                             {activity.description && (
-                              <div className="mt-1 text-xs text-slate-500">{activity.description}</div>
+                              <div className="text-sm text-slate-600">
+                                {activity.description}
+                              </div>
                             )}
                           </div>
-                          <div className="text-xs text-slate-500">
+
+                          {/* Date Info */}
+                          <div className="text-xs text-right text-slate-500 space-y-1">
                             {activity.startDate && (
                               <div>Bắt đầu: {new Date(activity.startDate).toLocaleString()}</div>
                             )}
@@ -702,10 +896,13 @@ const ClubBrowser = () => {
                             )}
                           </div>
                         </div>
-                        {/* <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-                          <div>{activity.location ?? 'No location'}</div>
-                          <div className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">{activity.status}</div>
-                        </div> */}
+
+                        {/* Location Highlight */}
+                        <div className="mt-2">
+                          <span className="inline-block rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700">
+                            Địa điểm: {activity.location ?? 'Không rõ'}
+                          </span>
+                        </div>
                       </div>
                     ))
                   )}
