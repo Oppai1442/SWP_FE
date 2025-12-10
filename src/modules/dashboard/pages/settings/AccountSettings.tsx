@@ -279,10 +279,10 @@ const AccountSettings = () => {
                       </p>
                     </div>
 
-                    {["firstName", "lastName", "fullName"].map((field) => (
+                    {["firstName", "lastName"].map((field) => (
                       <div key={field}>
                         <label className="mb-2 block text-sm font-medium text-slate-600">
-                          {field === "fullName" ? "Tên hiển thị" : field === "firstName" ? "Tên" : "Họ"}
+                          { field === "firstName" ? "Tên" : "Họ"}
                         </label>
                         <input
                           type="text"
