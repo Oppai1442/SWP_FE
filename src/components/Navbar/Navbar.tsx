@@ -71,6 +71,12 @@ const Navbar = () => {
     // { path: ROUTES.POLICY.getPath(), label: "Chính sách" },
     { path: ROUTES.CONTACT.getPath(), label: "Hỗ trợ" },
   ];
+  if (user && user.role?.name !== "ROLE_ADMIN") {
+    navLinks.push({
+      path: ROUTES.DASHBOARD.child.CLUB_BROWSER.getPath(),
+      label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
+    });
+  }
 
   const primaryClubLink = user?.role?.name === "ROLE_ADMIN"
     ? {
