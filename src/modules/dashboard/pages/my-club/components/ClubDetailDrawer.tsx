@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { toast } from 'react-hot-toast';
 import {
@@ -66,11 +66,45 @@ interface ClubDetailDrawerProps {
   onLeaveClub: () => void;
   onUpdateClubImage: (clubId: number, file: File) => void;
   isImageUpdating: boolean;
+  onUpdateClubOverview: (
+    clubId: number,
+    payload: Partial<{
+      category: string | null;
+      meetingLocation: string | null;
+      mission: string | null;
+      operatingDays: string[];
+      operatingStartTime: string | null;
+      operatingEndTime: string | null;
+    }>
+  ) => Promise<ClubDetail | void>;
   onClose: () => void;
 }
 
 type DrawerClubMember = ClubMember & { __virtual?: boolean };
 
+type OverviewFormState = {
+  category: string;
+  meetingLocation: string;
+  mission: string;
+  operatingDays: string[];
+  operatingStartTime: string;
+  operatingEndTime: string;
+};
+
+const WEEKDAY_OPTIONS = [
+  { value: 'MONDAY', label: 'Thứ 2' },
+  { value: 'TUESDAY', label: 'Thứ 3' },
+  { value: 'WEDNESDAY', label: 'Thứ 4' },
+  { value: 'THURSDAY', label: 'Thứ 5' },
+  { value: 'FRIDAY', label: 'Thứ 6' },
+  { value: 'SATURDAY', label: 'Thứ 7' },
+  { value: 'SUNDAY', label: 'Chủ nhật' },
+] as const;
+
+const WEEKDAY_LABELS: Record<string, string> = WEEKDAY_OPTIONS.reduce(
+  (acc, day) => ({ ...acc, [day.value]: day.label }),
+  {} as Record<string, string>
+);
 const resolveLeaderId = (club?: Pick<ClubDetail, 'leaderId' | 'presidentId'>) =>
   club?.leaderId ?? club?.presidentId ?? null;
 
@@ -173,6 +207,7 @@ const ClubDetailDrawer = ({
   onLeaveClub,
   onUpdateClubImage,
   isImageUpdating,
+  onUpdateClubOverview,
   onClose,
 }: ClubDetailDrawerProps) => {
   const memberTabs = useMemo<DetailTab[]>(() => ['overview', 'members', 'activities'], []);
@@ -190,6 +225,11 @@ const ClubDetailDrawer = ({
   const showMemberActions = canManage || Boolean(currentMember);
   const leaderId = resolveLeaderId(club);
   const leaderName = resolveLeaderName(club);
+  const [isOverviewEditing, setIsOverviewEditing] = useState(false);
+  const [isOverviewSaving, setIsOverviewSaving] = useState(false);
+  const [overviewForm, setOverviewForm] = useState<OverviewFormState>(() =>
+    buildOverviewFormState(club)
+  );
   const selfMember = useMemo<DrawerClubMember | null>(() => {
     if (currentMember) {
       return currentMember as DrawerClubMember;
@@ -235,6 +275,77 @@ const ClubDetailDrawer = ({
     return unique;
   }, [club, members, selfMember, leaderId, leaderName]);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const overviewOperatingDays = formatOperatingDays(club.operatingDays);
+  const overviewOperatingHours = formatOperatingHours(club.operatingStartTime, club.operatingEndTime);
+
+  useEffect(() => {
+    setOverviewForm(buildOverviewFormState(club));
+    setIsOverviewEditing(false);
+  }, [club]);
+
+  const handleOverviewFieldChange = <K extends keyof OverviewFormState>(
+    field: K,
+    value: OverviewFormState[K]
+  ) => {
+    setOverviewForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const toggleOverviewDay = (dayValue: string) => {
+    setOverviewForm((prev) => {
+      const set = new Set(prev.operatingDays);
+      if (set.has(dayValue)) {
+        set.delete(dayValue);
+      } else {
+        set.add(dayValue);
+      }
+      return {
+        ...prev,
+        operatingDays: Array.from(set),
+      };
+    });
+  };
+
+  const handleOverviewCancel = () => {
+    setOverviewForm(buildOverviewFormState(club));
+    setIsOverviewEditing(false);
+  };
+
+  const handleOverviewSave = async () => {
+    const { operatingStartTime, operatingEndTime } = overviewForm;
+    if ((operatingStartTime && !operatingEndTime) || (!operatingStartTime && operatingEndTime)) {
+      showToast('error', 'Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.');
+      return;
+    }
+    if (
+      operatingStartTime &&
+      operatingEndTime &&
+      operatingStartTime >= operatingEndTime
+    ) {
+      showToast('error', 'Giờ kết thúc cần sau giờ bắt đầu.');
+      return;
+    }
+    try {
+      setIsOverviewSaving(true);
+      await onUpdateClubOverview(club.id, {
+        category: overviewForm.category.trim() || null,
+        meetingLocation: overviewForm.meetingLocation.trim() || null,
+        mission: overviewForm.mission.trim() || null,
+        operatingDays: overviewForm.operatingDays,
+        operatingStartTime: overviewForm.operatingStartTime || null,
+        operatingEndTime: overviewForm.operatingEndTime || null,
+      });
+      showToast('success', 'Đã cập nhật thông tin câu lạc bộ.');
+      setIsOverviewEditing(false);
+    } catch (error) {
+      console.error(error);
+      showToast('error', 'Không thể cập nhật thông tin câu lạc bộ.');
+    } finally {
+      setIsOverviewSaving(false);
+    }
+  };
 
   const handleClubImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -381,6 +492,141 @@ const ClubDetailDrawer = ({
               <DetailItem label="Members" value={`${club.memberCount ?? 0}`} />
               <DetailItem label="Meeting location" value={club.meetingLocation ?? 'Not provided'} />
               <DetailItem label="Mission" value={club.mission ?? 'Not provided'} />
+              <DetailItem
+                label="Operating days"
+                value={overviewOperatingDays ?? 'Not configured'}
+              />
+              <DetailItem
+                label="Operating hours"
+                value={overviewOperatingHours ?? 'Not configured'}
+              />
+            </div>
+          )}
+
+          {resolvedTab === 'overview' && canManage && (
+            <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Chỉnh sửa thông tin</p>
+                  <p className="text-xs text-slate-500">
+                    Cập nhật danh mục, địa điểm, sứ mệnh và lịch hoạt động của câu lạc bộ.
+                  </p>
+                </div>
+                {!isOverviewEditing ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsOverviewEditing(true)}
+                    className="rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
+                  >
+                    Chỉnh sửa
+                  </button>
+                ) : null}
+              </div>
+              {isOverviewEditing && (
+                <div className="mt-4 space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Category
+                      <input
+                        type="text"
+                        value={overviewForm.category}
+                        onChange={(event) => handleOverviewFieldChange('category', event.target.value)}
+                        className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        placeholder="Sports, Culture..."
+                      />
+                    </label>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Meeting location
+                      <input
+                        type="text"
+                        value={overviewForm.meetingLocation}
+                        onChange={(event) =>
+                          handleOverviewFieldChange('meetingLocation', event.target.value)
+                        }
+                        className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        placeholder="Building A..."
+                      />
+                    </label>
+                  </div>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Mission
+                    <textarea
+                      value={overviewForm.mission}
+                      onChange={(event) => handleOverviewFieldChange('mission', event.target.value)}
+                      rows={3}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      placeholder="Sứ mệnh của câu lạc bộ..."
+                    />
+                  </label>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Operating days
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {WEEKDAY_OPTIONS.map((day) => {
+                        const selected = overviewForm.operatingDays.includes(day.value);
+                        return (
+                          <button
+                            key={day.value}
+                            type="button"
+                            onClick={() => toggleOverviewDay(day.value)}
+                            className={`rounded-2xl border px-3 py-1.5 text-xs font-semibold transition ${
+                              selected
+                                ? 'border-orange-400 bg-orange-50 text-orange-600'
+                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-orange-200 hover:text-orange-500'
+                            }`}
+                          >
+                            {day.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Giờ bắt đầu
+                      <input
+                        type="time"
+                        value={overviewForm.operatingStartTime}
+                        onChange={(event) =>
+                          handleOverviewFieldChange('operatingStartTime', event.target.value)
+                        }
+                        className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Giờ kết thúc
+                      <input
+                        type="time"
+                        value={overviewForm.operatingEndTime}
+                        onChange={(event) =>
+                          handleOverviewFieldChange('operatingEndTime', event.target.value)
+                        }
+                        className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      />
+                    </label>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={handleOverviewCancel}
+                      className="rounded-2xl border border-transparent px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700"
+                      disabled={isOverviewSaving}
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleOverviewSave}
+                      disabled={isOverviewSaving}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 disabled:opacity-60"
+                    >
+                      {isOverviewSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Lưu thay đổi
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1143,3 +1389,29 @@ const BankInstructionCard = ({
 
 
 export default ClubDetailDrawer;
+
+const buildOverviewFormState = (club: ClubDetail): OverviewFormState => ({
+  category: club.category ?? '',
+  meetingLocation: club.meetingLocation ?? '',
+  mission: club.mission ?? '',
+  operatingDays: club.operatingDays ?? [],
+  operatingStartTime: club.operatingStartTime ?? '',
+  operatingEndTime: club.operatingEndTime ?? '',
+});
+
+const formatOperatingDays = (days?: string[] | null) => {
+  if (!days || days.length === 0) {
+    return null;
+  }
+  if (days.length === WEEKDAY_OPTIONS.length) {
+    return 'Hoạt động cả tuần';
+  }
+  return days.map((day) => WEEKDAY_LABELS[day] ?? day).join(', ');
+};
+
+const formatOperatingHours = (start?: string | null, end?: string | null) => {
+  if (!start || !end) {
+    return null;
+  }
+  return `${start} - ${end}`;
+};
