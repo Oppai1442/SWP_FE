@@ -1,6 +1,16 @@
 import { type ChangeEvent, type FormEvent, useRef } from 'react';
 import { Loader2, MapPin, UploadCloud, X } from 'lucide-react';
 
+const WEEKDAY_OPTIONS = [
+  { value: 'MONDAY', label: 'Thứ 2' },
+  { value: 'TUESDAY', label: 'Thứ 3' },
+  { value: 'WEDNESDAY', label: 'Thứ 4' },
+  { value: 'THURSDAY', label: 'Thứ 5' },
+  { value: 'FRIDAY', label: 'Thứ 6' },
+  { value: 'SATURDAY', label: 'Thứ 7' },
+  { value: 'SUNDAY', label: 'Chủ nhật' },
+] as const;
+
 interface CreateClubForm {
   name: string;
   description: string;
@@ -10,12 +20,15 @@ interface CreateClubForm {
   meetingLocation: string;
   mission: string;
   foundedDate: string;
+  operatingDays: string[];
+  operatingStartTime: string;
+  operatingEndTime: string;
 }
 
 interface CreateClubModalProps {
   form: CreateClubForm;
   isSubmitting: boolean;
-  onChange: (field: keyof CreateClubForm, value: string) => void;
+  onChange: (field: keyof CreateClubForm, value: CreateClubForm[keyof CreateClubForm]) => void;
   onUploadImage: (file: File) => void;
   onRemoveImage: () => void;
   isUploadingImage: boolean;
@@ -36,6 +49,17 @@ const CreateClubModal = ({
   onClose,
 }: CreateClubModalProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const toggleOperatingDay = (dayValue: string) => {
+    const current = form.operatingDays ?? [];
+    const set = new Set(current);
+    if (set.has(dayValue)) {
+      set.delete(dayValue);
+    } else {
+      set.add(dayValue);
+    }
+    onChange('operatingDays', Array.from(set));
+  };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -141,6 +165,64 @@ const CreateClubModal = ({
             className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
             placeholder="Explain why the club exists and the value it brings."
           />
+        </div>
+
+        <div className="rounded-3xl border border-slate-100 bg-slate-50/40 p-4">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Operating schedule</p>
+              <h4 className="text-base font-semibold text-slate-900">Thời gian hoạt động</h4>
+              <p className="text-xs text-slate-500">Chọn các ngày và khung giờ sinh hoạt của câu lạc bộ.</p>
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Ngày hoạt động</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {WEEKDAY_OPTIONS.map((day) => {
+                const selected = form.operatingDays?.includes(day.value);
+                return (
+                  <button
+                    key={day.value}
+                    type="button"
+                    onClick={() => toggleOperatingDay(day.value)}
+                    className={`rounded-2xl border px-3 py-1.5 text-xs font-semibold transition ${
+                      selected
+                        ? 'border-orange-400 bg-orange-50 text-orange-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-orange-200 hover:text-orange-500'
+                    }`}
+                  >
+                    {day.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Giờ bắt đầu
+              </label>
+              <input
+                type="time"
+                value={form.operatingStartTime}
+                onChange={(event) => onChange('operatingStartTime', event.target.value)}
+                required
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Giờ kết thúc
+              </label>
+              <input
+                type="time"
+                value={form.operatingEndTime}
+                onChange={(event) => onChange('operatingEndTime', event.target.value)}
+                required
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+              />
+            </div>
+          </div>
         </div>
 
         <div>

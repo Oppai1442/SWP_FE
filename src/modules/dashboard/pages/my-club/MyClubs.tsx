@@ -183,6 +183,9 @@ const MyClubs = () => {
     meetingLocation: '',
     mission: '',
     foundedDate: '',
+    operatingDays: [],
+    operatingStartTime: '',
+    operatingEndTime: '',
   });
   const [isCreating, setIsCreating] = useState(false);
   const [isUploadingClubImage, setIsUploadingClubImage] = useState(false);
@@ -522,6 +525,9 @@ const MyClubs = () => {
       meetingLocation: '',
       mission: '',
       foundedDate: '',
+      operatingDays: [],
+      operatingStartTime: '',
+      operatingEndTime: '',
     });
     setClubImageError(null);
     setIsCreateModalOpen(true);
@@ -532,6 +538,18 @@ const MyClubs = () => {
     event.preventDefault();
     if (!createForm.name.trim()) {
       showToast('error', 'Tên câu lạc bộ là bắt buộc.');
+      return;
+    }
+    if (!createForm.operatingDays.length) {
+      showToast('error', 'Chọn ít nhất một ngày hoạt động.');
+      return;
+    }
+    if (!createForm.operatingStartTime || !createForm.operatingEndTime) {
+      showToast('error', 'Cung cấp đầy đủ giờ bắt đầu và kết thúc.');
+      return;
+    }
+    if (createForm.operatingStartTime >= createForm.operatingEndTime) {
+      showToast('error', 'Giờ kết thúc phải sau giờ bắt đầu.');
       return;
     }
 
@@ -787,12 +805,12 @@ const MyClubs = () => {
           prev.map((club) =>
             club.id === clubId
               ? {
-                  ...club,
-                  leaderId: targetMember.memberId ?? null,
-                  leaderName: targetMember.memberName,
-                  presidentId: targetMember.memberId ?? null,
-                  presidentName: targetMember.memberName,
-                }
+                ...club,
+                leaderId: targetMember.memberId ?? null,
+                leaderName: targetMember.memberName,
+                presidentId: targetMember.memberId ?? null,
+                presidentName: targetMember.memberName,
+              }
               : club
           )
         );
@@ -958,6 +976,8 @@ const MyClubs = () => {
       bankTransferNote: bankForm.bankTransferNote.trim(),
       joinFee: bankForm.joinFee.trim(),
     };
+
+
     if (!payload.bankId || !payload.bankAccountNumber) {
       showToast('error', 'Mã ngân hàng và số tài khoản là bắt buộc.');
       return;
@@ -986,6 +1006,39 @@ const MyClubs = () => {
     }
   }, [bankForm, selectedClub, setSettingsCache]);
 
+  const handleUpdateClubOverview = useCallback(
+    async (
+      clubId: number,
+      payload: Partial<{
+        category: string | null;
+        meetingLocation: string | null;
+        mission: string | null;
+        operatingDays: string[];
+        operatingStartTime: string | null;
+        operatingEndTime: string | null;
+      }>
+    ) => {
+      const updated = await updateClubAPI(clubId, payload);
+      const updatedData = updated ?? (payload as Partial<ClubDetail>);
+      setClubs((prev) =>
+        prev.map((club) => (club.id === clubId ? { ...club, ...updatedData } : club))
+      );
+      setSelectedClub((prev) => (prev?.id === clubId ? { ...prev, ...updatedData } : prev));
+      setClubDetailCache((prev) =>
+        prev[clubId]
+          ? {
+            ...prev,
+            [clubId]: {
+              ...prev[clubId],
+              ...updatedData,
+            },
+          }
+          : prev
+      );
+      return updated;
+    },
+    []
+  );
 
   const handleRefreshJoinQueue = useCallback(() => {
     if (!selectedClub?.id) return;
@@ -1182,6 +1235,7 @@ const MyClubs = () => {
           onKickMember={handleKickMember}
           onLeaveClub={handleLeaveClub}
           onUpdateClubImage={handleUpdateClubImage}
+          onUpdateClubOverview={handleUpdateClubOverview}
           isImageUpdating={isUpdatingClubImage}
           onClose={() => setSelectedClub(null)}
         />
