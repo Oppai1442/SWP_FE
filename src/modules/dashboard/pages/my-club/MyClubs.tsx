@@ -29,6 +29,7 @@ import {
   updateClubMemberAPI,
   updateClubSettingsAPI,
   updateClubActivityAPI,
+  updateClubAPI,
   uploadClubImageAPI,
   type ClubDetail,
   type ClubJoinRequest,
@@ -69,6 +70,7 @@ import {
 import type { ActivityFormState, BankInstructionForm } from './types';
 
 import type { DetailTab } from './constants';
+import { showToast } from '@/utils';
 
 
 
@@ -181,6 +183,9 @@ const MyClubs = () => {
     meetingLocation: '',
     mission: '',
     foundedDate: '',
+    operatingDays: [],
+    operatingStartTime: '',
+    operatingEndTime: '',
   });
   const [isCreating, setIsCreating] = useState(false);
   const [isUploadingClubImage, setIsUploadingClubImage] = useState(false);
@@ -207,6 +212,7 @@ const MyClubs = () => {
   const [memberActionLoading, setMemberActionLoading] = useState<Record<number, boolean>>({});
   const [isLeavingClub, setIsLeavingClub] = useState(false);
   const [editingActivityId, setEditingActivityId] = useState<number | null>(null);
+  const [isUpdatingClubImage, setIsUpdatingClubImage] = useState(false);
 
 
   useEffect(() => {
@@ -235,7 +241,7 @@ const MyClubs = () => {
       setRequests(mine);
     } catch (error) {
       console.error(error);
-      toast.error('Không thể tải yêu cầu câu lạc bộ của bạn.');
+      showToast('error', 'Không thể tải yêu cầu câu lạc bộ của bạn.');
     } finally {
       setIsLoadingRequests(false);
     }
@@ -254,7 +260,7 @@ const MyClubs = () => {
         setMyJoinRequests(mine);
       } catch (error) {
         console.error(error);
-        toast.error('Không thể tải yêu cầu tham gia của bạn.');
+        showToast('error', 'Không thể tải yêu cầu tham gia của bạn.');
       } finally {
         setIsLoadingJoinHistory(false);
       }
@@ -271,7 +277,7 @@ const MyClubs = () => {
       setActivitiesCache((prev) => ({ ...prev, [clubId]: data ?? [] }));
     } catch (error) {
       console.error(error);
-      toast.error('Không thể tải hoạt động câu lạc bộ.');
+      showToast('error', 'Không thể tải hoạt động câu lạc bộ.');
     } finally {
       setIsActivitiesLoading(false);
     }
@@ -294,7 +300,7 @@ const MyClubs = () => {
       setClubs(mine);
     } catch (error) {
       console.error(error);
-      toast.error('Không thể tải câu lạc bộ của bạn.');
+      showToast('error', 'Không thể tải câu lạc bộ của bạn.');
     } finally {
       setIsLoadingClubs(false);
     }
@@ -309,7 +315,7 @@ const MyClubs = () => {
       setJoinQueueCache((prev) => ({ ...prev, [clubId]: data }));
     } catch (error) {
       console.error(error);
-      toast.error('Không thể tải yêu cầu tham gia.');
+      showToast('error', 'Không thể tải yêu cầu tham gia.');
     } finally {
       setIsJoinQueueLoading(false);
     }
@@ -345,10 +351,10 @@ const MyClubs = () => {
           club.id === clubId ? { ...club, inviteCode: updated.inviteCode ?? club.inviteCode } : club
         )
       );
-      toast.success('Mã mời đã được làm mới.');
+      showToast('success', 'Mã mời đã được làm mới.');
     } catch (error) {
       console.error(error);
-      toast.error('Không thể làm mới mã mời.');
+      showToast('error', 'Không thể làm mới mã mời.');
     }
   }, []);
 
@@ -519,6 +525,9 @@ const MyClubs = () => {
       meetingLocation: '',
       mission: '',
       foundedDate: '',
+      operatingDays: [],
+      operatingStartTime: '',
+      operatingEndTime: '',
     });
     setClubImageError(null);
     setIsCreateModalOpen(true);
@@ -528,7 +537,19 @@ const MyClubs = () => {
   const handleCreateClub = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!createForm.name.trim()) {
-      toast.error('T?n c?u l?c b? l? b?t bu?c.');
+      showToast('error', 'Tên câu lạc bộ là bắt buộc.');
+      return;
+    }
+    if (!createForm.operatingDays.length) {
+      showToast('error', 'Chọn ít nhất một ngày hoạt động.');
+      return;
+    }
+    if (!createForm.operatingStartTime || !createForm.operatingEndTime) {
+      showToast('error', 'Cung cấp đầy đủ giờ bắt đầu và kết thúc.');
+      return;
+    }
+    if (createForm.operatingStartTime >= createForm.operatingEndTime) {
+      showToast('error', 'Giờ kết thúc phải sau giờ bắt đầu.');
       return;
     }
 
@@ -540,12 +561,12 @@ const MyClubs = () => {
         imageUrl: payload.imageUrl || undefined,
         foundedDate: payload.foundedDate || null,
       });
-      toast.success('Y?u c?u t?o c?u l?c b? ?? ???c g?i th?nh c?ng.');
+      showToast('success', 'Yêu cầu tạo câu lạc bộ đã được gửi thành công.');
       setIsCreateModalOpen(false);
       await refreshAll();
     } catch (error) {
       console.error(error);
-      toast.error('Kh?ng th? g?i y?u c?u c?u l?c b?.');
+      showToast('error', 'Không thể gửi yêu cầu câu lạc bộ.');
     } finally {
       setIsCreating(false);
     }
@@ -553,12 +574,12 @@ const MyClubs = () => {
 
   const handleClubImageUpload = async (file: File) => {
     if (!file.type?.startsWith('image/')) {
-      toast.error('H?y ch?n h?nh ?nh cho c?u l?c b?.');
+      showToast('error', 'Hãy chọn hình ảnh cho câu lạc bộ.');
       return;
     }
     const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      toast.error('H?nh ?nh kh?ng ???c v??t qu? 5MB.');
+      showToast('error', 'Hình ảnh không được vượt quá 5MB.');
       return;
     }
     try {
@@ -570,13 +591,42 @@ const MyClubs = () => {
         imageUrl: uploaded.url ?? '',
         imageFileName: file.name,
       }));
-      toast.success('T?i h?nh ?nh c?u l?c b? th?nh c?ng.');
+      showToast('success', 'Tải hình ảnh câu lạc bộ thành công.');
     } catch (error) {
       console.error(error);
-      setClubImageError('Kh?ng th? t?i h?nh ?nh.');
-      toast.error('Kh?ng th? t?i h?nh ?nh.');
+      setClubImageError('Không thể tải hình ảnh.');
+      showToast('error', 'Không thể tải hình ảnh.');
     } finally {
       setIsUploadingClubImage(false);
+    }
+  };
+
+  const handleUpdateClubImage = async (clubId: number, file: File) => {
+    if (!file.type?.startsWith('image/')) {
+      showToast('error', 'Hãy chọn hình ảnh hợp lệ.');
+      return;
+    }
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      showToast('error', 'Hình ảnh không được vượt quá 5MB.');
+      return;
+    }
+    try {
+      setIsUpdatingClubImage(true);
+      const uploaded = await uploadClubImageAPI(file, clubId);
+      const newUrl = uploaded.url ?? '';
+      await updateClubAPI(clubId, { imageUrl: newUrl });
+      setClubs((prev) => prev.map((club) => (club.id === clubId ? { ...club, imageUrl: newUrl } : club)));
+      setSelectedClub((prev) => (prev?.id === clubId ? { ...prev, imageUrl: newUrl } : prev));
+      setClubDetailCache((prev) =>
+        prev[clubId] ? { ...prev, [clubId]: { ...prev[clubId], imageUrl: newUrl } } : prev
+      );
+      showToast('success', 'Đã cập nhật ảnh câu lạc bộ.');
+    } catch (error) {
+      console.error(error);
+      showToast('error', 'Không thể cập nhật ảnh câu lạc bộ.');
+    } finally {
+      setIsUpdatingClubImage(false);
     }
   };
 
@@ -602,7 +652,7 @@ const MyClubs = () => {
       }
     } catch (error) {
       console.error(error);
-      toast.error('Không thể tải chi tiết câu lạc bộ.');
+      showToast('error', 'Không thể tải chi tiết câu lạc bộ.');
     }
   };
 
@@ -659,7 +709,7 @@ const MyClubs = () => {
   const handleSubmitActivity = useCallback(async () => {
     if (!selectedClub) return;
     if (!activityForm.title.trim()) {
-      toast.error('Tiêu đề hoạt động là bắt buộc.');
+      showToast('error', 'Tiêu đề hoạt động là bắt buộc.');
       return;
     }
     try {
@@ -685,19 +735,19 @@ const MyClubs = () => {
             activity.id === updated.id ? updated : activity
           ),
         }));
-        toast.success('Hoạt động đã được cập nhật.');
+        showToast('success', 'Hoạt động đã được cập nhật.');
       } else {
         const created = await createClubActivityAPI(selectedClub.id, payload);
         setActivitiesCache((prev) => ({
           ...prev,
           [selectedClub.id]: [created, ...(prev[selectedClub.id] ?? [])],
         }));
-        toast.success('Hoạt động đã được thêm.');
+        showToast('success', 'Hoạt động đã được thêm.');
       }
       resetActivityForm();
     } catch (error) {
       console.error(error);
-      toast.error(editingActivityId ? 'Không thể cập nhật hoạt động.' : 'Không thể tạo hoạt động.');
+      showToast('error', editingActivityId ? 'Không thể cập nhật hoạt động.' : 'Không thể tạo hoạt động.');
     } finally {
       setIsCreatingActivity(false);
     }
@@ -714,7 +764,7 @@ const MyClubs = () => {
       if (!selectedClub) return;
       const clubId = selectedClub.id;
       if (targetMember.memberId === getClubLeaderId(selectedClub)) {
-        toast.error('Thành viên này đã là trưởng nhóm.');
+        showToast('error', 'Thành viên này đã là trưởng nhóm.');
         return;
       }
       const confirmed = window.confirm(
@@ -755,12 +805,12 @@ const MyClubs = () => {
           prev.map((club) =>
             club.id === clubId
               ? {
-                  ...club,
-                  leaderId: targetMember.memberId ?? null,
-                  leaderName: targetMember.memberName,
-                  presidentId: targetMember.memberId ?? null,
-                  presidentName: targetMember.memberName,
-                }
+                ...club,
+                leaderId: targetMember.memberId ?? null,
+                leaderName: targetMember.memberName,
+                presidentId: targetMember.memberId ?? null,
+                presidentName: targetMember.memberName,
+              }
               : club
           )
         );
@@ -776,10 +826,10 @@ const MyClubs = () => {
             return member;
           }),
         }));
-        toast.success('Quyền lãnh đạo đã được chuyển giao.');
+        showToast('success', 'Quyền lãnh đạo đã được chuyển giao.');
       } catch (error) {
         console.error(error);
-        toast.error('Không thể chuyển giao quyền lãnh đạo.');
+        showToast('error', 'Không thể chuyển giao quyền lãnh đạo.');
       } finally {
         setMemberLoadingState(affectedIds, false);
       }
@@ -801,7 +851,7 @@ const MyClubs = () => {
       if (!selectedClub) return;
       const clubId = selectedClub.id;
       if (member.memberId === getClubLeaderId(selectedClub)) {
-        toast.error('Hãy chuyển giao quyền lãnh đạo trước khi xóa thành viên này.');
+        showToast('error', 'Hãy chuyển giao quyền lãnh đạo trước khi xóa thành viên này.');
         return;
       }
       const confirmed = window.confirm(
@@ -835,10 +885,10 @@ const MyClubs = () => {
             return { ...club, memberCount: nextCount };
           })
         );
-        toast.success('Đã xóa thành viên khỏi câu lạc bộ.');
+        showToast('success', 'Đã xóa thành viên khỏi câu lạc bộ.');
       } catch (error) {
         console.error(error);
-        toast.error('Không thể xóa thành viên.');
+        showToast('error', 'Không thể xóa thành viên.');
       } finally {
         setMemberLoadingState([member.id], false);
       }
@@ -849,12 +899,12 @@ const MyClubs = () => {
 
   const handleLeaveClub = useCallback(async () => {
     if (!selectedClub || !currentMemberRecord) {
-      toast.error('Bạn không phải là thành viên của câu lạc bộ này.');
+      showToast('error', 'Bạn không phải là thành viên của câu lạc bộ này.');
       return;
     }
     const clubId = selectedClub.id;
     if (isCurrentLeader) {
-      toast.error('Hãy chuyển giao quyền lãnh đạo trước khi rời câu lạc bộ.');
+      showToast('error', 'Hãy chuyển giao quyền lãnh đạo trước khi rời câu lạc bộ.');
       return;
     }
     const confirmed = window.confirm('Rời khỏi câu lạc bộ này? Bạn sẽ mất quyền truy cập vào các tài nguyên của nó.');
@@ -887,10 +937,10 @@ const MyClubs = () => {
           return { ...club, memberCount: nextCount };
         })
       );
-      toast.success('Bạn đã rời khỏi câu lạc bộ.');
+      showToast('success', 'Bạn đã rời khỏi câu lạc bộ.');
     } catch (error) {
       console.error(error);
-      toast.error('Không thể rời câu lạc bộ.');
+      showToast('error', 'Không thể rời câu lạc bộ.');
     } finally {
       setIsLeavingClub(false);
       setMemberLoadingState([currentMemberRecord.id], false);
@@ -926,13 +976,15 @@ const MyClubs = () => {
       bankTransferNote: bankForm.bankTransferNote.trim(),
       joinFee: bankForm.joinFee.trim(),
     };
+
+
     if (!payload.bankId || !payload.bankAccountNumber) {
-      toast.error('Mã ngân hàng và số tài khoản là bắt buộc.');
+      showToast('error', 'Mã ngân hàng và số tài khoản là bắt buộc.');
       return;
     }
     const parsedFee = payload.joinFee ? Number(payload.joinFee) : 0;
     if (Number.isNaN(parsedFee) || parsedFee < 0) {
-      toast.error('Phí tham gia phải bằng 0 hoặc lớn hơn.');
+      showToast('error', 'Phí tham gia phải bằng 0 hoặc lớn hơn.');
       return;
     }
     try {
@@ -945,15 +997,48 @@ const MyClubs = () => {
         bankTransferNote: payload.bankTransferNote,
       });
       setSettingsCache((prev) => ({ ...prev, [selectedClub.id]: updated }));
-      toast.success('Hướng dẫn ngân hàng đã được cập nhật.');
+      showToast('success', 'Hướng dẫn ngân hàng đã được cập nhật.');
     } catch (error) {
       console.error(error);
-      toast.error('Không thể lưu hướng dẫn ngân hàng.');
+      showToast('error', 'Không thể lưu hướng dẫn ngân hàng.');
     } finally {
       setIsSavingBankSettings(false);
     }
   }, [bankForm, selectedClub, setSettingsCache]);
 
+  const handleUpdateClubOverview = useCallback(
+    async (
+      clubId: number,
+      payload: Partial<{
+        category: string | null;
+        meetingLocation: string | null;
+        mission: string | null;
+        operatingDays: string[];
+        operatingStartTime: string | null;
+        operatingEndTime: string | null;
+      }>
+    ) => {
+      const updated = await updateClubAPI(clubId, payload);
+      const updatedData = updated ?? (payload as Partial<ClubDetail>);
+      setClubs((prev) =>
+        prev.map((club) => (club.id === clubId ? { ...club, ...updatedData } : club))
+      );
+      setSelectedClub((prev) => (prev?.id === clubId ? { ...prev, ...updatedData } : prev));
+      setClubDetailCache((prev) =>
+        prev[clubId]
+          ? {
+            ...prev,
+            [clubId]: {
+              ...prev[clubId],
+              ...updatedData,
+            },
+          }
+          : prev
+      );
+      return updated;
+    },
+    []
+  );
 
   const handleRefreshJoinQueue = useCallback(() => {
     if (!selectedClub?.id) return;
@@ -964,7 +1049,7 @@ const MyClubs = () => {
   const handleJoinRequestDecision = useCallback(
     async (requestId: number, status: ClubJoinRequestStatus, note?: string | null) => {
       if (!selectedClub?.id || !user?.id) {
-        toast.error('Thiếu ngữ cảnh cho quyết định.');
+        showToast('error', 'Thiếu ngữ cảnh cho quyết định.');
         return;
       }
       try {
@@ -982,10 +1067,10 @@ const MyClubs = () => {
             [selectedClub.id]: current.map((item) => (item.id === updated.id ? updated : item)),
           };
         });
-        toast.success('Yêu cầu đã được chấp thuận.');
+        showToast('success', 'Yêu cầu đã được chấp thuận.');
       } catch (error) {
         console.error(error);
-        toast.error('Yêu cầu đã bị từ chối.');
+        showToast('error', 'Yêu cầu đã bị từ chối.');
       } finally {
         setJoinQueueDecisionMap((prev) => ({ ...prev, [requestId]: false }));
       }
@@ -1005,7 +1090,7 @@ const MyClubs = () => {
         })
         .catch((error) => {
           console.error(error);
-          toast.error('Không thể tải thành viên.');
+          showToast('error', 'Không thể tải thành viên.');
         })
         .finally(() => setIsMembersLoading(false));
     }
@@ -1018,7 +1103,7 @@ const MyClubs = () => {
         })
         .catch((error) => {
           console.error(error);
-          toast.error('Không thể tải cài đặt câu lạc bộ.');
+          showToast('error', 'Không thể tải cài đặt câu lạc bộ.');
         })
         .finally(() => setIsSettingsLoading(false));
     }
@@ -1149,6 +1234,9 @@ const MyClubs = () => {
           onTransferLeadership={handleTransferLeadership}
           onKickMember={handleKickMember}
           onLeaveClub={handleLeaveClub}
+          onUpdateClubImage={handleUpdateClubImage}
+          onUpdateClubOverview={handleUpdateClubOverview}
+          isImageUpdating={isUpdatingClubImage}
           onClose={() => setSelectedClub(null)}
         />
       )}
