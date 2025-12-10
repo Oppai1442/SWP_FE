@@ -440,7 +440,7 @@ const ClubBrowser = () => {
         </div>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-3xl border border-slate-100 bg-white/80 p-5 shadow-sm">
           <div className="text-sm text-slate-500">Tổng số câu lạc bộ</div>
           <p className="mt-1 flex items-center gap-2 text-2xl font-semibold text-slate-900">
@@ -455,7 +455,7 @@ const ClubBrowser = () => {
             {clubs.filter((club) => club.status === 'ACTIVE').length}
           </p>
         </div>
-      </section>
+      </section> */}
 
       <section className="mt-6">
         <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/40 p-6 shadow-sm">
