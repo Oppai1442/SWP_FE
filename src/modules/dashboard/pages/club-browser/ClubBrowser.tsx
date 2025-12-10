@@ -460,10 +460,10 @@ const ClubBrowser = () => {
       <section className="mt-6">
         <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/40 p-6 shadow-sm">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
+            {/* <div>
               <p className="text-sm font-semibold text-slate-900">Bạn đã có mã mời?</p>
               <p className="text-xs text-slate-500">Dán mã vào đây để gửi yêu cầu tham gia ngay cả khi câu lạc bộ không được liệt kê.</p>
-            </div>
+            </div> */}
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <input
                 type="text"
