@@ -94,7 +94,6 @@ const Navbar: FC<NavbarProps> = ({ sidebarOpen, setSidebarOpen }) => {
           <div className="flex flex-col">
             <button
               type="button"
-              onClick={() => navigate("/dashboard")}
               className="text-left text-lg font-semibold text-slate-900"
             >
               Văn phòng ClubHub
