@@ -71,6 +71,7 @@ interface ClubDetailDrawerProps {
     payload: Partial<{
       category: string | null;
       meetingLocation: string | null;
+      description: string | null;
       mission: string | null;
       operatingDays: string[];
       operatingStartTime: string | null;
@@ -85,6 +86,7 @@ type DrawerClubMember = ClubMember & { __virtual?: boolean };
 type OverviewFormState = {
   category: string;
   meetingLocation: string;
+  description: string;
   mission: string;
   operatingDays: string[];
   operatingStartTime: string;
@@ -113,6 +115,8 @@ const resolveLeaderName = (club?: Pick<ClubDetail, 'leaderName' | 'presidentName
 
 const GMT7_OFFSET_MS = 7 * 60 * 60 * 1000;
 const MIN_ACTIVITY_DURATION_MS = 2 * 60 * 60 * 1000;
+const MIN_OPERATING_START = '05:00';
+const MAX_OPERATING_END = '19:00';
 
 const runtimeStatusMeta = {
   upcoming: {
@@ -316,7 +320,15 @@ const ClubDetailDrawer = ({
   const handleOverviewSave = async () => {
     const { operatingStartTime, operatingEndTime } = overviewForm;
     if ((operatingStartTime && !operatingEndTime) || (!operatingStartTime && operatingEndTime)) {
-      showToast('error', 'Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.');
+      showToast('error', 'Vui l?ng nh?p ??y ?? gi? b?t ??u v? k?t th?c.');
+      return;
+    }
+    if (operatingStartTime && operatingStartTime < MIN_OPERATING_START) {
+      showToast('error', 'Gi? b?t ??u kh?ng ???c tr??c 05:00.');
+      return;
+    }
+    if (operatingEndTime && operatingEndTime > MAX_OPERATING_END) {
+      showToast('error', 'Gi? k?t th?c kh?ng ???c sau 19:00.');
       return;
     }
     if (
@@ -324,7 +336,7 @@ const ClubDetailDrawer = ({
       operatingEndTime &&
       operatingStartTime >= operatingEndTime
     ) {
-      showToast('error', 'Giờ kết thúc cần sau giờ bắt đầu.');
+      showToast('error', 'Gi? k?t th?c c?n sau gi? b?t ??u.');
       return;
     }
     try {
@@ -332,21 +344,21 @@ const ClubDetailDrawer = ({
       await onUpdateClubOverview(club.id, {
         category: overviewForm.category.trim() || null,
         meetingLocation: overviewForm.meetingLocation.trim() || null,
+        description: overviewForm.description.trim() || null,
         mission: overviewForm.mission.trim() || null,
         operatingDays: overviewForm.operatingDays,
         operatingStartTime: overviewForm.operatingStartTime || null,
         operatingEndTime: overviewForm.operatingEndTime || null,
       });
-      showToast('success', 'Đã cập nhật thông tin câu lạc bộ.');
+      showToast('success', '?? c?p nh?t th?ng tin c?u l?c b?.');
       setIsOverviewEditing(false);
     } catch (error) {
       console.error(error);
-      showToast('error', 'Không thể cập nhật thông tin câu lạc bộ.');
+      showToast('error', 'Kh?ng th? c?p nh?t th?ng tin c?u l?c b?.');
     } finally {
       setIsOverviewSaving(false);
     }
   };
-
   const handleClubImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -492,6 +504,7 @@ const ClubDetailDrawer = ({
               <DetailItem label="Members" value={`${club.memberCount ?? 0}`} />
               <DetailItem label="Meeting location" value={club.meetingLocation ?? 'Not provided'} />
               <DetailItem label="Mission" value={club.mission ?? 'Not provided'} />
+              <DetailItem label="Description" value={club.description ?? 'Not provided'} />
               <DetailItem
                 label="Operating days"
                 value={overviewOperatingDays ?? 'Not configured'}
@@ -556,6 +569,18 @@ const ClubDetailDrawer = ({
                       rows={3}
                       className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       placeholder="Sứ mệnh của câu lạc bộ..."
+                    />
+                  </label>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Description
+                    <textarea
+                      value={overviewForm.description}
+                      onChange={(event) =>
+                        handleOverviewFieldChange('description', event.target.value)
+                      }
+                      rows={3}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      placeholder="Add additional club information..."
                     />
                   </label>
                   <div>
@@ -1393,6 +1418,7 @@ export default ClubDetailDrawer;
 const buildOverviewFormState = (club: ClubDetail): OverviewFormState => ({
   category: club.category ?? '',
   meetingLocation: club.meetingLocation ?? '',
+  description: club.description ?? '',
   mission: club.mission ?? '',
   operatingDays: club.operatingDays ?? [],
   operatingStartTime: club.operatingStartTime ?? '',

@@ -1012,6 +1012,7 @@ const MyClubs = () => {
       payload: Partial<{
         category: string | null;
         meetingLocation: string | null;
+        description: string | null;
         mission: string | null;
         operatingDays: string[];
         operatingStartTime: string | null;
