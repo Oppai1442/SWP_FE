@@ -33,6 +33,7 @@ import {
   type ClubJoinRequest,
 } from '../my-club/services/myClubService';
 import { formatDate, formatDateTime } from '../my-club/utils';
+import { showToast } from '@/utils';
 
 const statusLabels: Record<ClubStatus, string> = {
   ACTIVE: 'Hoạt động',
@@ -93,7 +94,7 @@ const ClubManagement = () => {
       setClubs(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
-      toast.error('Unable to load clubs.');
+      showToast('error', 'Unable to load clubs.');
     } finally {
       setIsLoading(false);
     }
@@ -142,7 +143,7 @@ const ClubManagement = () => {
     try {
       setIsRefreshing(true);
       await fetchClubs();
-      toast.success('Club list refreshed.');
+      showToast('success', 'Club list refreshed.');
     } finally {
       setIsRefreshing(false);
     }
@@ -167,7 +168,7 @@ const ClubManagement = () => {
       setJoinHistory(Array.isArray(historyData) ? historyData : []);
     } catch (error) {
       console.error(error);
-      toast.error('Unable to load club details.');
+      showToast('error', 'Unable to load club details.');
     } finally {
       setIsDetailLoading(false);
     }
@@ -185,12 +186,12 @@ const ClubManagement = () => {
   const handleUpdateClubImage = useCallback(
     async (clubId: number, file: File) => {
       if (!file?.type?.startsWith('image/')) {
-        toast.error('Please upload an image file.');
+        showToast('error', 'Please upload an image file.');
         return;
       }
       const MAX_SIZE = 5 * 1024 * 1024;
       if (file.size > MAX_SIZE) {
-        toast.error('Image must be under 5MB.');
+        showToast('error', 'Image must be under 5MB.');
         return;
       }
       try {
@@ -201,10 +202,10 @@ const ClubManagement = () => {
         setClubDetail((prev) => (prev?.id === clubId ? { ...prev, imageUrl: newUrl } : prev));
         setSelectedClub((prev) => (prev?.id === clubId ? { ...prev, imageUrl: newUrl } : prev));
         setClubs((prev) => prev.map((club) => (club.id === clubId ? { ...club, imageUrl: newUrl } : club)));
-        toast.success('Club picture updated.');
+        showToast('success', 'Club picture updated.');
       } catch (error) {
         console.error(error);
-        toast.error('Unable to update club picture.');
+        showToast('error', 'Unable to update club picture.');
       } finally {
         setIsUpdatingImage(false);
       }
@@ -709,5 +710,3 @@ const DetailItem = ({ label, value }: DetailItemProps) => (
 );
 
 export default ClubManagement;
-
-

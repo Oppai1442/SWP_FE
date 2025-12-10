@@ -872,7 +872,7 @@ const ClubDetailDrawer = ({
                     className="hidden"
                     onChange={handleClubImageChange}
                   />
-                  <SettingItem
+                  {/* <SettingItem
                     icon={Users}
                     label="Yêu cầu phê duyệt"
                     value={settings?.requireApproval ?? true}
@@ -886,7 +886,7 @@ const ClubDetailDrawer = ({
                     icon={Settings2}
                     label="Thông báo"
                     value={settings?.enableNotifications ?? true}
-                  />
+                  /> */}
                   <BankInstructionCard
                     club={club}
                     canManage={canManage}
@@ -1089,7 +1089,7 @@ const BankInstructionCard = ({
               disabled={isSaving}
               className="rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
             >
-              {isSaving ? 'Đang lưuGǪ' : 'Lưu hướng dẫn'}
+              {isSaving ? 'Đang lưu' : 'Lưu'}
             </button>
           </div>
         </div>
