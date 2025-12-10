@@ -137,7 +137,7 @@ const JoinClubModal = ({
                   </p>
                 </div>
                 <div className="mt-4 space-y-4">
-                  {showInviteCodeInput ? (
+                  {/* {showInviteCodeInput ? (
                     <div>
                       <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                         Mã mời
@@ -155,7 +155,7 @@ const JoinClubModal = ({
                     <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                       {inviteCodeHint ?? 'Mã mời được cung cấp tự động cho câu lạc bộ này.'}
                     </div>
-                  )}
+                  )} */}
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Động lực (tùy chọn)
