@@ -109,12 +109,17 @@ const ClubsTableSection = ({
                     <button
                       type="button"
                       onClick={() => onViewClub(club)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
+                      disabled={club.status !== 'ACTIVE'}
+                      className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-semibold transition ${
+                        club.status !== 'ACTIVE'
+                          ? 'cursor-not-allowed border-slate-100 text-slate-300'
+                          : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500'
+                      }`}
                     >
                       <Eye className="h-3.5 w-3.5" />
                       Xem
                     </button>
-                  ) : null}
+                 ) : null}
                 </td>
               </tr>
             ))
