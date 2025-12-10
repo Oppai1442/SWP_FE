@@ -320,15 +320,15 @@ const ClubDetailDrawer = ({
   const handleOverviewSave = async () => {
     const { operatingStartTime, operatingEndTime } = overviewForm;
     if ((operatingStartTime && !operatingEndTime) || (!operatingStartTime && operatingEndTime)) {
-      showToast('error', 'Vui l?ng nh?p ??y ?? gi? b?t ??u v? k?t th?c.');
+      showToast('error', 'Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.');
       return;
     }
     if (operatingStartTime && operatingStartTime < MIN_OPERATING_START) {
-      showToast('error', 'Gi? b?t ??u kh?ng ???c tr??c 05:00.');
+      showToast('error', 'Giờ bắt đầu không được trước 05:00.');
       return;
     }
     if (operatingEndTime && operatingEndTime > MAX_OPERATING_END) {
-      showToast('error', 'Gi? k?t th?c kh?ng ???c sau 19:00.');
+      showToast('error', 'Giờ kết thúc không được sau 19:00.');
       return;
     }
     if (
@@ -336,7 +336,7 @@ const ClubDetailDrawer = ({
       operatingEndTime &&
       operatingStartTime >= operatingEndTime
     ) {
-      showToast('error', 'Gi? k?t th?c c?n sau gi? b?t ??u.');
+      showToast('error', 'Giờ kết thúc cần sau giờ bắt đầu.');
       return;
     }
     try {
@@ -350,11 +350,11 @@ const ClubDetailDrawer = ({
         operatingStartTime: overviewForm.operatingStartTime || null,
         operatingEndTime: overviewForm.operatingEndTime || null,
       });
-      showToast('success', '?? c?p nh?t th?ng tin c?u l?c b?.');
+      showToast('success', 'Đã cập nhật thông tin câu lạc bộ.');
       setIsOverviewEditing(false);
     } catch (error) {
       console.error(error);
-      showToast('error', 'Kh?ng th? c?p nh?t th?ng tin c?u l?c b?.');
+      showToast('error', 'Không thể cập nhật thông tin câu lạc bộ.');
     } finally {
       setIsOverviewSaving(false);
     }
@@ -1069,7 +1069,7 @@ const ClubDetailDrawer = ({
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500 disabled:opacity-50"
                           >
-                            {decisionLoading ? 'Đang xử lýGǪ' : 'Từ chối'}
+                            {decisionLoading ? 'Đang xử lý' : 'Từ chối'}
                           </button>
                           <button
                             type="button"
@@ -1077,7 +1077,7 @@ const ClubDetailDrawer = ({
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-50"
                           >
-                            {decisionLoading ? 'Đang xử lýGǪ' : 'Phê duyệt'}
+                            {decisionLoading ? 'Đang xử lý' : 'Phê duyệt'}
                           </button>
                         </div>
                       )}
