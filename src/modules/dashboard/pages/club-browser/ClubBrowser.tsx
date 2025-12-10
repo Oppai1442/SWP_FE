@@ -457,9 +457,9 @@ const ClubBrowser = () => {
         </div>
       </section> */}
 
-      <section className="mt-6">
+      {/* <section className="mt-6">
         <div className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/40 p-6 shadow-sm">
-          {/* <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-slate-900">Bạn đã có mã mời?</p>
               <p className="text-xs text-slate-500">Dán mã vào đây để gửi yêu cầu tham gia ngay cả khi câu lạc bộ không được liệt kê.</p>
@@ -482,9 +482,9 @@ const ClubBrowser = () => {
                 {isResolvingInviteCode ? 'Đang kiểm tra...' : 'Tham gia bằng mã'}
               </button>
             </div>
-          </div> */}
+          </div>
         </div>
-      </section>
+      </section> */}
 
       <section className="mt-8">
         <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
