@@ -182,11 +182,10 @@ const ClubBrowser = () => {
   // --- FILTERS & PAGINATION ---
   const filteredClubs = useMemo(() => {
     const visibleClubs = clubs.filter((club) => {
-      if (club.status === 'PENDING') return false;
-      if (club.status === 'ACTIVE') {
-        return isSettingsComplete(clubSettingsMap[club.id]);
+      if (club.status !== 'ACTIVE') {
+        return false;
       }
-      return true;
+      return isSettingsComplete(clubSettingsMap[club.id]);
     });
 
     return visibleClubs
