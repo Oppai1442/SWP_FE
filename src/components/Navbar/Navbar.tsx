@@ -67,8 +67,8 @@ const Navbar = () => {
 
   const navLinks = [
     { path: ROUTES.HOME.getPath(), label: "Tổng quan" },
-    { path: ROUTES.TOS.getPath(), label: "Điều khoản" },
-    { path: ROUTES.POLICY.getPath(), label: "Chính sách" },
+    // { path: ROUTES.TOS.getPath(), label: "Điều khoản" },
+    // { path: ROUTES.POLICY.getPath(), label: "Chính sách" },
     { path: ROUTES.CONTACT.getPath(), label: "Hỗ trợ" },
   ];
 
