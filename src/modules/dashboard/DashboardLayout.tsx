@@ -66,7 +66,7 @@ const DashboardLayout = () => {
       label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
       icon: Compass,
       submenu: null,
-      roles: ["ROLE_USER", "ROLE_ADMIN", "ROLE_STAFF"]
+      roles: ["ROLE_USER"]
     },
     // {
     //   id: 'ticket',
