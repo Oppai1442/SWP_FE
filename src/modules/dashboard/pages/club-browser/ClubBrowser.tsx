@@ -75,12 +75,15 @@ const ClubBrowser = () => {
   const [transferCode, setTransferCode] = useState('');
 
   const createTransferCode = () => {
+    let rawCode: string;
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID();
+      rawCode = crypto.randomUUID();
+    } else {
+      rawCode = `JOIN${Date.now().toString(36)}${Math.random()
+        .toString(36)
+        .slice(2, 10)}`.toUpperCase();
     }
-    return `JOIN-${Date.now().toString(36)}-${Math.random()
-      .toString(36)
-      .slice(2, 10)}`.toUpperCase();
+    return rawCode.replace(/-/g, '');
   };
 
   //   Manual Invite Code
