@@ -1027,40 +1027,20 @@ const ClubDetailDrawer = ({
                           {request.motivation}
                         </p>
                       )}
-                      {request.paymentProofUrl ? (
-                        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-2">
-                            <img
-                              src={request.paymentProofUrl}
-                              alt="Payment proof"
-                              className="h-48 w-full rounded-xl object-cover"
-                            />
-                          </div>
-                          <div className="flex flex-col justify-between">
-                            Bằng chứng thanh toán                              <p className="text-sm font-semibold text-slate-900">
-                              {request.applicantName ?? 'Người nộp đơn'}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              Đảm bảo thông tin chuyển khoản khớp trước khi phê duyệt.
-                            </p>
-                          </div>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <a
-                              href={request.paymentProofUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
-                            >
-                              <Image className="h-3.5 w-3.5" />
-                              Xem toàn bộ kích thước
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/60 px-3 py-2 text-xs text-amber-700">
-                          Người nộp đơn chưa đính kèm bằng chứng thanh toán.
+                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          M? chuy?n kho?n
                         </p>
-                      )}
+                        {request.transferCode ? (
+                          <p className="mt-2 break-all font-mono text-sm font-semibold text-slate-900">
+                            {request.transferCode}
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-xs text-slate-500">
+                            Ch?a c? m? chuy?n kho?n. C?n y?u c?u b? sung tr??c khi ph? duy?t.
+                          </p>
+                        )}
+                      </div>
                       {request.status === 'PENDING' && (
                         <div className="mt-4 flex flex-wrap gap-3">
                           <button
