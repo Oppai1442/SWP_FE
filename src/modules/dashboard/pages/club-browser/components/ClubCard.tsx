@@ -203,7 +203,7 @@ const ClubCard = ({
                 Thành viên
               </span>
               <span className="truncate text-xs font-semibold leading-none">
-                {club.memberCount ?? 0}
+                {club.memberCount ?? 1}
               </span>
             </div>
           </div>
