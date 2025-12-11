@@ -19,9 +19,8 @@ const formatDateBlock = (dateStr?: string | null) => {
   };
 };
 
-// --- CẬP NHẬT HÀM NÀY ---
 const formatTimeRange = (start?: string | null, end?: string | null) => {
-  if (!start) return "Chưa cập nhật";
+  if (!start) return "Chưa cập nhật thời gian";
 
   const startDate = new Date(start);
   const startTime = startDate.toLocaleTimeString("vi-VN", {
@@ -40,11 +39,9 @@ const formatTimeRange = (start?: string | null, end?: string | null) => {
   const isSameDay = startDate.toDateString() === endDate.toDateString();
 
   if (isSameDay) {
-    // Cùng ngày: 07:00 - 11:00
     return `${startTime} - ${endTime}`;
   }
 
-  // Khác ngày: 07:00 09/12 - 17:00 10/12
   const startDay = startDate.toLocaleDateString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
@@ -56,7 +53,6 @@ const formatTimeRange = (start?: string | null, end?: string | null) => {
 
   return `${startTime} ${startDay} - ${endTime} ${endDay}`;
 };
-// ------------------------
 
 const getActivityStatus = (start?: string | null, end?: string | null) => {
   const now = new Date();
@@ -66,24 +62,24 @@ const getActivityStatus = (start?: string | null, end?: string | null) => {
   if (startDate && startDate > now) {
     return {
       label: "Sắp diễn ra",
-      color: "bg-blue-50 text-blue-600 border-blue-100",
+      color: "bg-blue-100 text-blue-700 border-blue-200",
     };
   }
   if (startDate && endDate && now >= startDate && now <= endDate) {
     return {
       label: "Đang diễn ra",
-      color: "bg-green-50 text-green-600 border-green-100",
+      color: "bg-green-100 text-green-700 border-green-200",
     };
   }
   if (endDate && now > endDate) {
     return {
       label: "Đã kết thúc",
-      color: "bg-slate-50 text-slate-500 border-slate-100",
+      color: "bg-slate-100 text-slate-600 border-slate-200",
     };
   }
   return {
     label: "Lên kế hoạch",
-    color: "bg-slate-50 text-slate-500 border-slate-100",
+    color: "bg-slate-100 text-slate-500 border-slate-200",
   };
 };
 
@@ -102,50 +98,53 @@ const ClubActivityModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      <div className="relative z-10 flex flex-col w-full max-w-2xl max-h-[85vh] rounded-3xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      {/* Modal Content */}
+      <div className="relative z-10 flex flex-col w-full max-w-3xl max-h-[90vh] rounded-3xl bg-white shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+        
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-50 text-orange-500">
-              <CalendarDays className="h-5 w-5" />
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 bg-white shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-600 shadow-sm">
+              <CalendarDays className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900">Hoạt Động</h3>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
-                {club.name}
+              <h3 className="text-xl font-bold text-slate-900">Danh sách Hoạt động</h3>
+              <p className="text-sm font-medium text-slate-500">
+                CLB: <span className="text-orange-600">{club.name}</span>
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="group flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
           >
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6 transition-transform group-hover:rotate-90" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6 bg-slate-50/50">
+        {/* Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6">
           {sortedActivities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="rounded-full bg-slate-100 p-4">
-                <AlertCircle className="h-8 w-8 text-slate-400" />
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="rounded-full bg-white p-6 shadow-sm mb-4">
+                <AlertCircle className="h-12 w-12 text-slate-300" />
               </div>
-              <h4 className="mt-4 text-base font-semibold text-slate-900">
+              <h4 className="text-lg font-bold text-slate-900">
                 Chưa có hoạt động
               </h4>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-2 text-base text-slate-500 max-w-xs">
                 Câu lạc bộ này hiện chưa có hoạt động nào được công bố.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-5">
               {sortedActivities.map((activity) => {
                 const dateBlock = formatDateBlock(activity.startDate);
                 const status = getActivityStatus(
@@ -156,62 +155,81 @@ const ClubActivityModal = ({
                 return (
                   <div
                     key={activity.id}
-                    className="group relative flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-orange-200 hover:shadow-md"
+                    className="group relative flex flex-col sm:flex-row gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-orange-300 hover:shadow-lg hover:shadow-orange-500/10"
                   >
-                    {/* Date Block */}
-                    <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl bg-orange-50 text-orange-600 border border-orange-100">
-                      <span className="text-xs font-medium uppercase">
+                    {/* Left: Date Block */}
+                    <div className="hidden sm:flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-2xl bg-orange-50 text-orange-600 border border-orange-100 shadow-sm group-hover:bg-orange-100 transition-colors">
+                      <span className="text-sm font-bold uppercase tracking-wider opacity-80">
                         {dateBlock.month}
                       </span>
-                      <span className="text-xl font-bold leading-none">
+                      <span className="text-4xl font-extrabold leading-none mt-1">
                         {dateBlock.day}
                       </span>
                     </div>
 
-                    {/* Content */}
-                    <div className="flex flex-1 flex-col justify-between gap-2">
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                          <h4
-                            className="text-base font-bold text-slate-800 line-clamp-1"
-                            title={activity.title}
-                          >
-                            {activity.title}
-                          </h4>
-                          <span
-                            className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border ${status.color}`}
-                          >
-                            {status.label}
-                          </span>
-                        </div>
-                        {activity.description && (
-                          <p className="mt-1 line-clamp-2 text-sm text-slate-500">
-                            {activity.description}
-                          </p>
-                        )}
+                    {/* Right: Content */}
+                    <div className="flex flex-1 flex-col">
+                      {/* Top: Status & Title */}
+                      <div className="flex flex-col-reverse sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                        <h4
+                          className="text-lg sm:text-xl font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-orange-600 transition-colors"
+                          title={activity.title}
+                        >
+                          {activity.title}
+                        </h4>
+                        <span
+                          className={`self-start sm:self-center shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold uppercase tracking-wide border shadow-sm ${status.color}`}
+                        >
+                          {status.label}
+                        </span>
+                      </div>
+                      
+                      {/* Mobile Date Block */}
+                      <div className="flex sm:hidden items-center gap-2 mb-3 text-orange-600 font-bold bg-orange-50 p-2 rounded-lg w-fit">
+                         <CalendarDays className="h-4 w-4"/> 
+                         <span>{dateBlock.day} {dateBlock.month}</span>
                       </div>
 
-                      {/* Footer Metadata */}
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 border-t border-slate-50 pt-2 mt-1">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className="h-3.5 w-3.5 text-slate-400" />
-                          <span className="font-medium">
-                            {formatTimeRange(
-                              activity.startDate,
-                              activity.endDate
-                            )}
-                          </span>
+                      {/* Description */}
+                      {activity.description && (
+                        <p className="mb-4 line-clamp-2 text-base text-slate-600 leading-relaxed">
+                          {activity.description}
+                        </p>
+                      )}
+
+                      {/* Footer Metadata (Đã bỏ hover) */}
+                      <div className="mt-auto grid grid-cols-1 gap-3 pt-2">
+                        {/* Thời gian */}
+                        <div className="flex items-start gap-4 rounded-xl bg-slate-50 p-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm text-slate-400">
+                             <Clock className="h-6 w-6" />
+                          </div>
+                          <div className="flex flex-col justify-center">
+                            <span className="text-xs font-semibold uppercase text-slate-400 mb-0.5">Thời gian</span>
+                            <span className="text-base font-bold text-slate-800 leading-snug">
+                                {formatTimeRange(
+                                activity.startDate,
+                                activity.endDate
+                                )}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                          <span
-                            className="truncate max-w-[150px]"
-                            title={activity.location || ""}
-                          >
-                            {activity.location || "Chưa cập nhật địa điểm"}
-                          </span>
+                        
+                        {/* Địa điểm */}
+                        <div className="flex items-start gap-4 rounded-xl bg-slate-50 p-3">
+                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm text-slate-400">
+                             <MapPin className="h-6 w-6" />
+                          </div>
+                          <div className="flex flex-col justify-center">
+                            <span className="text-xs font-semibold uppercase text-slate-400 mb-0.5">Địa điểm</span>
+                            <span className="text-base font-bold text-slate-800 leading-snug">
+                                {activity.location || "Chưa cập nhật địa điểm"}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      {/* End Footer Metadata */}
+
                     </div>
                   </div>
                 );
@@ -220,8 +238,9 @@ const ClubActivityModal = ({
           )}
         </div>
 
-        <div className="border-t border-slate-100 bg-white px-6 py-4 text-xs text-slate-400 text-center rounded-b-3xl">
-          Hiển thị {activities.length} hoạt động.
+        {/* Footer info */}
+        <div className="border-t border-slate-100 bg-white px-6 py-4 text-sm font-medium text-slate-500 text-center shrink-0">
+          Hiển thị tổng cộng <span className="text-slate-900 font-bold">{activities.length}</span> hoạt động.
         </div>
       </div>
     </div>
