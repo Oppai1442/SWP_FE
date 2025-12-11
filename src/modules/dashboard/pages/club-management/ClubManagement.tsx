@@ -4,9 +4,15 @@ import {
   getClubsAPI,
   getClubDetailAPI,
   getClubActivitiesAPI,
+  getClubMembersAPI,
+  getClubSettingsAPI,
+  getClubJoinRequestsAPI,
   type ClubSummary,
   type ClubDetail,
   type ClubActivity,
+  type ClubMember,
+  type ClubSettingInfo,
+  type ClubJoinRequest,
 } from "../my-club/services/myClubService";
 import { showToast } from "@/utils";
 
@@ -15,7 +21,7 @@ import { ClubStats } from "./components/ClubStats";
 import { ClubListTable } from "./components/ClubListTable";
 import { ClubDetailDrawer } from "./components/ClubDetailDrawer";
 
-type DetailTab = "overview" | "activities";
+type DetailTab = 'overview' | 'members' | 'activities' | 'settings' | 'history';
 
 const ClubManagement = () => {
   // --- Global State ---
@@ -27,8 +33,13 @@ const ClubManagement = () => {
   const [selectedClub, setSelectedClub] = useState<ClubSummary | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>("overview");
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  
+  // Data cho Drawer
   const [clubDetail, setClubDetail] = useState<ClubDetail | null>(null);
   const [activities, setActivities] = useState<ClubActivity[]>([]);
+  const [members, setMembers] = useState<ClubMember[]>([]);          
+  const [settings, setSettings] = useState<ClubSettingInfo | null>(null); 
+  const [history, setHistory] = useState<ClubJoinRequest[]>([]);   
 
   // --- Actions ---
   const fetchClubs = useCallback(async () => {
@@ -55,22 +66,37 @@ const ClubManagement = () => {
     showToast("success", "Đã làm mới danh sách.");
   };
 
+  // --- Logic mở Drawer và load TẤT CẢ dữ liệu ---
   const openDetail = useCallback(async (club: ClubSummary) => {
     setSelectedClub(club);
     setDetailTab("overview");
     setIsDetailLoading(true);
-    // Reset data
+
+    // Reset data cũ
     setClubDetail(null);
     setActivities([]);
+    setMembers([]);
+    setSettings(null);
+    setHistory([]);
 
     try {
-      const [detail, actData] = await Promise.all([
+      // Gọi song song 5 API
+      const [detailData, actData, memData, setData, reqData] = await Promise.all([
         getClubDetailAPI(club.id),
         getClubActivitiesAPI(club.id),
+        getClubMembersAPI(club.id),        
+        getClubSettingsAPI(club.id),        
+        getClubJoinRequestsAPI(club.id),
       ]);
-      setClubDetail(detail ?? club);
+
+      setClubDetail(detailData ?? club);
       setActivities(Array.isArray(actData) ? actData : []);
+      setMembers(Array.isArray(memData) ? memData : []);
+      setSettings(setData); 
+      setHistory(Array.isArray(reqData) ? reqData : []);
+
     } catch (e) {
+      console.error(e);
       showToast("error", "Lỗi khi tải thông tin chi tiết.");
     } finally {
       setIsDetailLoading(false);
@@ -115,12 +141,19 @@ const ClubManagement = () => {
         onOpenDetail={openDetail}
       />
 
-      {/* Drawer (Chỉ xem) */}
+      {/* Drawer */}
       {selectedClub && (
         <ClubDetailDrawer
           clubSummary={selectedClub}
           club={clubDetail}
+          
+          // Truyền Data
+          members={members}      
           activities={activities}
+          settings={settings}    
+          history={history}
+          
+          // Trạng thái UI
           activeTab={detailTab}
           onTabChange={setDetailTab}
           isLoading={isDetailLoading}
