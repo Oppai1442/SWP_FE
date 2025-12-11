@@ -27,8 +27,6 @@ const ClubHubHome = () => {
             intro:
               "FEC không phải một Câu lạc bộ học thuật đơn thuần mà là nơi những con người tử tế cùng nhau cố gắng.",
             contact: {
-              leader: "Nguyễn Văn A",
-              phone: "0901 234 567",
               email: "englishclub.fu@gmail.com",
             },
             location: "Phòng 601",
@@ -41,8 +39,6 @@ const ClubHubHome = () => {
             intro:
               "Câu lạc bộ công nghệ chuyên về lập trình, AI, IoT và các dự án sáng tạo.",
             contact: {
-              leader: "Trần Minh Khoa",
-              phone: "0912 345 678",
               email: "itinnovation@fptu.edu.vn",
             },
             location: "Innovation Lab",
@@ -61,8 +57,6 @@ const ClubHubHome = () => {
             intro:
               "Nơi sinh viên yêu nghệ thuật, hội họa và thiết kế đồ họa thể hiện bản sắc sáng tạo.",
             contact: {
-              leader: "Lê Hoàng Mai",
-              phone: "0933 222 111",
               email: "artdesign@fptu.edu.vn",
             },
             location: "Phòng Mỹ thuật - 603",
@@ -75,8 +69,6 @@ const ClubHubHome = () => {
             intro:
               "CLB Nhạc Cụ Truyền Thống Đại học FPT - Nơi hội tụ những con người yêu Âm hưởng Truyền thống!",
             contact: {
-              leader: "Phạm Quang Huy",
-              phone: "0988 111 222",
               email: "clbnhaccutruyenthongfu@gmail.com",
             },
             location: "Phòng nhạc cụ - Tầng trệt 022",
@@ -95,8 +87,6 @@ const ClubHubHome = () => {
             intro:
               "Câu lạc võ Vovinam của sinh viên FPTU dành cho người yêu thích rèn luyện võ thuật và phát triển thể chất.",
             contact: {
-              leader: "Đỗ Thành Đạt",
-              phone: "0909 888 777",
               email: "vovinam@fptu.edu.vn",
             },
             location: "Sân ngoài trời FPTU",
@@ -109,8 +99,6 @@ const ClubHubHome = () => {
             intro:
               "CLB Bóng đá trường Đại Học FPT Hà Nội - FFC được thành lập với sứ mệnh tạo ra sân chơi cho các bạn sinh viên đam mê bóng đá.",
             contact: {
-              leader: "Vũ Thảo Nhi",
-              phone: "0977 123 456",
               email: "ffc.fptu.football.club@gmail.com",
             },
             location: "Sân bóng đá ngoài trời FPTU",
@@ -129,8 +117,6 @@ const ClubHubHome = () => {
             intro:
               "CLB tình nguyện tổ chức các hoạt động cộng đồng, thiện nguyện và chiến dịch xanh.",
             contact: {
-              leader: "Ngô Thanh Bình",
-              phone: "0905 222 333",
               email: "igoclubvicongdong@gmail.com",
             },
             location: "Phòng 204",
@@ -142,8 +128,6 @@ const ClubHubHome = () => {
           details: {
             intro: "FPT 日本 クラブ - CLB Nhật Đại học FPT.",
             contact: {
-              leader: "Hoàng Mỹ Dung",
-              phone: "0916 555 444",
               email: "fjcmaymuaclub@gmail.com",
             },
             location: "Phòng 404",
@@ -297,12 +281,6 @@ const ClubHubHome = () => {
                                 {club.name}
                               </h4>
                               <p className="mb-1">{club.details.intro}</p>
-                              <p className="mb-1">
-                                <b>Chủ nhiệm:</b> {club.details.contact.leader}
-                              </p>
-                              <p className="mb-1">
-                                <b>SĐT:</b> {club.details.contact.phone}
-                              </p>
                               <p className="mb-1">
                                 <b>Email:</b> {club.details.contact.email}
                               </p>
