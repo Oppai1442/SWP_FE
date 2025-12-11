@@ -36,9 +36,9 @@ const JoinClubModal = ({
   onChange,
   onSubmit,
   onClose,
-  modalTitle = 'Nhập mã mời của bạn',
-  showInviteCodeInput = false,
-  inviteCodeHint,
+  // modalTitle = 'Nhập mã mời của bạn',
+  // showInviteCodeInput = false,
+  // inviteCodeHint,
 }: JoinClubModalProps) => {
   const [modalTab, setModalTab] = useState<'details' | 'payment'>('details');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
