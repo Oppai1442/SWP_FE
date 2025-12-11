@@ -23,6 +23,7 @@ import {
   getClubMembersAPI,
   getClubSettingsAPI,
   getJoinRequestHistoryAPI,
+  getMyMembershipsAPI,
   refreshInviteCodeAPI,
   removeClubMemberAPI,
   reviewClubJoinRequestAPI,
@@ -35,6 +36,7 @@ import {
   type ClubJoinRequest,
   type ClubJoinRequestStatus,
   type ClubMember,
+  type ClubMemberStatus,
   type ClubActivity,
   type ClubActivityStatus,
   type ClubSettingInfo,
@@ -203,6 +205,8 @@ const MyClubs = () => {
   const [joinQueueFilter, setJoinQueueFilter] = useState<ClubJoinRequestStatus | 'all'>('PENDING');
   const [joinQueueDecisionMap, setJoinQueueDecisionMap] = useState<Record<number, boolean>>({});
   const [myJoinRequests, setMyJoinRequests] = useState<ClubJoinRequest[]>([]);
+  const [myMemberships, setMyMemberships] = useState<ClubMember[]>([]);
+  const [isLoadingMemberships, setIsLoadingMemberships] = useState(true);
   const [isLoadingJoinHistory, setIsLoadingJoinHistory] = useState(false);
   const [joinHistoryFilter, setJoinHistoryFilter] = useState<ClubJoinRequestStatus | 'all'>('all');
   const [activitiesCache, setActivitiesCache] = useState<Record<number, ClubActivity[]>>({});
@@ -268,6 +272,20 @@ const MyClubs = () => {
     [user?.id]
   );
 
+  const fetchMyMemberships = useCallback(async (status: ClubMemberStatus | 'all' = 'all') => {
+    if (!user?.id) return;
+    try {
+      setIsLoadingMemberships(true);
+      const data = await getMyMembershipsAPI(status);
+      setMyMemberships(data ?? []);
+    } catch (error) {
+      console.error(error);
+      showToast('error', 'Không thể tải danh sách câu lạc bộ đã tham gia.');
+    } finally {
+      setIsLoadingMemberships(false);
+    }
+  }, [user?.id]);
+
 
   const fetchActivities = useCallback(async (clubId: number) => {
     if (!clubId) return;
@@ -323,8 +341,8 @@ const MyClubs = () => {
 
 
   const refreshAll = useCallback(async () => {
-    await Promise.all([fetchClubs(), fetchRequests(), fetchJoinHistory()]);
-  }, [fetchClubs, fetchRequests, fetchJoinHistory]);
+    await Promise.all([fetchClubs(), fetchRequests(), fetchJoinHistory(), fetchMyMemberships()]);
+  }, [fetchClubs, fetchRequests, fetchJoinHistory, fetchMyMemberships]);
 
 
   const canManageClub = useCallback(
@@ -455,15 +473,10 @@ const MyClubs = () => {
 
 
   const joinedClubs = useMemo(() => {
-    const approved = myJoinRequests.filter((request) => request.status === 'APPROVED');
-    const uniqueMap = new Map<number, ClubJoinRequest>();
-    approved.forEach((request) => {
-      if (request.clubId && !uniqueMap.has(request.clubId)) {
-        uniqueMap.set(request.clubId, request);
-      }
-    });
-    return Array.from(uniqueMap.values());
-  }, [myJoinRequests]);
+    return myMemberships.filter(
+      (membership) => membership.status === 'ACTIVE' && membership.clubId
+    );
+  }, [myMemberships]);
 
 
   const filteredJoinHistory = useMemo(() => {
@@ -937,6 +950,9 @@ const MyClubs = () => {
           return { ...club, memberCount: nextCount };
         })
       );
+      setMyMemberships((prev) =>
+        prev.filter((membership) => membership.id !== currentMemberRecord.id)
+      );
       showToast('success', 'Bạn đã rời khỏi câu lạc bộ.');
     } catch (error) {
       console.error(error);
@@ -1012,6 +1028,7 @@ const MyClubs = () => {
       payload: Partial<{
         category: string | null;
         meetingLocation: string | null;
+        description: string | null;
         mission: string | null;
         operatingDays: string[];
         operatingStartTime: string | null;
@@ -1141,8 +1158,11 @@ const MyClubs = () => {
       <MembershipOverviewSection
         joinedProps={{
           joinedClubs,
-          isLoading: isLoadingJoinHistory,
-          onRefresh: () => void fetchJoinHistory(joinHistoryFilter),
+          isLoading: isLoadingMemberships,
+          onRefresh: () => {
+            void fetchMyMemberships();
+            void fetchJoinHistory(joinHistoryFilter);
+          },
           onSelectClub: (club) => void openClubDetails(club),
         }}
         historyProps={{
