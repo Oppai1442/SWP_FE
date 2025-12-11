@@ -1,7 +1,7 @@
 import type { ClubJoinRequest, ClubJoinRequestStatus } from '../services/myClubService';
 import { formatDateTime } from '../utils';
 import { joinRequestStatusMeta } from '../constants';
-import { Eye, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface JoinHistorySectionProps {
   joinHistory: ClubJoinRequest[];
@@ -20,7 +20,7 @@ const JoinHistorySection = ({
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <p className="text-sm font-semibold text-slate-900">Lịch sử yêu cầu tham gia</p>
-        <p className="text-xs text-slate-500">Theo dõi mọi nỗ lực tham gia câu lạc bộ.</p>
+        <p className="text-xs text-slate-500">Theo dõi mọi lần bạn gửi yêu cầu đến các câu lạc bộ.</p>
       </div>
       <select
         value={filter}
@@ -29,8 +29,8 @@ const JoinHistorySection = ({
       >
         <option value="all">Tất cả</option>
         <option value="PENDING">Đang chờ</option>
-        <option value="APPROVED">Đã phê duyệt</option>
-        <option value="REJECTED">Bị từ chối</option>
+        <option value="APPROVED">Đã duyệt</option>
+        <option value="REJECTED">Từ chối</option>
       </select>
     </div>
     {isLoading ? (
@@ -38,7 +38,7 @@ const JoinHistorySection = ({
         <Loader2 className="h-5 w-5 animate-spin" />
       </div>
     ) : joinHistory.length === 0 ? (
-      <p className="py-8 text-center text-sm text-slate-500">Không tìm thấy yêu cầu tham gia nào.</p>
+      <p className="py-8 text-center text-sm text-slate-500">Chưa có yêu cầu nào.</p>
     ) : (
       <div className="mt-4 overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
@@ -47,7 +47,7 @@ const JoinHistorySection = ({
               <th className="py-3 pr-4">Câu lạc bộ</th>
               <th className="px-4 py-3">Trạng thái</th>
               <th className="px-4 py-3">Đã gửi</th>
-              <th className="px-4 py-3 text-right">Bằng chứng</th>
+              <th className="px-4 py-3 text-right">Mã chuyển khoản</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -68,18 +68,12 @@ const JoinHistorySection = ({
                 </td>
                 <td className="px-4 py-3 text-slate-500">{formatDateTime(request.createdAt)}</td>
                 <td className="px-4 py-3 text-right">
-                  {request.paymentProofUrl ? (
-                    <a
-                      href={request.paymentProofUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      Xem
-                    </a>
+                  {request.transferCode ? (
+                    <span className="font-mono text-xs font-semibold text-slate-700">
+                      {request.transferCode}
+                    </span>
                   ) : (
-                    <span className="text-xs text-slate-400">Không áp dụng</span>
+                    <span className="text-xs text-slate-400">Chưa có</span>
                   )}
                 </td>
               </tr>
