@@ -537,38 +537,38 @@ const ClubDetailDrawer = ({
 
           {resolvedTab === "overview" && (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <DetailItem label="Status" value={club.status} />
-              <DetailItem label="Category" value={club.category ?? "N/A"} />
+              <DetailItem label="Trạng thái" value={club.status} />
+              <DetailItem label="Danh mục" value={club.category ?? "Chưa có"} />
               <DetailItem
-                label="Founded"
+                label="Ngày thành lập"
                 value={formatDate(club.foundedDate)}
               />
 
               {/* --- ĐÃ SỬA: CỘNG THÊM 1 VÀO SỐ LƯỢNG THÀNH VIÊN --- */}
               <DetailItem
-                label="Members"
+                label="Thành viên"
                 value={`${(club.memberCount ?? 0) + 1}`}
               />
 
               <DetailItem
-                label="Meeting location"
-                value={club.meetingLocation ?? "Not provided"}
+                label="Địa điểm họp"
+                value={club.meetingLocation ?? "Chưa cập nhật"}
               />
               <DetailItem
-                label="Mission"
-                value={club.mission ?? "Not provided"}
+                label="Sứ mệnh"
+                value={club.mission ?? "Chưa cập nhật"}
               />
               <DetailItem
-                label="Description"
-                value={club.description ?? "Not provided"}
+                label="Mô tả"
+                value={club.description ?? "Chưa cập nhật"}
               />
               <DetailItem
-                label="Operating days"
-                value={overviewOperatingDays ?? "Not configured"}
+                label="Ngày hoạt động"
+                value={overviewOperatingDays ?? "Chưa cấu hình"}
               />
               <DetailItem
-                label="Operating hours"
-                value={overviewOperatingHours ?? "Not configured"}
+                label="Giờ hoạt động"
+                value={overviewOperatingHours ?? "Chưa cấu hình"}
               />
             </div>
           )}
@@ -599,7 +599,7 @@ const ClubDetailDrawer = ({
                 <div className="mt-4 space-y-4">
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Category
+                      Danh mục
                       <input
                         type="text"
                         value={overviewForm.category}
@@ -610,11 +610,11 @@ const ClubDetailDrawer = ({
                           )
                         }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                        placeholder="Sports, Culture..."
+                        placeholder="Thể thao, Văn hóa..."
                       />
                     </label>
                     <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Meeting location
+                      Địa điểm họp
                       <input
                         type="text"
                         value={overviewForm.meetingLocation}
@@ -625,12 +625,12 @@ const ClubDetailDrawer = ({
                           )
                         }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                        placeholder="Building A..."
+                        placeholder="Tòa nhà A..."
                       />
                     </label>
                   </div>
                   <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Mission
+                    Sứ mệnh
                     <textarea
                       value={overviewForm.mission}
                       onChange={(event) =>
@@ -642,7 +642,7 @@ const ClubDetailDrawer = ({
                     />
                   </label>
                   <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Description
+                    Mô tả
                     <textarea
                       value={overviewForm.description}
                       onChange={(event) =>
@@ -653,12 +653,12 @@ const ClubDetailDrawer = ({
                       }
                       rows={3}
                       className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                      placeholder="Add additional club information..."
+                      placeholder="Thêm thông tin khác về câu lạc bộ..."
                     />
                   </label>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Operating days
+                      Ngày hoạt động
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {WEEKDAY_OPTIONS.map((day) => {
@@ -1194,7 +1194,7 @@ const ClubDetailDrawer = ({
                       )}
                       <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-4">
                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          M? chuy?n kho?n
+                          Mã chuyển khoản
                         </p>
                         {request.transferCode ? (
                           <p className="mt-2 break-all font-mono text-sm font-semibold text-slate-900">
@@ -1202,8 +1202,8 @@ const ClubDetailDrawer = ({
                           </p>
                         ) : (
                           <p className="mt-2 text-xs text-slate-500">
-                            Ch?a c? m? chuy?n kho?n. C?n y?u c?u b? sung tr??c
-                            khi ph? duy?t.
+                            Chưa có mã chuyển khoản. Cần yêu cầu bổ sung trước
+                            khi phê duyệt.
                           </p>
                         )}
                       </div>
