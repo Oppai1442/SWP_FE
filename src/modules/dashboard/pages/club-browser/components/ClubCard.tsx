@@ -180,7 +180,7 @@ const ClubCard = ({
 
         {/* Info Grid: Thống kê quan trọng */}
         <div className="mb-4 grid grid-cols-2 gap-3">
-          {/* Phí gia nhập (Đã sửa theo yêu cầu trước) */}
+          {/* Phí gia nhập */}
           <div
             className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${feeInfo.color} bg-opacity-50 border-opacity-50`}
           >
@@ -203,7 +203,8 @@ const ClubCard = ({
                 Thành viên
               </span>
               <span className="truncate text-xs font-semibold leading-none">
-                {club.memberCount ?? 0}
+                {/* --- ĐÃ CỘNG THÊM 1 CHO LEADER Ở ĐÂY --- */}
+                {(club.memberCount ?? 0) + 1}
               </span>
             </div>
           </div>
@@ -248,7 +249,7 @@ const ClubCard = ({
             className="group/btn flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 disabled:opacity-50"
             title="Xem hoạt động"
           >
-          <PartyPopper className="h-4 w-4" />
+            <PartyPopper className="h-4 w-4" />
           </button>
 
           <button
