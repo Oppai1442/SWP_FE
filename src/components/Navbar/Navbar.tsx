@@ -67,10 +67,16 @@ const Navbar = () => {
 
   const navLinks = [
     { path: ROUTES.HOME.getPath(), label: "Tổng quan" },
-    { path: ROUTES.TOS.getPath(), label: "Điều khoản" },
-    { path: ROUTES.POLICY.getPath(), label: "Chính sách" },
+    // { path: ROUTES.TOS.getPath(), label: "Điều khoản" },
+    // { path: ROUTES.POLICY.getPath(), label: "Chính sách" },
     { path: ROUTES.CONTACT.getPath(), label: "Hỗ trợ" },
   ];
+  if (user && user.role?.name !== "ROLE_ADMIN") {
+    navLinks.push({
+      path: ROUTES.DASHBOARD.child.CLUB_BROWSER.getPath(),
+      label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
+    });
+  }
 
   const primaryClubLink = user?.role?.name === "ROLE_ADMIN"
     ? {
@@ -86,13 +92,18 @@ const Navbar = () => {
         href: ROUTES.DASHBOARD.child.MY_CLUB.getPath(),
       };
 
-  const menuItems = [
-    {
+  const menuItems: Array<{ icon: any; label: string; onClick: () => void; href?: string; isButton?: boolean }> = [];
+
+  if (user?.role?.name === "ROLE_USER") {
+    menuItems.push({
       icon: Compass,
       label: ROUTES.DASHBOARD.child.CLUB_BROWSER.label,
       onClick: () => handleItemClick(),
       href: ROUTES.DASHBOARD.child.CLUB_BROWSER.getPath(),
-    },
+    });
+  }
+
+  menuItems.push(
     primaryClubLink,
     {
       icon: Settings,
@@ -105,9 +116,8 @@ const Navbar = () => {
       label: "Đăng xuất",
       onClick: () => handleItemClick("logout"),
       isButton: true,
-    },
-  ];
-
+    }
+  );
 
   const avatarUrl =
     user?.avatarUrl && user.avatarUrl.trim().length > 0

@@ -1,10 +1,6 @@
-import {
-  type ChangeEvent,
-  type DragEvent,
-  type FormEvent,
-  useState,
-} from 'react';
-import { Loader2, UploadCloud, X } from 'lucide-react';
+import { type FormEvent, useState } from 'react';
+import { Copy, Loader2, RefreshCcw, X } from 'lucide-react';
+
 import type { ClubSettingInfo } from '../services/myClubService';
 import { buildVietQrUrl, formatJoinFeeValue } from '../utils';
 
@@ -19,13 +15,8 @@ export interface JoinClubModalProps {
   preview?: ClubSettingInfo | null;
   isPreviewLoading?: boolean;
   previewError?: string | null;
-  paymentProofUrl: string | null;
-  paymentProofFileName?: string | null;
-  isUploadingProof?: boolean;
-  proofError?: string | null;
-  allowUpload?: boolean;
-  onUploadProof: (file: File) => void;
-  onRemoveProof: () => void;
+  transferCode: string;
+  onRefreshTransferCode?: () => void;
   onChange: (field: keyof JoinClubForm, value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
@@ -40,44 +31,56 @@ const JoinClubModal = ({
   preview,
   isPreviewLoading,
   previewError,
-  paymentProofUrl,
-  paymentProofFileName,
-  isUploadingProof,
-  proofError,
-  allowUpload = false,
-  onUploadProof,
-  onRemoveProof,
+  transferCode,
+  onRefreshTransferCode,
   onChange,
   onSubmit,
   onClose,
   modalTitle = 'Nhập mã mời của bạn',
-  showInviteCodeInput = true,
+  showInviteCodeInput = false,
   inviteCodeHint,
 }: JoinClubModalProps) => {
   const [modalTab, setModalTab] = useState<'details' | 'payment'>('details');
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  const transferNote =
+    transferCode?.trim() ||
+    preview?.bankTransferNote ||
+    preview?.clubCode ||
+    preview?.clubName ||
+    '';
+
   const qrUrl = preview
     ? buildVietQrUrl({
         bankId: preview.bankId,
         bankAccountNumber: preview.bankAccountNumber,
         bankAccountName: preview.bankAccountName ?? preview.clubName,
         amount: preview.joinFee ?? 0,
-        content: preview.bankTransferNote ?? preview.clubCode ?? preview.clubName,
+        content: transferNote,
       })
     : '';
+
   const hasBankInstructions = Boolean(preview?.bankId && preview?.bankAccountNumber);
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      onUploadProof(file);
-    }
-    event.target.value = '';
-  };
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    if (!allowUpload || isUploadingProof) return;
-    const file = event.dataTransfer.files?.[0];
-    if (file) {
-      onUploadProof(file);
+
+  const handleCopyTransferCode = async () => {
+    if (!transferCode) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(transferCode);
+      } else {
+        const temp = document.createElement('input');
+        temp.value = transferCode;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+      setCopyState('copied');
+      setTimeout(() => setCopyState('idle'), 2500);
+    } catch (error) {
+      console.error(error);
+      setCopyState('error');
+      setTimeout(() => setCopyState('idle'), 2500);
     }
   };
 
@@ -92,7 +95,7 @@ const JoinClubModal = ({
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Tham gia câu lạc bộ</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Tham gia CLB</p>
             <h3 className="text-lg font-semibold text-slate-900">{modalTitle}</h3>
           </div>
           <button
@@ -109,7 +112,7 @@ const JoinClubModal = ({
             <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
               {[
                 { id: 'details', label: 'Chi tiết tham gia' },
-                { id: 'payment', label: 'Thanh toán & bằng chứng' },
+                { id: 'payment', label: 'Thanh toán & xác nhận' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -133,7 +136,7 @@ const JoinClubModal = ({
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Chi tiết tham gia</p>
                   <p className="text-xs text-slate-500">
-                    Cung cấp mã mời và một động lực ngắn gọn.
+                    Cung cấp động lực ngắn gọn để giúp ban quản trị hiểu thêm về bạn.
                   </p>
                 </div>
                 <div className="mt-4 space-y-4">
@@ -153,7 +156,7 @@ const JoinClubModal = ({
                     </div>
                   ) : (
                     <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      {inviteCodeHint ?? 'Mã mời được cung cấp tự động cho câu lạc bộ này.'}
+                      {inviteCodeHint ?? 'Mã mời sẽ được xử lý tự động cho yêu cầu này.'}
                     </div>
                   )}
                   <div>
@@ -176,7 +179,7 @@ const JoinClubModal = ({
               <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
                 <p className="text-sm font-semibold text-slate-900">Hướng dẫn thanh toán</p>
                 <p className="text-xs text-slate-500">
-                  Thanh toán phí tham gia bằng mã QR được tạo bên dưới, sau đó gửi yêu cầu của bạn. Trưởng nhóm xem xét mọi hồ sơ theo cách thủ công.
+                  Thanh toán phí tham gia bằng mã QR bên dưới, sau đó gửi yêu cầu để ban quản trị xác minh.
                 </p>
                 <div className="mt-3 rounded-2xl border border-slate-100 bg-white p-3">
                   {isPreviewLoading ? (
@@ -203,14 +206,12 @@ const JoinClubModal = ({
                           {formatJoinFeeValue(preview?.joinFee)}
                         </span>
                       </div>
-                      {preview?.bankTransferNote && (
-                        <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
-                          <span className="text-slate-500">Ghi chú chuyển khoản</span>
-                          <span className="font-semibold text-slate-900">
-                            {preview.bankTransferNote}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                        <span className="text-slate-500">Nội dung gợi ý</span>
+                        <span className="font-semibold text-slate-900">
+                          {transferNote || 'Đang tạo mã...'}
+                        </span>
+                      </div>
                       {qrUrl && (
                         <div className="mt-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3 text-center">
                           <img
@@ -219,14 +220,14 @@ const JoinClubModal = ({
                             className="mx-auto h-36 w-36 rounded-2xl border border-white bg-white object-contain p-3 shadow-inner"
                           />
                           <p className="mt-2 text-[11px] uppercase tracking-wide text-slate-500">
-                            Quét để thanh toán trước khi gửi
+                            Quét mã trước khi gửi yêu cầu
                           </p>
                         </div>
                       )}
                     </div>
                   ) : (
                     <p className="text-sm text-slate-500">
-                      Hướng dẫn thanh toán sẽ xuất hiện khi câu lạc bộ cung cấp.
+                      Hướng dẫn thanh toán sẽ hiển thị khi câu lạc bộ cung cấp thông tin ngân hàng.
                     </p>
                   )}
                 </div>
@@ -234,83 +235,50 @@ const JoinClubModal = ({
 
               <div className="rounded-2xl border border-slate-100 bg-white p-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-slate-900">Bằng chứng thanh toán</p>
+                  <p className="text-sm font-semibold text-slate-900">Mã chuyển khoản</p>
                   <p className="text-xs text-slate-500">
-                    Tải lên ảnh chụp màn hình biên lai. Kéo & thả hoặc chọn tệp. Các tệp được hỗ trợ: hình ảnh, tối đa 10MB.
+                    Sử dụng mã này làm nội dung chuyển khoản. Ban quản trị sẽ đối chiếu mã khi duyệt.
                   </p>
                 </div>
-                {paymentProofUrl ? (
-                  <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 p-2">
-                      <img
-                        src={paymentProofUrl}
-                        alt="Payment evidence"
-                        className="h-32 w-32 rounded-xl object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 text-sm">
-                      <p className="font-semibold text-slate-900">{paymentProofFileName ?? 'bang-chung-thanh-toan.jpg'}</p>
-                      <p className="text-xs text-slate-500">Tải lên thành công.</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Nội dung chuyển khoản
+                  </p>
+                  <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <p className="flex-1 break-all font-mono text-lg font-semibold text-slate-900">
+                      {transferCode || 'Đang tạo mã...'}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyTransferCode}
+                        disabled={!transferCode}
+                        className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:text-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                        {copyState === 'copied'
+                          ? 'Đã sao chép'
+                          : copyState === 'error'
+                          ? 'Không thể sao chép'
+                          : 'Sao chép'}
+                      </button>
+                      {onRefreshTransferCode && (
                         <button
                           type="button"
-                          onClick={onRemoveProof}
-                          className="rounded-2xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500"
+                          onClick={onRefreshTransferCode}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-2 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
                         >
-                          Xóa
+                          <RefreshCcw className="h-3.5 w-3.5" />
+                          Tạo mã mới
                         </button>
-                        <a
-                          href={paymentProofUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
-                        >
-                          Xem đầy đủ
-                        </a>
-                      </div>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <div
-                    className={`mt-4 rounded-2xl border border-dashed px-4 py-6 text-center ${
-                      allowUpload ? 'border-orange-200 bg-orange-50/50' : 'border-slate-200 bg-slate-50'
-                    } ${isUploadingProof ? 'opacity-70' : ''}`}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={handleDrop}
-                  >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      id="payment-proof-input"
-                      className="hidden"
-                      disabled={!allowUpload || isUploadingProof}
-                      onChange={handleFileChange}
-                    />
-                    <label
-                      htmlFor="payment-proof-input"
-                      className={`flex cursor-pointer flex-col items-center justify-center gap-2 ${
-                        !allowUpload ? 'pointer-events-none' : ''
-                      }`}
-                    >
-                      <UploadCloud className="h-8 w-8 text-orange-400" />
-                      <p className="text-sm font-semibold text-slate-900">
-                        {allowUpload ? 'Thả hình ảnh của bạn vào đây' : 'Nhập mã mời để kích hoạt tải lên'}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {allowUpload
-                          ? 'hoặc nhấp để duyệt tệp'
-                          : 'Tải lên sẽ mở khóa sau khi có hướng dẫn.'}
-                      </p>
-                    </label>
-                    {isUploadingProof && (
-                      <div className="mt-3 flex items-center justify-center gap-2 text-xs text-slate-500">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        Đang tải bằng chứng lên...
-                      </div>
-                    )}
-                  </div>
-                )}
-                {proofError && <p className="mt-2 text-xs text-rose-500">{proofError}</p>}
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  Mỗi mã chỉ hợp lệ cho một yêu cầu tham gia. Hãy chắc chắn bạn đã thanh toán trước khi
+                  gửi.
+                </p>
               </div>
             </div>
           </div>
@@ -325,8 +293,8 @@ const JoinClubModal = ({
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition hover:bg-orange-600 disabled:opacity-60"
+              disabled={isSubmitting || !transferCode}
+              className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/30 transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Gửi yêu cầu

@@ -71,6 +71,7 @@ interface ClubDetailDrawerProps {
     payload: Partial<{
       category: string | null;
       meetingLocation: string | null;
+      description: string | null;
       mission: string | null;
       operatingDays: string[];
       operatingStartTime: string | null;
@@ -85,6 +86,7 @@ type DrawerClubMember = ClubMember & { __virtual?: boolean };
 type OverviewFormState = {
   category: string;
   meetingLocation: string;
+  description: string;
   mission: string;
   operatingDays: string[];
   operatingStartTime: string;
@@ -113,6 +115,8 @@ const resolveLeaderName = (club?: Pick<ClubDetail, 'leaderName' | 'presidentName
 
 const GMT7_OFFSET_MS = 7 * 60 * 60 * 1000;
 const MIN_ACTIVITY_DURATION_MS = 2 * 60 * 60 * 1000;
+const MIN_OPERATING_START = '05:00';
+const MAX_OPERATING_END = '19:00';
 
 const runtimeStatusMeta = {
   upcoming: {
@@ -319,6 +323,14 @@ const ClubDetailDrawer = ({
       showToast('error', 'Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.');
       return;
     }
+    if (operatingStartTime && operatingStartTime < MIN_OPERATING_START) {
+      showToast('error', 'Giờ bắt đầu không được trước 05:00.');
+      return;
+    }
+    if (operatingEndTime && operatingEndTime > MAX_OPERATING_END) {
+      showToast('error', 'Giờ kết thúc không được sau 19:00.');
+      return;
+    }
     if (
       operatingStartTime &&
       operatingEndTime &&
@@ -332,6 +344,7 @@ const ClubDetailDrawer = ({
       await onUpdateClubOverview(club.id, {
         category: overviewForm.category.trim() || null,
         meetingLocation: overviewForm.meetingLocation.trim() || null,
+        description: overviewForm.description.trim() || null,
         mission: overviewForm.mission.trim() || null,
         operatingDays: overviewForm.operatingDays,
         operatingStartTime: overviewForm.operatingStartTime || null,
@@ -346,7 +359,6 @@ const ClubDetailDrawer = ({
       setIsOverviewSaving(false);
     }
   };
-
   const handleClubImageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -492,6 +504,7 @@ const ClubDetailDrawer = ({
               <DetailItem label="Members" value={`${club.memberCount ?? 0}`} />
               <DetailItem label="Meeting location" value={club.meetingLocation ?? 'Not provided'} />
               <DetailItem label="Mission" value={club.mission ?? 'Not provided'} />
+              <DetailItem label="Description" value={club.description ?? 'Not provided'} />
               <DetailItem
                 label="Operating days"
                 value={overviewOperatingDays ?? 'Not configured'}
@@ -556,6 +569,18 @@ const ClubDetailDrawer = ({
                       rows={3}
                       className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       placeholder="Sứ mệnh của câu lạc bộ..."
+                    />
+                  </label>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Description
+                    <textarea
+                      value={overviewForm.description}
+                      onChange={(event) =>
+                        handleOverviewFieldChange('description', event.target.value)
+                      }
+                      rows={3}
+                      className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      placeholder="Add additional club information..."
                     />
                   </label>
                   <div>
@@ -1002,40 +1027,20 @@ const ClubDetailDrawer = ({
                           {request.motivation}
                         </p>
                       )}
-                      {request.paymentProofUrl ? (
-                        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-2">
-                            <img
-                              src={request.paymentProofUrl}
-                              alt="Payment proof"
-                              className="h-48 w-full rounded-xl object-cover"
-                            />
-                          </div>
-                          <div className="flex flex-col justify-between">
-                            Bằng chứng thanh toán                              <p className="text-sm font-semibold text-slate-900">
-                              {request.applicantName ?? 'Người nộp đơn'}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              Đảm bảo thông tin chuyển khoản khớp trước khi phê duyệt.
-                            </p>
-                          </div>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <a
-                              href={request.paymentProofUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-2xl border border-orange-200 px-3 py-1.5 text-xs font-semibold text-orange-500 transition hover:bg-orange-50"
-                            >
-                              <Image className="h-3.5 w-3.5" />
-                              Xem toàn bộ kích thước
-                            </a>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/60 px-3 py-2 text-xs text-amber-700">
-                          Người nộp đơn chưa đính kèm bằng chứng thanh toán.
+                      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-4">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          M? chuy?n kho?n
                         </p>
-                      )}
+                        {request.transferCode ? (
+                          <p className="mt-2 break-all font-mono text-sm font-semibold text-slate-900">
+                            {request.transferCode}
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-xs text-slate-500">
+                            Ch?a c? m? chuy?n kho?n. C?n y?u c?u b? sung tr??c khi ph? duy?t.
+                          </p>
+                        )}
+                      </div>
                       {request.status === 'PENDING' && (
                         <div className="mt-4 flex flex-wrap gap-3">
                           <button
@@ -1044,7 +1049,7 @@ const ClubDetailDrawer = ({
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500 disabled:opacity-50"
                           >
-                            {decisionLoading ? 'Đang xử lýGǪ' : 'Từ chối'}
+                            {decisionLoading ? 'Đang xử lý' : 'Từ chối'}
                           </button>
                           <button
                             type="button"
@@ -1052,7 +1057,7 @@ const ClubDetailDrawer = ({
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-50"
                           >
-                            {decisionLoading ? 'Đang xử lýGǪ' : 'Phê duyệt'}
+                            {decisionLoading ? 'Đang xử lý' : 'Phê duyệt'}
                           </button>
                         </div>
                       )}
@@ -1142,7 +1147,7 @@ const ClubDetailDrawer = ({
                     onSave={onSaveBankSettings}
                     isSaving={isBankSettingsSaving}
                   />
-                  <div className="rounded-2xl border border-slate-100 bg-white p-4">
+                  {/* <div className="rounded-2xl border border-slate-100 bg-white p-4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-slate-900">Invite code</p>
@@ -1172,7 +1177,7 @@ const ClubDetailDrawer = ({
                         Sao chép
                       </button>
                     </div>
-                  </div>
+                  </div> */}
                 </Fragment>
               )}
             </div>
@@ -1393,6 +1398,7 @@ export default ClubDetailDrawer;
 const buildOverviewFormState = (club: ClubDetail): OverviewFormState => ({
   category: club.category ?? '',
   meetingLocation: club.meetingLocation ?? '',
+  description: club.description ?? '',
   mission: club.mission ?? '',
   operatingDays: club.operatingDays ?? [],
   operatingStartTime: club.operatingStartTime ?? '',
