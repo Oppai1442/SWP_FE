@@ -211,7 +211,8 @@ const ClubHubHome = () => {
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-600 font-light mb-8 max-w-3xl mx-auto leading-relaxed">
-            Điều phối toàn bộ vòng đời câu lạc bộ – dữ liệu, thành viên và báo cáo.
+            Điều phối toàn bộ vòng đời câu lạc bộ – dữ liệu, thành viên và báo
+            cáo.
           </p>
         </div>
       </section>
@@ -330,10 +331,11 @@ const ClubHubHome = () => {
               return (
                 <div
                   key={idx}
-                  className={`p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-500 ${isVisible
+                  className={`p-6 rounded-2xl bg-white border border-slate-200 shadow-sm transition-all duration-500 ${
+                    isVisible
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 translate-y-8"
-                    }`}
+                  }`}
                   style={{ transitionDelay: `${idx * 100}ms` }}
                 >
                   <h3 className="text-xl font-semibold mb-2">{op.title}</h3>
