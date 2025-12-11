@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import type { ChangeEvent } from 'react';
-import { toast } from 'react-hot-toast';
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
+import { toast } from "react-hot-toast";
 import {
   type ClubActivity,
   type ClubDetail,
@@ -8,10 +8,19 @@ import {
   type ClubJoinRequestStatus,
   type ClubMember,
   type ClubSettingInfo,
-} from '../services/myClubService';
-import { formatDate, formatDateTime, buildVietQrUrl, formatJoinFeeValue } from '../utils';
-import type { ActivityFormState, BankInstructionForm } from '../types';
-import { detailTabs, joinRequestStatusMeta, type DetailTab } from '../constants';
+} from "../services/myClubService";
+import {
+  formatDate,
+  formatDateTime,
+  buildVietQrUrl,
+  formatJoinFeeValue,
+} from "../utils";
+import type { ActivityFormState, BankInstructionForm } from "../types";
+import {
+  detailTabs,
+  joinRequestStatusMeta,
+  type DetailTab,
+} from "../constants";
 import {
   Crown,
   Image,
@@ -23,7 +32,7 @@ import {
   Users,
   Users2,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 import { showToast } from "@/utils";
 
 interface ClubDetailDrawerProps {
@@ -42,11 +51,15 @@ interface ClubDetailDrawerProps {
   onSaveBankSettings: () => void;
   isBankSettingsSaving: boolean;
   joinRequests: ClubJoinRequest[];
-  joinQueueFilter: ClubJoinRequestStatus | 'all';
+  joinQueueFilter: ClubJoinRequestStatus | "all";
   isJoinQueueLoading: boolean;
-  onJoinQueueFilterChange: (value: ClubJoinRequestStatus | 'all') => void;
+  onJoinQueueFilterChange: (value: ClubJoinRequestStatus | "all") => void;
   onRefreshJoinQueue: () => void;
-  onDecideJoinRequest: (requestId: number, status: ClubJoinRequestStatus, note?: string | null) => void;
+  onDecideJoinRequest: (
+    requestId: number,
+    status: ClubJoinRequestStatus,
+    note?: string | null
+  ) => void;
   decisionLoadingMap: Record<number, boolean>;
   activities: ClubActivity[];
   isActivitiesLoading: boolean;
@@ -94,42 +107,43 @@ type OverviewFormState = {
 };
 
 const WEEKDAY_OPTIONS = [
-  { value: 'MONDAY', label: 'Thứ 2' },
-  { value: 'TUESDAY', label: 'Thứ 3' },
-  { value: 'WEDNESDAY', label: 'Thứ 4' },
-  { value: 'THURSDAY', label: 'Thứ 5' },
-  { value: 'FRIDAY', label: 'Thứ 6' },
-  { value: 'SATURDAY', label: 'Thứ 7' },
-  { value: 'SUNDAY', label: 'Chủ nhật' },
+  { value: "MONDAY", label: "Thứ 2" },
+  { value: "TUESDAY", label: "Thứ 3" },
+  { value: "WEDNESDAY", label: "Thứ 4" },
+  { value: "THURSDAY", label: "Thứ 5" },
+  { value: "FRIDAY", label: "Thứ 6" },
+  { value: "SATURDAY", label: "Thứ 7" },
+  { value: "SUNDAY", label: "Chủ nhật" },
 ] as const;
 
 const WEEKDAY_LABELS: Record<string, string> = WEEKDAY_OPTIONS.reduce(
   (acc, day) => ({ ...acc, [day.value]: day.label }),
   {} as Record<string, string>
 );
-const resolveLeaderId = (club?: Pick<ClubDetail, 'leaderId' | 'presidentId'>) =>
+const resolveLeaderId = (club?: Pick<ClubDetail, "leaderId" | "presidentId">) =>
   club?.leaderId ?? club?.presidentId ?? null;
 
-const resolveLeaderName = (club?: Pick<ClubDetail, 'leaderName' | 'presidentName'>) =>
-  club?.leaderName ?? club?.presidentName ?? 'Trưởng nhóm câu lạc bộ';
+const resolveLeaderName = (
+  club?: Pick<ClubDetail, "leaderName" | "presidentName">
+) => club?.leaderName ?? club?.presidentName ?? "Trưởng nhóm câu lạc bộ";
 
 const GMT7_OFFSET_MS = 7 * 60 * 60 * 1000;
 const MIN_ACTIVITY_DURATION_MS = 2 * 60 * 60 * 1000;
-const MIN_OPERATING_START = '05:00';
-const MAX_OPERATING_END = '19:00';
+const MIN_OPERATING_START = "05:00";
+const MAX_OPERATING_END = "19:00";
 
 const runtimeStatusMeta = {
   upcoming: {
-    label: 'Sắp diễn ra',
-    className: 'border-amber-200 bg-amber-50 text-amber-600',
+    label: "Sắp diễn ra",
+    className: "border-amber-200 bg-amber-50 text-amber-600",
   },
   ongoing: {
-    label: 'Đang diễn ra',
-    className: 'border-emerald-200 bg-emerald-50 text-emerald-600',
+    label: "Đang diễn ra",
+    className: "border-emerald-200 bg-emerald-50 text-emerald-600",
   },
   past: {
-    label: 'Đã qua',
-    className: 'border-slate-200 bg-slate-50 text-slate-500',
+    label: "Đã qua",
+    className: "border-slate-200 bg-slate-50 text-slate-500",
   },
 } as const;
 
@@ -214,16 +228,22 @@ const ClubDetailDrawer = ({
   onUpdateClubOverview,
   onClose,
 }: ClubDetailDrawerProps) => {
-  const memberTabs = useMemo<DetailTab[]>(() => ['overview', 'members', 'activities'], []);
+  const memberTabs = useMemo<DetailTab[]>(
+    () => ["overview", "members", "activities"],
+    []
+  );
   const visibleTabs = useMemo(
-    () => (canManage ? detailTabs : detailTabs.filter((tab) => memberTabs.includes(tab.id))),
+    () =>
+      canManage
+        ? detailTabs
+        : detailTabs.filter((tab) => memberTabs.includes(tab.id)),
     [canManage, memberTabs]
   );
   const resolvedTab = useMemo<DetailTab>(() => {
     if (canManage || memberTabs.includes(activeTab)) {
       return activeTab;
     }
-    return 'overview';
+    return "overview";
   }, [activeTab, canManage, memberTabs]);
   const isEditingActivity = Boolean(editingActivityId);
   const showMemberActions = canManage || Boolean(currentMember);
@@ -244,8 +264,8 @@ const ClubDetailDrawer = ({
         clubId: club.id,
         memberId: leaderId,
         memberName: leaderName,
-        role: 'PRESIDENT',
-        status: 'ACTIVE',
+        role: "PRESIDENT",
+        status: "ACTIVE",
         joinedAt: club.createdAt ?? club.updatedAt ?? null,
         notes: null,
         __virtual: true,
@@ -257,7 +277,9 @@ const ClubDetailDrawer = ({
     const unique = [...members] as DrawerClubMember[];
     const addMember = (memberToAdd?: DrawerClubMember | null) => {
       if (!memberToAdd) return;
-      const exists = unique.some((member) => member.memberId === memberToAdd.memberId);
+      const exists = unique.some(
+        (member) => member.memberId === memberToAdd.memberId
+      );
       if (!exists) {
         unique.push(memberToAdd);
       }
@@ -269,8 +291,8 @@ const ClubDetailDrawer = ({
         clubId: club.id,
         memberId: leaderId,
         memberName: leaderName,
-        role: 'PRESIDENT',
-        status: 'ACTIVE',
+        role: "PRESIDENT",
+        status: "ACTIVE",
         joinedAt: club.createdAt ?? club.updatedAt ?? null,
         notes: null,
         __virtual: true,
@@ -280,7 +302,10 @@ const ClubDetailDrawer = ({
   }, [club, members, selfMember, leaderId, leaderName]);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const overviewOperatingDays = formatOperatingDays(club.operatingDays);
-  const overviewOperatingHours = formatOperatingHours(club.operatingStartTime, club.operatingEndTime);
+  const overviewOperatingHours = formatOperatingHours(
+    club.operatingStartTime,
+    club.operatingEndTime
+  );
 
   useEffect(() => {
     setOverviewForm(buildOverviewFormState(club));
@@ -319,16 +344,19 @@ const ClubDetailDrawer = ({
 
   const handleOverviewSave = async () => {
     const { operatingStartTime, operatingEndTime } = overviewForm;
-    if ((operatingStartTime && !operatingEndTime) || (!operatingStartTime && operatingEndTime)) {
-      showToast('error', 'Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.');
+    if (
+      (operatingStartTime && !operatingEndTime) ||
+      (!operatingStartTime && operatingEndTime)
+    ) {
+      showToast("error", "Vui lòng nhập đầy đủ giờ bắt đầu và kết thúc.");
       return;
     }
     if (operatingStartTime && operatingStartTime < MIN_OPERATING_START) {
-      showToast('error', 'Giờ bắt đầu không được trước 05:00.');
+      showToast("error", "Giờ bắt đầu không được trước 05:00.");
       return;
     }
     if (operatingEndTime && operatingEndTime > MAX_OPERATING_END) {
-      showToast('error', 'Giờ kết thúc không được sau 19:00.');
+      showToast("error", "Giờ kết thúc không được sau 19:00.");
       return;
     }
     if (
@@ -336,7 +364,7 @@ const ClubDetailDrawer = ({
       operatingEndTime &&
       operatingStartTime >= operatingEndTime
     ) {
-      showToast('error', 'Giờ kết thúc cần sau giờ bắt đầu.');
+      showToast("error", "Giờ kết thúc cần sau giờ bắt đầu.");
       return;
     }
     try {
@@ -350,11 +378,11 @@ const ClubDetailDrawer = ({
         operatingStartTime: overviewForm.operatingStartTime || null,
         operatingEndTime: overviewForm.operatingEndTime || null,
       });
-      showToast('success', 'Đã cập nhật thông tin câu lạc bộ.');
+      showToast("success", "Đã cập nhật thông tin câu lạc bộ.");
       setIsOverviewEditing(false);
     } catch (error) {
       console.error(error);
-      showToast('error', 'Không thể cập nhật thông tin câu lạc bộ.');
+      showToast("error", "Không thể cập nhật thông tin câu lạc bộ.");
     } finally {
       setIsOverviewSaving(false);
     }
@@ -365,7 +393,7 @@ const ClubDetailDrawer = ({
       onUpdateClubImage(club.id, file);
     }
     if (event.target) {
-      event.target.value = '';
+      event.target.value = "";
     }
   };
 
@@ -374,7 +402,7 @@ const ClubDetailDrawer = ({
 
     // 1. Kiểm tra thiếu
     if (!startDate || !endDate) {
-      showToast('error', 'Vui lòng chọn đầy đủ thời gian bắt đầu và kết thúc.');
+      showToast("error", "Vui lòng chọn đầy đủ thời gian bắt đầu và kết thúc.");
       return;
     }
 
@@ -387,48 +415,56 @@ const ClubDetailDrawer = ({
 
     // 3. Kiểm tra parse lỗi
     if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
-      showToast('error', 'Thời gian hoạt động không hợp lệ.');
+      showToast("error", "Thời gian hoạt động không hợp lệ.");
       return;
     }
 
     // 4. Kiểm tra start >= end
     if (startTime >= endTime) {
-      showToast('error', 'Ngày bắt đầu phải đứng trước ngày kết thúc.');
+      showToast("error", "Ngày bắt đầu phải đứng trước ngày kết thúc.");
       return;
     }
 
     // 5. Kiểm tra duration tối thiểu
     if (endTime - startTime < MIN_ACTIVITY_DURATION_MS) {
-      showToast('error', 'Mỗi hoạt động cần kéo dài ít nhất 2 giờ.');
+      showToast("error", "Mỗi hoạt động cần kéo dài ít nhất 2 giờ.");
       return;
     }
 
     // 6. (Optional) Kiểm tra không được chọn trước thời điểm hiện tại
     const now = Date.now();
     if (startTime < now) {
-      showToast('error', 'Thời gian bắt đầu không được ở quá khứ.');
+      showToast("error", "Thời gian bắt đầu không được ở quá khứ.");
       return;
     }
 
     // 7. (Optional) Giới hạn duration tối đa (VD: không quá 24h)
     const MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
     if (endTime - startTime > MAX_DURATION_MS) {
-      showToast('error', 'Thời lượng hoạt động không được vượt quá 24 giờ.');
+      showToast("error", "Thời lượng hoạt động không được vượt quá 24 giờ.");
       return;
     }
 
     // 8. (Optional) Kiểm tra sai format giờ (nếu UI tách ngày + giờ)
     // Ví dụ người dùng nhập 32:70 → vẫn parse được nhưng sai
-    if (start.toString() === 'Invalid Date' || end.toString() === 'Invalid Date') {
-      showToast('error', 'Định dạng thời gian không hợp lệ.');
+    if (
+      start.toString() === "Invalid Date" ||
+      end.toString() === "Invalid Date"
+    ) {
+      showToast("error", "Định dạng thời gian không hợp lệ.");
       return;
     }
 
     // 9. (Optional) Kiểm tra năm/tháng nằm ngoài phạm vi hợp lý
     const startYear = start.getFullYear();
     const endYear = end.getFullYear();
-    if (startYear < 2000 || startYear > 2100 || endYear < 2000 || endYear > 2100) {
-      showToast('error', 'Thời gian nằm ngoài phạm vi cho phép.');
+    if (
+      startYear < 2000 ||
+      startYear > 2100 ||
+      endYear < 2000 ||
+      endYear > 2100
+    ) {
+      showToast("error", "Thời gian nằm ngoài phạm vi cho phép.");
       return;
     }
 
@@ -436,27 +472,25 @@ const ClubDetailDrawer = ({
     onSubmitActivity();
   };
 
-
   const handleCopyInviteCode = async () => {
     if (!club.inviteCode) {
-      showToast('error', 'Mã mời không có sẵn.');
+      showToast("error", "Mã mời không có sẵn.");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(club.inviteCode);
-      showToast('success', 'Đã sao chép mã mời.');
+      showToast("success", "Đã sao chép mã mời.");
     } catch (error) {
       console.error(error);
-      showToast('error', 'Không thể sao chép mã mời.');
+      showToast("error", "Không thể sao chép mã mời.");
     }
   };
 
-
   const handleDecision = (requestId: number, status: ClubJoinRequestStatus) => {
     const note =
-      status === 'REJECTED'
-        ? window.prompt('Thêm ghi chú từ chối (tùy chọn)') ?? undefined
+      status === "REJECTED"
+        ? window.prompt("Thêm ghi chú từ chối (tùy chọn)") ?? undefined
         : undefined;
     onDecideJoinRequest(requestId, status, note);
   };
@@ -466,9 +500,13 @@ const ClubDetailDrawer = ({
       <div className="h-full w-full max-w-4xl overflow-y-auto bg-white shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Câu lạc bộ</p>
-            <h3 className="text-xl font-semibold text-slate-900">{club.name}</h3>
-            <p className="text-xs text-slate-500">#{club.code ?? 'N/A'}</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-orange-400">
+              Câu lạc bộ
+            </p>
+            <h3 className="text-xl font-semibold text-slate-900">
+              {club.name}
+            </h3>
+            <p className="text-xs text-slate-500">#{club.code ?? "N/A"}</p>
           </div>
           <button
             type="button"
@@ -486,43 +524,65 @@ const ClubDetailDrawer = ({
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
-                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${resolvedTab === tab.id
-                  ? 'bg-white text-orange-600 shadow'
-                  : 'text-slate-500 hover:text-orange-500'
-                  }`}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                  resolvedTab === tab.id
+                    ? "bg-white text-orange-600 shadow"
+                    : "text-slate-500 hover:text-orange-500"
+                }`}
               >
                 {tab.label}
               </button>
             ))}
           </div>
 
-          {resolvedTab === 'overview' && (
+          {resolvedTab === "overview" && (
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <DetailItem label="Status" value={club.status} />
-              <DetailItem label="Category" value={club.category ?? 'N/A'} />
-              <DetailItem label="Founded" value={formatDate(club.foundedDate)} />
-              <DetailItem label="Members" value={`${club.memberCount ?? 0}`} />
-              <DetailItem label="Meeting location" value={club.meetingLocation ?? 'Not provided'} />
-              <DetailItem label="Mission" value={club.mission ?? 'Not provided'} />
-              <DetailItem label="Description" value={club.description ?? 'Not provided'} />
+              <DetailItem label="Category" value={club.category ?? "N/A"} />
+              <DetailItem
+                label="Founded"
+                value={formatDate(club.foundedDate)}
+              />
+
+              {/* --- ĐÃ SỬA: CỘNG THÊM 1 VÀO SỐ LƯỢNG THÀNH VIÊN --- */}
+              <DetailItem
+                label="Members"
+                value={`${(club.memberCount ?? 0) + 1}`}
+              />
+
+              <DetailItem
+                label="Meeting location"
+                value={club.meetingLocation ?? "Not provided"}
+              />
+              <DetailItem
+                label="Mission"
+                value={club.mission ?? "Not provided"}
+              />
+              <DetailItem
+                label="Description"
+                value={club.description ?? "Not provided"}
+              />
               <DetailItem
                 label="Operating days"
-                value={overviewOperatingDays ?? 'Not configured'}
+                value={overviewOperatingDays ?? "Not configured"}
               />
               <DetailItem
                 label="Operating hours"
-                value={overviewOperatingHours ?? 'Not configured'}
+                value={overviewOperatingHours ?? "Not configured"}
               />
             </div>
           )}
 
-          {resolvedTab === 'overview' && canManage && (
+          {resolvedTab === "overview" && canManage && (
             <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Chỉnh sửa thông tin</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Chỉnh sửa thông tin
+                  </p>
                   <p className="text-xs text-slate-500">
-                    Cập nhật danh mục, địa điểm, sứ mệnh và lịch hoạt động của câu lạc bộ.
+                    Cập nhật danh mục, địa điểm, sứ mệnh và lịch hoạt động của
+                    câu lạc bộ.
                   </p>
                 </div>
                 {!isOverviewEditing ? (
@@ -543,7 +603,12 @@ const ClubDetailDrawer = ({
                       <input
                         type="text"
                         value={overviewForm.category}
-                        onChange={(event) => handleOverviewFieldChange('category', event.target.value)}
+                        onChange={(event) =>
+                          handleOverviewFieldChange(
+                            "category",
+                            event.target.value
+                          )
+                        }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         placeholder="Sports, Culture..."
                       />
@@ -554,7 +619,10 @@ const ClubDetailDrawer = ({
                         type="text"
                         value={overviewForm.meetingLocation}
                         onChange={(event) =>
-                          handleOverviewFieldChange('meetingLocation', event.target.value)
+                          handleOverviewFieldChange(
+                            "meetingLocation",
+                            event.target.value
+                          )
                         }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         placeholder="Building A..."
@@ -565,7 +633,9 @@ const ClubDetailDrawer = ({
                     Mission
                     <textarea
                       value={overviewForm.mission}
-                      onChange={(event) => handleOverviewFieldChange('mission', event.target.value)}
+                      onChange={(event) =>
+                        handleOverviewFieldChange("mission", event.target.value)
+                      }
                       rows={3}
                       className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       placeholder="Sứ mệnh của câu lạc bộ..."
@@ -576,7 +646,10 @@ const ClubDetailDrawer = ({
                     <textarea
                       value={overviewForm.description}
                       onChange={(event) =>
-                        handleOverviewFieldChange('description', event.target.value)
+                        handleOverviewFieldChange(
+                          "description",
+                          event.target.value
+                        )
                       }
                       rows={3}
                       className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
@@ -589,7 +662,9 @@ const ClubDetailDrawer = ({
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {WEEKDAY_OPTIONS.map((day) => {
-                        const selected = overviewForm.operatingDays.includes(day.value);
+                        const selected = overviewForm.operatingDays.includes(
+                          day.value
+                        );
                         return (
                           <button
                             key={day.value}
@@ -597,8 +672,8 @@ const ClubDetailDrawer = ({
                             onClick={() => toggleOverviewDay(day.value)}
                             className={`rounded-2xl border px-3 py-1.5 text-xs font-semibold transition ${
                               selected
-                                ? 'border-orange-400 bg-orange-50 text-orange-600'
-                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-orange-200 hover:text-orange-500'
+                                ? "border-orange-400 bg-orange-50 text-orange-600"
+                                : "border-slate-200 bg-slate-50 text-slate-600 hover:border-orange-200 hover:text-orange-500"
                             }`}
                           >
                             {day.label}
@@ -614,7 +689,10 @@ const ClubDetailDrawer = ({
                         type="time"
                         value={overviewForm.operatingStartTime}
                         onChange={(event) =>
-                          handleOverviewFieldChange('operatingStartTime', event.target.value)
+                          handleOverviewFieldChange(
+                            "operatingStartTime",
+                            event.target.value
+                          )
                         }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
@@ -625,7 +703,10 @@ const ClubDetailDrawer = ({
                         type="time"
                         value={overviewForm.operatingEndTime}
                         onChange={(event) =>
-                          handleOverviewFieldChange('operatingEndTime', event.target.value)
+                          handleOverviewFieldChange(
+                            "operatingEndTime",
+                            event.target.value
+                          )
                         }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
@@ -646,7 +727,9 @@ const ClubDetailDrawer = ({
                       disabled={isOverviewSaving}
                       className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow shadow-orange-500/30 disabled:opacity-60"
                     >
-                      {isOverviewSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {isOverviewSaving && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
                       Lưu thay đổi
                     </button>
                   </div>
@@ -655,40 +738,51 @@ const ClubDetailDrawer = ({
             </div>
           )}
 
-          {resolvedTab === 'members' && (
+          {resolvedTab === "members" && (
             <div className="mt-6 space-y-4">
               {selfMember && (
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Tư cách thành viên của bạn</p>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Tư cách thành viên của bạn
+                      </p>
                       <p className="text-xs text-slate-500">
-                        Vai trò:{' '}
-                        <span className="font-semibold text-slate-800">{selfMember.role}</span>
+                        Vai trò:{" "}
+                        <span className="font-semibold text-slate-800">
+                          {selfMember.role}
+                        </span>
                         {selfMember.joinedAt && (
-                          <span className="ml-2">Đã tham gia {formatDate(selfMember.joinedAt)}</span>
+                          <span className="ml-2">
+                            Đã tham gia {formatDate(selfMember.joinedAt)}
+                          </span>
                         )}
                       </p>
                       {isCurrentLeader && (
                         <p className="text-xs text-amber-600">
-                          Chuyển giao quyền lãnh đạo cho thành viên khác trước khi rời câu lạc bộ này.
+                          Chuyển giao quyền lãnh đạo cho thành viên khác trước
+                          khi rời câu lạc bộ này.
                         </p>
                       )}
                     </div>
                     <button
                       type="button"
                       onClick={onLeaveClub}
-                      disabled={isCurrentLeader || isLeavingClub || !currentMember}
-                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${isCurrentLeader || !currentMember
-                        ? 'cursor-not-allowed border-amber-200 text-amber-500'
-                        : 'border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60'
-                        }`}
+                      disabled={
+                        isCurrentLeader || isLeavingClub || !currentMember
+                      }
+                      className={`inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
+                        isCurrentLeader || !currentMember
+                          ? "cursor-not-allowed border-amber-200 text-amber-500"
+                          : "border-slate-200 text-slate-600 hover:border-orange-200 hover:text-orange-500 disabled:opacity-60"
+                      }`}
                     >
                       <LogOut className="h-4 w-4" />
                       {isCurrentLeader
-                        ? 'Chuyển giao quyền lãnh đạo để rời đi'
+                        ? "Chuyển giao quyền lãnh đạo để rời đi"
                         : isLeavingClub
-                          ? 'Đang rời đi...' : 'Rời câu lạc bộ'}
+                        ? "Đang rời đi..."
+                        : "Rời câu lạc bộ"}
                     </button>
                   </div>
                 </div>
@@ -702,7 +796,9 @@ const ClubDetailDrawer = ({
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
               ) : displayedMembers.length === 0 ? (
-                <p className="py-6 text-sm text-slate-500">Không có thành viên nào để hiển thị.</p>
+                <p className="py-6 text-sm text-slate-500">
+                  Không có thành viên nào để hiển thị.
+                </p>
               ) : (
                 <div className="overflow-x-auto rounded-2xl border border-slate-100">
                   <table className="min-w-full divide-y divide-slate-100 text-sm">
@@ -712,32 +808,49 @@ const ClubDetailDrawer = ({
                         <th className="px-4 py-3 text-left">Vai trò</th>
                         <th className="px-4 py-3 text-left">Trạng thái</th>
                         <th className="px-4 py-3 text-left">Tham gia</th>
-                        {showMemberActions && <th className="px-4 py-3 text-right">Hành động</th>}
+                        {showMemberActions && (
+                          <th className="px-4 py-3 text-right">Hành động</th>
+                        )}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {displayedMembers.map((member) => {
-                        const rowLoading = Boolean(memberActionLoading[member.id]);
-                        const isSelf = Boolean(selfMember) && member.memberId === selfMember?.memberId;
+                        const rowLoading = Boolean(
+                          memberActionLoading[member.id]
+                        );
+                        const isSelf =
+                          Boolean(selfMember) &&
+                          member.memberId === selfMember?.memberId;
                         const isSelfActual =
-                          Boolean(currentMember) && member.memberId === currentMember?.memberId;
+                          Boolean(currentMember) &&
+                          member.memberId === currentMember?.memberId;
                         const isLeader = leaderId === member.memberId;
-                        const isVirtual = Boolean((member as DrawerClubMember).__virtual);
+                        const isVirtual = Boolean(
+                          (member as DrawerClubMember).__virtual
+                        );
                         return (
                           <tr key={member.id} className="text-slate-700">
                             <td className="px-4 py-3 font-medium text-slate-900">
-                              {member.memberName ?? 'Unknown'}
+                              {member.memberName ?? "Unknown"}
                             </td>
-                            <td className="px-4 py-3 text-slate-500">{member.role}</td>
-                            <td className="px-4 py-3 text-slate-500">{member.status}</td>
-                            <td className="px-4 py-3 text-slate-500">{formatDate(member.joinedAt)}</td>
+                            <td className="px-4 py-3 text-slate-500">
+                              {member.role}
+                            </td>
+                            <td className="px-4 py-3 text-slate-500">
+                              {member.status}
+                            </td>
+                            <td className="px-4 py-3 text-slate-500">
+                              {formatDate(member.joinedAt)}
+                            </td>
                             {showMemberActions && (
                               <td className="px-4 py-3">
                                 <div className="flex flex-wrap justify-end gap-2">
                                   {canManage && !isLeader && !isVirtual && (
                                     <button
                                       type="button"
-                                      onClick={() => onTransferLeadership(member)}
+                                      onClick={() =>
+                                        onTransferLeadership(member)
+                                      }
                                       disabled={rowLoading}
                                       className="inline-flex items-center gap-1 rounded-2xl border border-orange-200 px-3 py-1 text-xs font-semibold text-orange-500 transition hover:bg-orange-50 disabled:opacity-50"
                                     >
@@ -760,11 +873,20 @@ const ClubDetailDrawer = ({
                                     <button
                                       type="button"
                                       onClick={onLeaveClub}
-                                      disabled={rowLoading || isCurrentLeader || isLeavingClub || !isSelfActual}
+                                      disabled={
+                                        rowLoading ||
+                                        isCurrentLeader ||
+                                        isLeavingClub ||
+                                        !isSelfActual
+                                      }
                                       className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-50"
                                     >
                                       <LogOut className="h-3.5 w-3.5" />
-                                      {isCurrentLeader ? 'Chuyển giao trước' : isLeavingClub ? 'Đang rời đi...' : 'Rời đi'}
+                                      {isCurrentLeader
+                                        ? "Chuyển giao trước"
+                                        : isLeavingClub
+                                        ? "Đang rời đi..."
+                                        : "Rời đi"}
                                     </button>
                                   )}
                                 </div>
@@ -779,19 +901,21 @@ const ClubDetailDrawer = ({
               )}
             </div>
           )}
-          {resolvedTab === 'activities' && (
+          {resolvedTab === "activities" && (
             <div className="mt-6 space-y-4">
               {canManage && (
                 <div className="rounded-2xl border border-slate-100 bg-white p-4">
                   <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
-                        {isEditingActivity ? 'Cập nhật hoạt động' : 'Tạo hoạt động'}
+                        {isEditingActivity
+                          ? "Cập nhật hoạt động"
+                          : "Tạo hoạt động"}
                       </p>
                       <p className="text-xs text-slate-500">
                         {isEditingActivity
-                          ? 'Điều chỉnh chi tiết hoạt động đã chọn và xuất bản các thay đổi.'
-                          : 'Chỉ trưởng nhóm mới có thể thêm hoạt động câu lạc bộ mới.'}
+                          ? "Điều chỉnh chi tiết hoạt động đã chọn và xuất bản các thay đổi."
+                          : "Chỉ trưởng nhóm mới có thể thêm hoạt động câu lạc bộ mới."}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -810,8 +934,10 @@ const ClubDetailDrawer = ({
                         disabled={isCreatingActivity}
                         className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
                       >
-                        {isCreatingActivity && <Loader2 className="h-4 w-4 animate-spin" />}
-                        {isEditingActivity ? 'Lưu thay đổi' : 'Xuất bản'}
+                        {isCreatingActivity && (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        )}
+                        {isEditingActivity ? "Lưu thay đổi" : "Xuất bản"}
                       </button>
                     </div>
                   </div>
@@ -821,7 +947,9 @@ const ClubDetailDrawer = ({
                       <input
                         type="text"
                         value={activityForm.title}
-                        onChange={(event) => onActivityFormChange('title', event.target.value)}
+                        onChange={(event) =>
+                          onActivityFormChange("title", event.target.value)
+                        }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         placeholder="Ngày định hướng"
                       />
@@ -831,7 +959,9 @@ const ClubDetailDrawer = ({
                       <input
                         type="text"
                         value={activityForm.location}
-                        onChange={(event) => onActivityFormChange('location', event.target.value)}
+                        onChange={(event) =>
+                          onActivityFormChange("location", event.target.value)
+                        }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         placeholder="Thính phòng A2"
                       />
@@ -843,7 +973,9 @@ const ClubDetailDrawer = ({
                       <input
                         type="datetime-local"
                         value={activityForm.startDate}
-                        onChange={(event) => onActivityFormChange('startDate', event.target.value)}
+                        onChange={(event) =>
+                          onActivityFormChange("startDate", event.target.value)
+                        }
                         required
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
@@ -853,7 +985,9 @@ const ClubDetailDrawer = ({
                       <input
                         type="datetime-local"
                         value={activityForm.endDate}
-                        onChange={(event) => onActivityFormChange('endDate', event.target.value)}
+                        onChange={(event) =>
+                          onActivityFormChange("endDate", event.target.value)
+                        }
                         required
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
@@ -866,7 +1000,9 @@ const ClubDetailDrawer = ({
                         type="number"
                         min="0"
                         value={activityForm.budget}
-                        onChange={(event) => onActivityFormChange('budget', event.target.value)}
+                        onChange={(event) =>
+                          onActivityFormChange("budget", event.target.value)
+                        }
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         placeholder="500000"
                       />
@@ -879,7 +1015,10 @@ const ClubDetailDrawer = ({
                       <textarea
                         value={activityForm.description}
                         onChange={(event) =>
-                          onActivityFormChange('description', event.target.value)
+                          onActivityFormChange(
+                            "description",
+                            event.target.value
+                          )
                         }
                         rows={3}
                         className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
@@ -894,7 +1033,9 @@ const ClubDetailDrawer = ({
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
               ) : activities.length === 0 ? (
-                <p className="py-8 text-center text-sm text-slate-500">Chưa có hoạt động nào được xuất bản.</p>
+                <p className="py-8 text-center text-sm text-slate-500">
+                  Chưa có hoạt động nào được xuất bản.
+                </p>
               ) : (
                 <div className="space-y-3">
                   {activities.map((activity) => {
@@ -902,14 +1043,21 @@ const ClubDetailDrawer = ({
                     return (
                       <div
                         key={activity.id}
-                        className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${editingActivityId === activity.id ? 'border-orange-200' : 'border-slate-100'
-                          }`}
+                        className={`rounded-2xl border bg-white px-4 py-3 shadow-sm ${
+                          editingActivityId === activity.id
+                            ? "border-orange-200"
+                            : "border-slate-100"
+                        }`}
                       >
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{activity.title}</p>
+                            <p className="text-sm font-semibold text-slate-900">
+                              {activity.title}
+                            </p>
                             {activity.description && (
-                              <p className="text-xs text-slate-500">{activity.description}</p>
+                              <p className="text-xs text-slate-500">
+                                {activity.description}
+                              </p>
                             )}
                           </div>
                           <div className="flex items-center gap-2">
@@ -925,13 +1073,14 @@ const ClubDetailDrawer = ({
                                 className="rounded-2xl border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500"
                               >
                                 Sửa
-                              </button>)}
+                              </button>
+                            )}
                           </div>
                         </div>
                         <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
                           {activity.startDate && (
                             <span>
-                              Bắt đầu{' '}
+                              Bắt đầu{" "}
                               <strong className="text-slate-900">
                                 {formatDateTime(activity.startDate)}
                               </strong>
@@ -939,7 +1088,7 @@ const ClubDetailDrawer = ({
                           )}
                           {activity.endDate && (
                             <span>
-                              Kết thúc{' '}
+                              Kết thúc{" "}
                               <strong className="text-slate-900">
                                 {formatDateTime(activity.endDate)}
                               </strong>
@@ -947,7 +1096,10 @@ const ClubDetailDrawer = ({
                           )}
                           {activity.location && (
                             <span>
-                              Địa điểm <strong className="text-slate-900">{activity.location}</strong>
+                              Địa điểm{" "}
+                              <strong className="text-slate-900">
+                                {activity.location}
+                              </strong>
                             </span>
                           )}
                         </div>
@@ -959,18 +1111,25 @@ const ClubDetailDrawer = ({
             </div>
           )}
 
-          {resolvedTab === 'requests' && (
+          {resolvedTab === "requests" && (
             <div className="mt-6 space-y-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Yêu cầu tham gia</p>
-                  <p className="text-xs text-slate-500">Xem xét bằng chứng thanh toán trước khi chấp nhận thành viên mới.</p>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Yêu cầu tham gia
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Xem xét bằng chứng thanh toán trước khi chấp nhận thành viên
+                    mới.
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <select
                     value={joinQueueFilter}
                     onChange={(event) =>
-                      onJoinQueueFilterChange(event.target.value as ClubJoinRequestStatus | 'all')
+                      onJoinQueueFilterChange(
+                        event.target.value as ClubJoinRequestStatus | "all"
+                      )
                     }
                     className="rounded-2xl border border-slate-200 px-3 py-2 text-xs text-slate-600 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                   >
@@ -985,7 +1144,11 @@ const ClubDetailDrawer = ({
                     disabled={isJoinQueueLoading}
                     className="inline-flex items-center gap-1 rounded-2xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-orange-200 hover:text-orange-500 disabled:opacity-60"
                   >
-                    <RefreshCcw className={`h-3.5 w-3.5 ${isJoinQueueLoading ? 'animate-spin' : ''}`} />
+                    <RefreshCcw
+                      className={`h-3.5 w-3.5 ${
+                        isJoinQueueLoading ? "animate-spin" : ""
+                      }`}
+                    />
                     Làm mới
                   </button>
                 </div>
@@ -1001,7 +1164,9 @@ const ClubDetailDrawer = ({
               ) : (
                 joinRequests.map((request) => {
                   const statusMeta = joinRequestStatusMeta[request.status];
-                  const decisionLoading = Boolean(decisionLoadingMap[request.id]);
+                  const decisionLoading = Boolean(
+                    decisionLoadingMap[request.id]
+                  );
                   return (
                     <div
                       key={request.id}
@@ -1010,7 +1175,7 @@ const ClubDetailDrawer = ({
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <p className="text-sm font-semibold text-slate-900">
-                            {request.applicantName ?? 'Ứng viên không xác định'}
+                            {request.applicantName ?? "Ứng viên không xác định"}
                           </p>
                           <p className="text-xs text-slate-500">
                             Đã gửi {formatDateTime(request.createdAt)}
@@ -1037,33 +1202,39 @@ const ClubDetailDrawer = ({
                           </p>
                         ) : (
                           <p className="mt-2 text-xs text-slate-500">
-                            Ch?a c? m? chuy?n kho?n. C?n y?u c?u b? sung tr??c khi ph? duy?t.
+                            Ch?a c? m? chuy?n kho?n. C?n y?u c?u b? sung tr??c
+                            khi ph? duy?t.
                           </p>
                         )}
                       </div>
-                      {request.status === 'PENDING' && (
+                      {request.status === "PENDING" && (
                         <div className="mt-4 flex flex-wrap gap-3">
                           <button
                             type="button"
-                            onClick={() => handleDecision(request.id, 'REJECTED')}
+                            onClick={() =>
+                              handleDecision(request.id, "REJECTED")
+                            }
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500 disabled:opacity-50"
                           >
-                            {decisionLoading ? 'Đang xử lý' : 'Từ chối'}
+                            {decisionLoading ? "Đang xử lý" : "Từ chối"}
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleDecision(request.id, 'APPROVED')}
+                            onClick={() =>
+                              handleDecision(request.id, "APPROVED")
+                            }
                             disabled={decisionLoading || !canManage}
                             className="rounded-2xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow disabled:opacity-50"
                           >
-                            {decisionLoading ? 'Đang xử lý' : 'Phê duyệt'}
+                            {decisionLoading ? "Đang xử lý" : "Phê duyệt"}
                           </button>
                         </div>
                       )}
-                      {!canManage && request.status === 'PENDING' && (
+                      {!canManage && request.status === "PENDING" && (
                         <p className="mt-3 text-xs text-slate-500">
-                          Chỉ trưởng nhóm câu lạc bộ mới có thể phê duyệt hoặc từ chối yêu cầu.
+                          Chỉ trưởng nhóm câu lạc bộ mới có thể phê duyệt hoặc
+                          từ chối yêu cầu.
                         </p>
                       )}
                     </div>
@@ -1073,7 +1244,7 @@ const ClubDetailDrawer = ({
             </div>
           )}
 
-          {resolvedTab === 'settings' && (
+          {resolvedTab === "settings" && (
             <div className="mt-6 space-y-3">
               {isSettingsLoading ? (
                 <div className="flex items-center justify-center py-10 text-slate-400">
@@ -1084,20 +1255,28 @@ const ClubDetailDrawer = ({
                   <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1fr)]">
                     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
                       {club.imageUrl ? (
-                        <img src={club.imageUrl} alt={club.name} className="h-60 w-full object-cover" />
+                        <img
+                          src={club.imageUrl}
+                          alt={club.name}
+                          className="h-60 w-full object-cover"
+                        />
                       ) : (
                         <div className="flex h-60 flex-col items-center justify-center gap-2 text-slate-400">
                           <Image className="h-8 w-8 text-orange-400" />
-                          <p className="text-sm font-semibold text-slate-500">Chưa có ảnh câu lạc bộ</p>
+                          <p className="text-sm font-semibold text-slate-500">
+                            Chưa có ảnh câu lạc bộ
+                          </p>
                         </div>
                       )}
                     </div>
                     <div className="rounded-2xl border border-slate-100 bg-white p-4">
-                      <p className="text-sm font-semibold text-slate-900">Ảnh câu lạc bộ</p>
+                      <p className="text-sm font-semibold text-slate-900">
+                        Ảnh câu lạc bộ
+                      </p>
                       <p className="text-xs text-slate-500">
                         {canManage
-                          ? 'Cập nhật ảnh bìa để thể hiện bản sắc câu lạc bộ.'
-                          : 'Chỉ trưởng nhóm mới có thể thay đổi ảnh này.'}
+                          ? "Cập nhật ảnh bìa để thể hiện bản sắc câu lạc bộ."
+                          : "Chỉ trưởng nhóm mới có thể thay đổi ảnh này."}
                       </p>
                       {canManage && (
                         <button
@@ -1111,7 +1290,9 @@ const ClubDetailDrawer = ({
                           ) : (
                             <Image className="h-4 w-4" />
                           )}
-                          {isImageUpdating ? 'Đang cập nhật...' : 'Cập nhật ảnh'}
+                          {isImageUpdating
+                            ? "Đang cập nhật..."
+                            : "Cập nhật ảnh"}
                         </button>
                       )}
                     </div>
@@ -1184,7 +1365,7 @@ const ClubDetailDrawer = ({
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 interface DetailItemProps {
@@ -1208,20 +1389,22 @@ interface SettingItemProps {
 const SettingItem = ({ icon: Icon, label, value }: SettingItemProps) => (
   <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3">
     <span
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-        }`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${
+        value ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"
+      }`}
     >
       <Icon className="h-4 w-4" />
     </span>
     <div className="flex-1">
       <p className="text-sm font-semibold text-slate-900">{label}</p>
-      <p className="text-xs text-slate-500">{value ? 'Đã bật' : 'Đã tắt'}</p>
+      <p className="text-xs text-slate-500">{value ? "Đã bật" : "Đã tắt"}</p>
     </div>
     <span
-      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${value ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-        }`}
+      className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+        value ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500"
+      }`}
     >
-      {value ? 'BẬT' : 'TẮT'}
+      {value ? "BẬT" : "TẮT"}
     </span>
   </div>
 );
@@ -1247,21 +1430,25 @@ const BankInstructionCard = ({
 }: BankInstructionCardProps) => {
   const formAmount = Number(bankForm.joinFee || 0);
   const configuredAmount =
-    settings?.joinFee !== undefined && settings?.joinFee !== null ? settings.joinFee : 0;
+    settings?.joinFee !== undefined && settings?.joinFee !== null
+      ? settings.joinFee
+      : 0;
   const amountForPreview = canManage ? formAmount : configuredAmount;
-  const bankId = canManage ? bankForm.bankId : settings?.bankId ?? '';
-  const accountNo = canManage ? bankForm.bankAccountNumber : settings?.bankAccountNumber ?? '';
+  const bankId = canManage ? bankForm.bankId : settings?.bankId ?? "";
+  const accountNo = canManage
+    ? bankForm.bankAccountNumber
+    : settings?.bankAccountNumber ?? "";
   const accountName =
     (canManage ? bankForm.bankAccountName : settings?.bankAccountName) ??
     settings?.clubName ??
     club.name ??
-    '';
+    "";
   const transferNote =
     (canManage ? bankForm.bankTransferNote : settings?.bankTransferNote) ??
     settings?.clubCode ??
     club.code ??
     club.name ??
-    '';
+    "";
   const qrUrl = buildVietQrUrl({
     bankId,
     bankAccountNumber: accountNo,
@@ -1274,8 +1461,13 @@ const BankInstructionCard = ({
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-4">
       <div>
-        <p className="text-sm font-semibold text-slate-900">Hướng dẫn ngân hàng</p>
-        <p className="text-xs text-slate-500">Thành viên thanh toán qua VietQR, sau đó gửi yêu cầu tham gia để trưởng nhóm phê duyệt.</p>
+        <p className="text-sm font-semibold text-slate-900">
+          Hướng dẫn ngân hàng
+        </p>
+        <p className="text-xs text-slate-500">
+          Thành viên thanh toán qua VietQR, sau đó gửi yêu cầu tham gia để
+          trưởng nhóm phê duyệt.
+        </p>
       </div>
       {canManage ? (
         <div className="mt-4 space-y-3">
@@ -1285,7 +1477,7 @@ const BankInstructionCard = ({
               <input
                 type="text"
                 value={bankForm.bankId}
-                onChange={(event) => onChange('bankId', event.target.value)}
+                onChange={(event) => onChange("bankId", event.target.value)}
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="ví dụ: ACB"
               />
@@ -1295,7 +1487,9 @@ const BankInstructionCard = ({
               <input
                 type="text"
                 value={bankForm.bankAccountNumber}
-                onChange={(event) => onChange('bankAccountNumber', event.target.value)}
+                onChange={(event) =>
+                  onChange("bankAccountNumber", event.target.value)
+                }
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="0123456789"
               />
@@ -1307,18 +1501,23 @@ const BankInstructionCard = ({
               <input
                 type="text"
                 value={bankForm.bankAccountName}
-                onChange={(event) => onChange('bankAccountName', event.target.value)}
+                onChange={(event) =>
+                  onChange("bankAccountName", event.target.value)
+                }
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="NGUYEN VAN A"
               />
             </label>
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Ghi chú chuyển khoản                <input
+              Ghi chú chuyển khoản{" "}
+              <input
                 type="text"
                 value={bankForm.bankTransferNote}
-                onChange={(event) => onChange('bankTransferNote', event.target.value)}
+                onChange={(event) =>
+                  onChange("bankTransferNote", event.target.value)
+                }
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                placeholder={`THAM GIA-${club.code ?? 'CAULACBO'}`}
+                placeholder={`THAM GIA-${club.code ?? "CAULACBO"}`}
               />
             </label>
           </div>
@@ -1329,7 +1528,7 @@ const BankInstructionCard = ({
                 type="number"
                 min="0"
                 value={bankForm.joinFee}
-                onChange={(event) => onChange('joinFee', event.target.value)}
+                onChange={(event) => onChange("joinFee", event.target.value)}
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="50000"
               />
@@ -1340,7 +1539,7 @@ const BankInstructionCard = ({
               disabled={isSaving}
               className="rounded-2xl bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow disabled:opacity-60"
             >
-              {isSaving ? 'Đang lưu' : 'Lưu'}
+              {isSaving ? "Đang lưu" : "Lưu"}
             </button>
           </div>
         </div>
@@ -1354,11 +1553,15 @@ const BankInstructionCard = ({
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Tài khoản</span>
-                <span className="font-semibold text-slate-900">{accountNo}</span>
+                <span className="font-semibold text-slate-900">
+                  {accountNo}
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Tên tài khoản</span>
-                <span className="font-semibold text-slate-900">{accountName}</span>
+                <span className="font-semibold text-slate-900">
+                  {accountName}
+                </span>
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Phí tham gia</span>
@@ -1368,7 +1571,9 @@ const BankInstructionCard = ({
               </div>
               <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2">
                 <span className="text-slate-500">Ghi chú chuyển khoản</span>
-                <span className="font-semibold text-slate-900">{transferNote}</span>
+                <span className="font-semibold text-slate-900">
+                  {transferNote}
+                </span>
               </div>
             </Fragment>
           ) : (
@@ -1385,24 +1590,25 @@ const BankInstructionCard = ({
             alt="VietQR"
             className="mx-auto h-36 w-36 rounded-2xl border border-white bg-white object-contain p-3 shadow-inner"
           />
-          <p className="mt-2 text-xs text-slate-500">Quét QR để thanh toán {formatJoinFeeValue(amountForPreview)}</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Quét QR để thanh toán {formatJoinFeeValue(amountForPreview)}
+          </p>
         </div>
       )}
     </div>
   );
 };
 
-
 export default ClubDetailDrawer;
 
 const buildOverviewFormState = (club: ClubDetail): OverviewFormState => ({
-  category: club.category ?? '',
-  meetingLocation: club.meetingLocation ?? '',
-  description: club.description ?? '',
-  mission: club.mission ?? '',
+  category: club.category ?? "",
+  meetingLocation: club.meetingLocation ?? "",
+  description: club.description ?? "",
+  mission: club.mission ?? "",
   operatingDays: club.operatingDays ?? [],
-  operatingStartTime: club.operatingStartTime ?? '',
-  operatingEndTime: club.operatingEndTime ?? '',
+  operatingStartTime: club.operatingStartTime ?? "",
+  operatingEndTime: club.operatingEndTime ?? "",
 });
 
 const formatOperatingDays = (days?: string[] | null) => {
@@ -1410,9 +1616,9 @@ const formatOperatingDays = (days?: string[] | null) => {
     return null;
   }
   if (days.length === WEEKDAY_OPTIONS.length) {
-    return 'Hoạt động cả tuần';
+    return "Hoạt động cả tuần";
   }
-  return days.map((day) => WEEKDAY_LABELS[day] ?? day).join(', ');
+  return days.map((day) => WEEKDAY_LABELS[day] ?? day).join(", ");
 };
 
 const formatOperatingHours = (start?: string | null, end?: string | null) => {
