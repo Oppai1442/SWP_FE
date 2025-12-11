@@ -87,7 +87,7 @@ export interface ClubJoinRequest {
   applicantId?: number | null;
   applicantName?: string | null;
   motivation?: string | null;
-  paymentProofUrl?: string | null;
+  transferCode?: string | null;
   status: ClubJoinRequestStatus;
   reviewerId?: number | null;
   reviewerName?: string | null;
@@ -107,7 +107,7 @@ export interface StorageObjectInfo {
 export interface JoinClubByInvitePayload {
   inviteCode: string;
   motivation?: string;
-  paymentProofUrl: string;
+  transferCode: string;
 }
 
 export type ClubActivityStatus = 'PLANNING' | 'APPROVED' | 'COMPLETED' | 'CANCELLED';
@@ -240,14 +240,12 @@ export const uploadClubImageAPI = async (file: File, clubId?: number) => {
   return unwrap<StorageObjectInfo>(response);
 };
 
-export const uploadPaymentProofAPI = async (clubId: number, file: File) => {
-  const formData = new FormData();
-  formData.append('clubId', String(clubId));
-  formData.append('file', file);
-  const response = await postData<StorageObjectInfo>(`/storage/payment-proof`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+export const getMyMembershipsAPI = async (status: ClubMemberStatus | 'all' = 'all') => {
+  const query = buildQuery({
+    status: status === 'all' ? undefined : status,
   });
-  return unwrap<StorageObjectInfo>(response);
+  const response = await getData<ClubMember[]>(`/club-members/my${query ? `?${query}` : ''}`);
+  return unwrap<ClubMember[]>(response);
 };
 
 export const joinClubByInviteCodeAPI = async (payload: JoinClubByInvitePayload) => {
