@@ -98,7 +98,7 @@ const ClubCard = ({
   onViewActivities,
 }: ClubCardProps) => {
   // const statusMeta = getStatusMeta(club.status); // <-- Đã ẩn dòng này
-  
+
   const scheduleDays = formatOperatingDays(club.operatingDays);
   const scheduleHours =
     club.operatingStartTime && club.operatingEndTime
@@ -246,8 +246,13 @@ const ClubCard = ({
           <button
             onClick={() => onViewActivities(club.id)}
             disabled={!hasActiveActivities}
-            className="group/btn flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600 disabled:opacity-50"
-            title="Xem hoạt động"
+            className={`group/btn flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors 
+            ${
+              hasActiveActivities
+                ? "hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600" // Có hoạt động: Hover sáng lên
+                : "opacity-50 cursor-not-allowed" // Không hoạt động: Mờ đi, không hover, chuột hiển thị dấu cấm
+            }`}
+            title={hasActiveActivities ? "Xem hoạt động" : "Chưa có hoạt động"}
           >
             <PartyPopper className="h-4 w-4" />
           </button>
