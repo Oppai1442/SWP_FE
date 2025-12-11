@@ -472,20 +472,20 @@ const ClubDetailDrawer = ({
     onSubmitActivity();
   };
 
-  const handleCopyInviteCode = async () => {
-    if (!club.inviteCode) {
-      showToast("error", "Mã mời không có sẵn.");
-      return;
-    }
+  // const handleCopyInviteCode = async () => {
+  //   if (!club.inviteCode) {
+  //     showToast("error", "Mã mời không có sẵn.");
+  //     return;
+  //   }
 
-    try {
-      await navigator.clipboard.writeText(club.inviteCode);
-      showToast("success", "Đã sao chép mã mời.");
-    } catch (error) {
-      console.error(error);
-      showToast("error", "Không thể sao chép mã mời.");
-    }
-  };
+  //   try {
+  //     await navigator.clipboard.writeText(club.inviteCode);
+  //     showToast("success", "Đã sao chép mã mời.");
+  //   } catch (error) {
+  //     console.error(error);
+  //     showToast("error", "Không thể sao chép mã mời.");
+  //   }
+  // };
 
   const handleDecision = (requestId: number, status: ClubJoinRequestStatus) => {
     const note =
