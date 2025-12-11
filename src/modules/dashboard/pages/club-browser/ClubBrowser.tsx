@@ -18,8 +18,8 @@ import {
   getClubSettingsAPI,
   //{** / getClubSettingsByInviteCodeAPI **/}
   joinClubByInviteCodeAPI,
-  uploadPaymentProofAPI,
   getJoinRequestHistoryAPI,
+  getMyMembershipsAPI,
   getClubActivitiesAPI,
   // Types
   type ClubSettingInfo,
@@ -72,17 +72,16 @@ const ClubBrowser = () => {
   const [joinPreview, setJoinPreview] = useState<ClubSettingInfo | null>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [paymentProof, setPaymentProof] = useState<{
-    url: string | null;
-    fileName: string | null;
-  }>({
-    url: null,
-    fileName: null,
-  });
-  const [isUploadingProof, setIsUploadingProof] = useState(false);
-  const [paymentProofError, setPaymentProofError] = useState<string | null>(
-    null
-  );
+  const [transferCode, setTransferCode] = useState('');
+
+  const createTransferCode = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return `JOIN-${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 10)}`.toUpperCase();
+  };
 
   //   Manual Invite Code
   //   const [manualInviteCode, setManualInviteCode] = useState('');
@@ -181,16 +180,26 @@ const ClubBrowser = () => {
   const fetchJoinStatuses = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const history = await getJoinRequestHistoryAPI("all");
-      const normalized: ClubJoinRequest[] = Array.isArray(history)
+      const [history, memberships] = await Promise.all([
+        getJoinRequestHistoryAPI("all"),
+        getMyMembershipsAPI("ACTIVE"),
+      ]);
+      const normalizedHistory: ClubJoinRequest[] = Array.isArray(history)
         ? history
         : [];
+      const activeMembershipIds = new Set(
+        (Array.isArray(memberships) ? memberships : [])
+          .map((membership) => membership?.clubId)
+          .filter((clubId): clubId is number => typeof clubId === "number")
+      );
 
       const map: Record<number, ClubJoinRequestStatus> = {};
-      normalized.forEach((request) => {
+      normalizedHistory.forEach((request) => {
         if (!request?.clubId) return;
-        if (request.status === "PENDING" || request.status === "APPROVED") {
-          map[request.clubId] = request.status;
+        if (request.status === "PENDING") {
+          map[request.clubId] = "PENDING";
+        } else if (request.status === "APPROVED" && activeMembershipIds.has(request.clubId)) {
+          map[request.clubId] = "APPROVED";
         }
       });
       setJoinStatusMap(map);
@@ -357,8 +366,7 @@ const ClubBrowser = () => {
     setJoinPreview(null);
     setPreviewError(null);
     setIsPreviewLoading(false);
-    setPaymentProof({ url: null, fileName: null });
-    setPaymentProofError(null);
+    setTransferCode(createTransferCode());
     setIsJoinModalOpen(true);
   };
 
@@ -369,8 +377,7 @@ const ClubBrowser = () => {
     setJoinPreview(null);
     setPreviewError(null);
     setIsPreviewLoading(false);
-    setPaymentProof({ url: null, fileName: null });
-    setPaymentProofError(null);
+    setTransferCode("");
   };
 
   useEffect(() => {
@@ -403,43 +410,7 @@ const ClubBrowser = () => {
     };
   }, [isJoinModalOpen, selectedClub]);
 
-  const handlePaymentProofUpload = useCallback(
-    async (file: File) => {
-      if (!selectedClub?.id) {
-        showToast("error", "Chọn một câu lạc bộ trước khi tải lên.");
-        return;
-      }
-      if (!file.type?.startsWith("image/")) {
-        showToast("error", "Bằng chứng thanh toán phải là hình ảnh.");
-        return;
-      }
-      const MAX_SIZE = 10 * 1024 * 1024;
-      if (file.size > MAX_SIZE) {
-        showToast("error", "File phải dưới 10MB.");
-        return;
-      }
-      try {
-        setIsUploadingProof(true);
-        setPaymentProofError(null);
-        // API uploadPaymentProofAPI trả về StorageObjectInfo có trường url
-        const uploaded = await uploadPaymentProofAPI(selectedClub.id, file);
-        setPaymentProof({ url: uploaded.url, fileName: file.name });
-        showToast("success", "Đã tải lên bằng chứng thanh toán.");
-      } catch (error) {
-        console.error(error);
-        setPaymentProofError("Không thể tải lên bằng chứng thanh toán.");
-        showToast("error", "Không thể tải lên.");
-      } finally {
-        setIsUploadingProof(false);
-      }
-    },
-    [selectedClub]
-  );
 
-  const handleRemovePaymentProof = () => {
-    setPaymentProof({ url: null, fileName: null });
-    setPaymentProofError(null);
-  };
 
   const handleJoinClub = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -450,8 +421,8 @@ const ClubBrowser = () => {
       showToast("error", "Câu lạc bộ này không có mã mời.");
       return;
     }
-    if (!paymentProof.url) {
-      showToast("error", "Tải lên bằng chứng thanh toán trước khi gửi.");
+    if (!transferCode) {
+      showToast("error", "Không thể tạo mã chuyển khoản.");
       return;
     }
     try {
@@ -459,7 +430,7 @@ const ClubBrowser = () => {
       await joinClubByInviteCodeAPI({
         inviteCode,
         motivation: joinForm.motivation.trim() || undefined,
-        paymentProofUrl: paymentProof.url,
+        transferCode,
       });
       showToast("success", "Yêu cầu tham gia đã được gửi.");
       if (selectedClub?.id) {
@@ -675,13 +646,8 @@ const ClubBrowser = () => {
           preview={joinPreview}
           isPreviewLoading={isPreviewLoading}
           previewError={previewError}
-          paymentProofUrl={paymentProof.url}
-          paymentProofFileName={paymentProof.fileName}
-          isUploadingProof={isUploadingProof}
-          proofError={paymentProofError}
-          allowUpload={Boolean(selectedClub)}
-          onUploadProof={handlePaymentProofUpload}
-          onRemoveProof={handleRemovePaymentProof}
+          transferCode={transferCode}
+          onRefreshTransferCode={() => setTransferCode(createTransferCode())}
           onChange={(field, value) =>
             setJoinForm((prev) => ({ ...prev, [field]: value }))
           }
