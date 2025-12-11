@@ -11,10 +11,6 @@ const MyClubsHeader = ({ onRefresh, onCreate, isRefreshing, exploreHref }: MyClu
   <header className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
     <div>
       <p className="text-xs uppercase tracking-[0.35em] text-orange-400">Câu lạc bộ của tôi</p>
-      <h1 className="text-2xl font-semibold text-slate-900">Quản lý câu lạc bộ của bạn</h1>
-      <p className="text-sm text-slate-500">
-        Tạo câu lạc bộ mới, theo dõi phê duyệt đang chờ xử lý và xem xét hoạt động thành viên trong một chế độ xem.
-      </p>
     </div>
     <div className="flex flex-wrap items-center gap-3">
       <button

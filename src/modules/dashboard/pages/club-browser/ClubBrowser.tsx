@@ -520,7 +520,7 @@ const ClubBrowser = () => {
                   className="w-full rounded-2xl border border-slate-200 py-2.5 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
                 />
               </div>
-              <select
+              {/* <select
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as ClubStatus | "all")
@@ -532,7 +532,7 @@ const ClubBrowser = () => {
                 <option value="REJECTED">Bị từ chối</option>
                 <option value="INACTIVE">Không hoạt động</option>
                 <option value="ARCHIVED">Đã lưu trữ</option>
-              </select>
+              </select> */}
             </div>
             <button
               type="button"

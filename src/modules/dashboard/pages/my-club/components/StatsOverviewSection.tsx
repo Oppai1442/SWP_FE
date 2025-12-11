@@ -22,13 +22,13 @@ const StatsOverviewSection = ({ stats }: StatsOverviewSectionProps) => (
       accent="bg-emerald-100 text-emerald-700"
     />
     <SummaryCard
-      label="Yêu cầu đang chờ"
+      label="Yêu cầu tạo câu lạc bộ đang chờ"
       value={stats.pendingRequests}
       icon={Calendar}
       accent="bg-amber-100 text-amber-700"
     />
     <SummaryCard
-      label="Yêu cầu bị từ chối"
+      label="Yêu cầu tạo câu lạc bộ bị từ chối"
       value={stats.rejectedRequests}
       icon={AlertTriangle}
       accent="bg-rose-100 text-rose-700"
