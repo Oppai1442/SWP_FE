@@ -7,6 +7,7 @@ import {
   Banknote,
   ChevronRight,
   PartyPopper,
+  Info,
 } from "lucide-react";
 import {
   type ClubSummary,
@@ -185,10 +186,26 @@ const ClubCard = ({
             className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${feeInfo.color} bg-opacity-50 border-opacity-50`}
           >
             <Banknote className="h-5 w-5 shrink-0 opacity-70" />
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-[10px] font-medium opacity-70 leading-none mb-0.5">
-                Phí gia nhập
-              </span>
+
+            {/* Container chữ: overflow-visible để tooltip không bị cắt */}
+            <div className="flex flex-col overflow-visible">
+              <div className="mb-0.5 flex items-center gap-1 leading-none opacity-70">
+                <span className="text-[10px] font-medium">Phí gia nhập</span>
+
+                {/* --- ICON INFO & TOOLTIP --- */}
+                <div className="group/info relative flex items-center">
+                  <Info className="h-3 w-3 cursor-help text-slate-500 transition-colors hover:text-slate-800" />
+
+                  {/* Tooltip Content */}
+                  <div className="pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-[150px] -translate-x-1/2 rounded-lg bg-slate-800 px-2 py-1.5 text-center text-[10px] font-medium leading-tight text-white opacity-0 shadow-sm transition-all group-hover/info:visible group-hover/info:translate-y-0 group-hover/info:opacity-100">
+                    Đây là phí chỉ thu 1 lần khi gia nhập
+                    {/* Mũi tên nhỏ */}
+                    <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-slate-800"></div>
+                  </div>
+                </div>
+                {/* ------------------------- */}
+              </div>
+
               <span className="truncate text-xs font-bold leading-none">
                 {feeInfo.text}
               </span>
@@ -203,7 +220,6 @@ const ClubCard = ({
                 Thành viên
               </span>
               <span className="truncate text-xs font-semibold leading-none">
-                {/* --- ĐÃ CỘNG THÊM 1 CHO LEADER Ở ĐÂY --- */}
                 {(club.memberCount ?? 0) + 1}
               </span>
             </div>
