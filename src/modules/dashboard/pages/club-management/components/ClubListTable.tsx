@@ -5,7 +5,7 @@ import type {
 } from "../../my-club/services/myClubService";
 import { useState, useMemo, useEffect } from "react";
 
-// --- Constants & Helpers ---
+// --- Hằng số & Hàm tiện ích ---
 const statusLabels: Record<ClubStatus, string> = {
   ACTIVE: "Hoạt động",
   PENDING: "Đang chờ",
@@ -24,7 +24,7 @@ const statusClasses: Record<ClubStatus, string> = {
 
 const ITEMS_PER_PAGE = 10;
 
-// --- Sub-component: Loading Skeleton ---
+// --- Component con: Hiệu ứng Loading (Skeleton) ---
 const TableLoading = () => (
   <>
     {Array.from({ length: 5 }).map((_, rowIdx) => (
@@ -55,7 +55,7 @@ export const ClubListTable = ({
   const [statusFilter, setStatusFilter] = useState<ClubStatus | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Debounce Search
+  // Xử lý tìm kiếm (Debounce)
   useEffect(() => {
     const timer = setTimeout(
       () => setDebouncedSearch(search.trim().toLowerCase()),
@@ -64,7 +64,7 @@ export const ClubListTable = ({
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Filter Logic
+  // Logic lọc và sắp xếp dữ liệu
   const filteredClubs = useMemo(() => {
     return clubs
       .filter((club) =>
@@ -81,7 +81,7 @@ export const ClubListTable = ({
       .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""));
   }, [clubs, statusFilter, debouncedSearch]);
 
-  // Pagination Logic
+  // Logic phân trang
   useEffect(() => setCurrentPage(1), [statusFilter, debouncedSearch]);
   const totalCount = filteredClubs.length;
   const pageCount = Math.max(
@@ -96,7 +96,7 @@ export const ClubListTable = ({
 
   return (
     <section className="mt-8 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-      {/* Search & Filter Bar */}
+      {/* Thanh tìm kiếm & Bộ lọc trạng thái */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -124,7 +124,7 @@ export const ClubListTable = ({
         </select>
       </div>
 
-      {/* Table */}
+      {/* Bảng danh sách câu lạc bộ */}
       <div className="mt-6 overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-100 text-left text-sm">
           <thead>
@@ -163,7 +163,7 @@ export const ClubListTable = ({
                     {club.category ?? "—"}
                   </td>
                   <td className="px-4 py-4 text-slate-500">
-                    {club.memberCount+1}
+                    {(club.memberCount ?? 0) + 1}
                   </td>
                   <td className="px-4 py-4">
                     <span
@@ -194,7 +194,7 @@ export const ClubListTable = ({
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Điều hướng phân trang */}
       {pageCount > 1 && !isLoading && (
         <div className="mt-6 flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>

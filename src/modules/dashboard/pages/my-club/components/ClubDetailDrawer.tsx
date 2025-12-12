@@ -551,11 +551,9 @@ const ClubDetailDrawer = ({
                 label="Ngày thành lập"
                 value={formatDate(club.foundedDate)}
               />
-
-              {/* --- ĐÃ SỬA: CỘNG THÊM 1 VÀO SỐ LƯỢNG THÀNH VIÊN --- */}
               <DetailItem
                 label="Thành viên"
-                value={`${club.memberCount+1}`}
+                value={`${(club.memberCount ?? 0) + 1}`}
               />
 
               <DetailItem
@@ -1038,7 +1036,7 @@ const ClubDetailDrawer = ({
                 </div>
               ) : activities.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-500">
-                  Chưa có hoạt động nào được xuất bản.
+                  Chưa có hoạt động nào, hãy thêm hoạt động mới cho câu lạc bộ của bạn.
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -1511,7 +1509,7 @@ const BankInstructionCard = ({
           </div>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <label className="flex-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Phí tham gia (VND)
+              Phí thành viên hằng tháng (VND)
               <input
                 type="number"
                 min="0"

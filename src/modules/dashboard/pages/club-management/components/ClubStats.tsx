@@ -12,6 +12,7 @@ interface SummaryCardProps {
   accent: string;
 }
 
+// --- Component con: Thẻ hiển thị số liệu thống kê ---
 const SummaryCard = ({
   label,
   value,
@@ -40,6 +41,7 @@ interface ClubStatsProps {
 }
 
 export const ClubStats = ({ clubs }: ClubStatsProps) => {
+  // Logic: Tính toán tổng quan số lượng dựa trên trạng thái
   const stats = useMemo(() => {
     const result: Record<"total" | ClubStatus, number> = {
       total: clubs.length,
