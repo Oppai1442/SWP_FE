@@ -555,7 +555,7 @@ const ClubDetailDrawer = ({
               {/* --- ĐÃ SỬA: CỘNG THÊM 1 VÀO SỐ LƯỢNG THÀNH VIÊN --- */}
               <DetailItem
                 label="Thành viên"
-                value={`${(club.memberCount ?? 1) + 0}`}
+                value={`${club.memberCount+1}`}
               />
 
               <DetailItem

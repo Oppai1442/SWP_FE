@@ -163,7 +163,7 @@ export const ClubListTable = ({
                     {club.category ?? "—"}
                   </td>
                   <td className="px-4 py-4 text-slate-500">
-                    {(club.memberCount ?? 1) + 0}
+                    {club.memberCount+1}
                   </td>
                   <td className="px-4 py-4">
                     <span
