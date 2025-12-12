@@ -108,12 +108,15 @@ const formatDateTimeLocalInput = (value?: string | null) => {
 
 
 
-const toIsoOrUndefined = (value?: string | null) => {
+const buildDateTimePayload = (value?: string | null) => {
   if (!value) return undefined;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return undefined;
-  return date.toISOString();
-
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  let normalized = trimmed.replace("T", " ");
+  if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(normalized)) {
+    normalized = `${normalized}:00`;
+  }
+  return normalized;
 };
 
 
@@ -713,8 +716,8 @@ const MyClubs = () => {
       const payload = {
         title: activityForm.title.trim(),
         description: activityForm.description.trim() || undefined,
-        startDate: toIsoOrUndefined(activityForm.startDate),
-        endDate: toIsoOrUndefined(activityForm.endDate),
+        startDate: buildDateTimePayload(activityForm.startDate),
+        endDate: buildDateTimePayload(activityForm.endDate),
         location: activityForm.location.trim() || undefined,
         budget: activityForm.budget ? Number(activityForm.budget) : undefined,
         status: activityForm.status,
@@ -764,7 +767,7 @@ const MyClubs = () => {
         return;
       }
       const confirmed = window.confirm(
-        `Chuyển giao quyền lãnh đạo của ${selectedClub.name} cho ${targetMember.memberName ?? 'thành viên này'}?`
+        `Chuyển giao chức trưởng club của ${selectedClub.name} cho ${targetMember.memberName ?? 'thành viên này'}?`
       );
       if (!confirmed) {
         return;
@@ -822,10 +825,10 @@ const MyClubs = () => {
             return member;
           }),
         }));
-        showToast('success', 'Quyền lãnh đạo đã được chuyển giao.');
+        showToast('success', 'Chức trưởng club đã được chuyển giao.');
       } catch (error) {
         console.error(error);
-        showToast('error', 'Không thể chuyển giao quyền lãnh đạo.');
+        showToast('error', 'Không thể chuyển giao chức trưởng club.');
       } finally {
         setMemberLoadingState(affectedIds, false);
       }
@@ -847,7 +850,7 @@ const MyClubs = () => {
       if (!selectedClub) return;
       const clubId = selectedClub.id;
       if (member.memberId === getClubLeaderId(selectedClub)) {
-        showToast('error', 'Hãy chuyển giao quyền lãnh đạo trước khi xóa thành viên này.');
+        showToast('error', 'Hãy chuyển giao chức trưởng club trước khi xóa thành viên này.');
         return;
       }
       const confirmed = window.confirm(
@@ -900,7 +903,7 @@ const MyClubs = () => {
     }
     const clubId = selectedClub.id;
     if (isCurrentLeader) {
-      showToast('error', 'Hãy chuyển giao quyền lãnh đạo trước khi rời câu lạc bộ.');
+      showToast('error', 'Hãy chuyển giao chức trưởng club trước khi rời câu lạc bộ.');
       return;
     }
     const confirmed = window.confirm('Rời khỏi câu lạc bộ này? Bạn sẽ mất quyền truy cập vào các tài nguyên của nó.');

@@ -72,11 +72,11 @@ export const activityStatusMeta: Record<
 };
 
 export const detailTabs = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'members', label: 'Members' },
-  { id: 'activities', label: 'Activities' },
-  { id: 'requests', label: 'Join requests' },
-  { id: 'settings', label: 'Settings' },
+  { id: 'overview', label: 'Tổng quan' },
+  { id: 'members', label: 'Thành viên' },
+  { id: 'activities', label: 'Hoạt động' },
+  { id: 'requests', label: 'Yêu cầu tham gia' },
+  { id: 'settings', label: 'Cài đặt' },
 ] as const;
 
 export type DetailTab = (typeof detailTabs)[number]['id'];
