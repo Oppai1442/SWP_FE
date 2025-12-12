@@ -19,6 +19,10 @@ import {
   type ClubCreationRequestStatus,
 } from "./services/clubCreationQueueService";
 import { showToast } from "@/utils";
+import {
+  getClubDetailAPI,
+  type ClubDetail,
+} from "../my-club/services/myClubService";
 
 // --- Types & Constants ---
 type StatusFilter = ClubCreationRequestStatus | "all";
@@ -75,6 +79,10 @@ const ClubCreationQueue = () => {
     useState<ClubCreationRequestStatus | null>(null);
   const [decisionNote, setDecisionNote] = useState("");
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
+  const [selectedClubDetail, setSelectedClubDetail] =
+    useState<ClubDetail | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   // --- Logic Hooks ---
   const fetchRequests = useCallback(async () => {
@@ -190,7 +198,44 @@ const ClubCreationQueue = () => {
     setSelectedRequest(null);
     setDecisionMode(null);
     setDecisionNote("");
+    setSelectedClubDetail(null);
+    setDetailError(null);
+    setIsDetailLoading(false);
   };
+
+  useEffect(() => {
+    if (!selectedRequest?.clubId) {
+      setSelectedClubDetail(null);
+      setIsDetailLoading(false);
+      setDetailError(null);
+      return;
+    }
+    let cancelled = false;
+    const fetchDetail = async () => {
+      try {
+        setIsDetailLoading(true);
+        setDetailError(null);
+        const detail = await getClubDetailAPI(selectedRequest.clubId!);
+        if (!cancelled) {
+          setSelectedClubDetail(detail);
+        }
+      } catch (error) {
+        console.error(error);
+        if (!cancelled) {
+          setDetailError("Không thể tải thông tin chi tiết của câu lạc bộ.");
+          setSelectedClubDetail(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsDetailLoading(false);
+        }
+      }
+    };
+    void fetchDetail();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedRequest?.clubId]);
 
   // --- Render ---
   return (
@@ -460,6 +505,9 @@ const ClubCreationQueue = () => {
             setDecisionMode(null);
             setDecisionNote("");
           }}
+          clubDetail={selectedClubDetail}
+          isDetailLoading={isDetailLoading}
+          detailError={detailError}
         />
       )}
     </div>
@@ -555,6 +603,9 @@ const DetailModal = ({
   onSubmitDecision,
   isSubmitting,
   onCancelDecision,
+  clubDetail,
+  isDetailLoading,
+  detailError,
 }: any) => {
   if (!isOpen) return null;
 
@@ -594,8 +645,7 @@ const DetailModal = ({
 
         {/* Modal Body (Scrollable) */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <InfoItem
               label="Trưởng nhóm"
               value={request.submittedByName}
@@ -618,7 +668,92 @@ const DetailModal = ({
             </div>
           </div>
 
-          {/* Admin Note if exists */}
+          <div className="rounded-2xl border border-slate-100 bg-white shadow-sm p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-600">
+                Thông tin chi tiết câu lạc bộ
+              </p>
+              {clubDetail?.imageUrl && (
+                <img
+                  src={clubDetail.imageUrl}
+                  alt={clubDetail.name ?? "Club cover"}
+                  className="h-16 w-16 rounded-xl object-cover border border-slate-100"
+                />
+              )}
+            </div>
+            {isDetailLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="h-12 rounded-xl bg-slate-100 animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : detailError ? (
+              <div className="rounded-xl border border-rose-100 bg-rose-50/60 p-4 text-sm text-rose-600">
+                {detailError}
+              </div>
+            ) : clubDetail ? (
+              <>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <InfoItem
+                    label="Tên câu lạc bộ"
+                    value={clubDetail.name}
+                    subValue={clubDetail.code ? `#${clubDetail.code}` : null}
+                  />
+                  <InfoItem
+                    label="Danh mục"
+                    value={clubDetail.category ?? "Chưa cập nhật"}
+                  />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <InfoItem
+                    label="Sứ mệnh"
+                    value={clubDetail.mission ?? "Chưa cập nhật"}
+                  />
+                  <InfoItem
+                    label="Vị trí hoạt động"
+                    value={clubDetail.meetingLocation ?? "Chưa có thông tin"}
+                  />
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                <InfoItem
+                  label="Lịch hoạt động"
+                  value={
+                    clubDetail.operatingDays?.length
+                      ? formatOperatingDaysDisplay(clubDetail.operatingDays)
+                      : "Chưa cấu hình"
+                  }
+                />
+                  <InfoItem
+                    label="Khung giờ hoạt động"
+                    value={
+                      clubDetail.operatingStartTime &&
+                      clubDetail.operatingEndTime
+                        ? `${clubDetail.operatingStartTime} - ${clubDetail.operatingEndTime}`
+                        : "Chưa cấu hình"
+                    }
+                  />
+                </div>
+                {clubDetail.description && (
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-400 mb-1.5">
+                      Mô tả
+                    </p>
+                    <p className="text-sm text-slate-700 leading-relaxed">
+                      {clubDetail.description}
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-slate-500">
+                Không có dữ liệu chi tiết cho câu lạc bộ này.
+              </p>
+            )}
+          </div>
+
           {request.note && (
             <div className="rounded-2xl bg-slate-50 border border-slate-100 p-4">
               <p className="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-1">
@@ -630,7 +765,6 @@ const DetailModal = ({
             </div>
           )}
 
-          {/* Decision Section */}
           {request.status === "PENDING" && (
             <div
               className={`mt-6 rounded-2xl border transition-all duration-300 overflow-hidden ${
@@ -751,3 +885,20 @@ const InfoItem = ({ label, value, subValue, mono }: any) => (
 );
 
 export default ClubCreationQueue;
+
+const DAY_LABELS: Record<string, string> = {
+  MONDAY: "Thứ 2",
+  TUESDAY: "Thứ 3",
+  WEDNESDAY: "Thứ 4",
+  THURSDAY: "Thứ 5",
+  FRIDAY: "Thứ 6",
+  SATURDAY: "Thứ 7",
+  SUNDAY: "Chủ nhật",
+};
+
+const formatOperatingDaysDisplay = (days?: string[] | null) => {
+  if (!days || !days.length) {
+    return "";
+  }
+  return days.map((day) => DAY_LABELS[day] ?? day).join(", ");
+};

@@ -156,6 +156,14 @@ const toGmt7Millis = (value?: string | null) => {
   return timestamp + GMT7_OFFSET_MS;
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  PRESIDENT: "Trưởng câu lạc bộ",
+  MEMBER: "Thành viên",
+};
+
+const formatRoleLabel = (role?: string | null) =>
+  role ? ROLE_LABELS[role] ?? role : "---";
+
 const getRuntimeStatusMeta = (activity: ClubActivity) => {
   const now = Date.now() + GMT7_OFFSET_MS;
   const start = toGmt7Millis(activity.startDate);
@@ -750,7 +758,7 @@ const ClubDetailDrawer = ({
                       <p className="text-xs text-slate-500">
                         Vai trò:{" "}
                         <span className="font-semibold text-slate-800">
-                          {selfMember.role}
+                          {formatRoleLabel(selfMember.role)}
                         </span>
                         {selfMember.joinedAt && (
                           <span className="ml-2">
@@ -760,7 +768,7 @@ const ClubDetailDrawer = ({
                       </p>
                       {isCurrentLeader && (
                         <p className="text-xs text-amber-600">
-                          Chuyển giao quyền lãnh đạo cho thành viên khác trước
+                          Chuyển giao chức trưởng club cho thành viên khác trước
                           khi rời câu lạc bộ này.
                         </p>
                       )}
@@ -779,7 +787,7 @@ const ClubDetailDrawer = ({
                     >
                       <LogOut className="h-4 w-4" />
                       {isCurrentLeader
-                        ? "Chuyển giao quyền lãnh đạo để rời đi"
+                        ? "Chuyển giao chức trưởng club để rời đi"
                         : isLeavingClub
                         ? "Đang rời đi..."
                         : "Rời câu lạc bộ"}
@@ -806,7 +814,6 @@ const ClubDetailDrawer = ({
                       <tr>
                         <th className="px-4 py-3 text-left">Thành viên</th>
                         <th className="px-4 py-3 text-left">Vai trò</th>
-                        <th className="px-4 py-3 text-left">Trạng thái</th>
                         <th className="px-4 py-3 text-left">Tham gia</th>
                         {showMemberActions && (
                           <th className="px-4 py-3 text-right">Hành động</th>
@@ -834,10 +841,7 @@ const ClubDetailDrawer = ({
                               {member.memberName ?? "Unknown"}
                             </td>
                             <td className="px-4 py-3 text-slate-500">
-                              {member.role}
-                            </td>
-                            <td className="px-4 py-3 text-slate-500">
-                              {member.status}
+                              {formatRoleLabel(member.role)}
                             </td>
                             <td className="px-4 py-3 text-slate-500">
                               {formatDate(member.joinedAt)}
@@ -937,7 +941,7 @@ const ClubDetailDrawer = ({
                         {isCreatingActivity && (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         )}
-                        {isEditingActivity ? "Lưu thay đổi" : "Xuất bản"}
+                        {isEditingActivity ? "Lưu thay đổi" : "Tạo sự kiện"}
                       </button>
                     </div>
                   </div>
