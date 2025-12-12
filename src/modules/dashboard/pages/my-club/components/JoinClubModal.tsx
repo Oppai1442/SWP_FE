@@ -25,21 +25,22 @@ export interface JoinClubModalProps {
   inviteCodeHint?: string;
 }
 
-const JoinClubModal = ({
-  form,
-  isSubmitting,
-  preview,
-  isPreviewLoading,
-  previewError,
-  transferCode,
-  onRefreshTransferCode,
-  onChange,
-  onSubmit,
-  onClose,
-  // modalTitle = 'Nhập mã mời của bạn',
-  // showInviteCodeInput = false,
-  // inviteCodeHint,
-}: JoinClubModalProps) => {
+const JoinClubModal = (props: JoinClubModalProps) => {
+  const {
+    form,
+    isSubmitting,
+    preview,
+    isPreviewLoading,
+    previewError,
+    transferCode,
+    onRefreshTransferCode,
+    onChange,
+    onSubmit,
+    onClose,
+    modalTitle = 'Nhập mã mời của bạn',
+    showInviteCodeInput = false,
+    inviteCodeHint,
+  } = props;
   const [modalTab, setModalTab] = useState<'details' | 'payment'>('details');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle');
   const [isQrExpanded, setIsQrExpanded] = useState(false);
@@ -330,3 +331,5 @@ const JoinClubModal = ({
 };
 
 export default JoinClubModal;
+
+
