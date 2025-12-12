@@ -42,7 +42,6 @@ const isSettingsComplete = (settings?: ClubSettingInfo | null) =>
       settings.bankId?.trim() &&
       settings.bankAccountNumber?.trim() &&
       settings.bankAccountName?.trim() &&
-      settings.bankTransferNote?.trim() &&
       settings.joinFee !== undefined &&
       settings.joinFee !== null
   );

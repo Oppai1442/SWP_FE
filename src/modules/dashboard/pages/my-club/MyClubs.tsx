@@ -184,7 +184,6 @@ const MyClubs = () => {
     imageFileName: '',
     meetingLocation: '',
     mission: '',
-    foundedDate: '',
     operatingDays: [],
     operatingStartTime: '',
     operatingEndTime: '',
@@ -196,7 +195,6 @@ const MyClubs = () => {
     bankId: '',
     bankAccountNumber: '',
     bankAccountName: '',
-    bankTransferNote: '',
     joinFee: '',
   });
   const [isSavingBankSettings, setIsSavingBankSettings] = useState(false);
@@ -489,32 +487,19 @@ const MyClubs = () => {
 
 
   useEffect(() => {
-    if (!selectedClub) {
+    if (!selectedClub || !selectedClubSettings) {
       setBankForm({
         bankId: '',
         bankAccountNumber: '',
         bankAccountName: '',
-        bankTransferNote: '',
         joinFee: '',
       });
-      return;
-    }
-    if (!selectedClubSettings) {
-      setBankForm((prev) => ({
-        ...prev,
-        bankTransferNote: selectedClub.code ?? selectedClub.name ?? '',
-      }));
       return;
     }
     setBankForm({
       bankId: selectedClubSettings.bankId ?? '',
       bankAccountNumber: selectedClubSettings.bankAccountNumber ?? '',
       bankAccountName: selectedClubSettings.bankAccountName ?? '',
-      bankTransferNote:
-        selectedClubSettings.bankTransferNote ??
-        selectedClubSettings.clubCode ??
-        selectedClubSettings.clubName ??
-        '',
       joinFee:
         selectedClubSettings.joinFee !== undefined && selectedClubSettings.joinFee !== null
           ? String(selectedClubSettings.joinFee)
@@ -537,7 +522,6 @@ const MyClubs = () => {
       imageFileName: '',
       meetingLocation: '',
       mission: '',
-      foundedDate: '',
       operatingDays: [],
       operatingStartTime: '',
       operatingEndTime: '',
@@ -572,7 +556,6 @@ const MyClubs = () => {
       await createClubAPI({
         ...payload,
         imageUrl: payload.imageUrl || undefined,
-        foundedDate: payload.foundedDate || null,
       });
       showToast('success', 'Yêu cầu tạo câu lạc bộ đã được gửi thành công.');
       setIsCreateModalOpen(false);
@@ -989,7 +972,6 @@ const MyClubs = () => {
       bankId: bankForm.bankId.trim(),
       bankAccountNumber: bankForm.bankAccountNumber.trim(),
       bankAccountName: bankForm.bankAccountName.trim(),
-      bankTransferNote: bankForm.bankTransferNote.trim(),
       joinFee: bankForm.joinFee.trim(),
     };
 
@@ -1010,7 +992,6 @@ const MyClubs = () => {
         bankId: payload.bankId,
         bankAccountNumber: payload.bankAccountNumber,
         bankAccountName: payload.bankAccountName,
-        bankTransferNote: payload.bankTransferNote,
       });
       setSettingsCache((prev) => ({ ...prev, [selectedClub.id]: updated }));
       showToast('success', 'Hướng dẫn ngân hàng đã được cập nhật.');

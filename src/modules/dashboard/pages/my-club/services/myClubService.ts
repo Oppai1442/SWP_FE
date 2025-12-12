@@ -42,7 +42,6 @@ export interface CreateClubPayload {
   operatingStartTime?: string;
   operatingEndTime?: string;
   mission?: string;
-  foundedDate?: string | null;
   advisorId?: number | null;
 }
 
@@ -75,7 +74,6 @@ export interface ClubSettingInfo {
   bankId?: string | null;
   bankAccountNumber?: string | null;
   bankAccountName?: string | null;
-  bankTransferNote?: string | null;
 }
 
 export type ClubJoinRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';

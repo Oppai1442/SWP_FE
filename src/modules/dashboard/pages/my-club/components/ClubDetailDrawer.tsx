@@ -1444,11 +1444,7 @@ const BankInstructionCard = ({
     club.name ??
     "";
   const transferNote =
-    (canManage ? bankForm.bankTransferNote : settings?.bankTransferNote) ??
-    settings?.clubCode ??
-    club.code ??
-    club.name ??
-    "";
+    settings?.clubCode ?? club.code ?? club.name ?? "";
   const qrUrl = buildVietQrUrl({
     bankId,
     bankAccountNumber: accountNo,
@@ -1471,7 +1467,7 @@ const BankInstructionCard = ({
       </div>
       {canManage ? (
         <div className="mt-4 space-y-3">
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 md:grid-cols-1">
             <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Mã ngân hàng
               <input
@@ -1506,18 +1502,6 @@ const BankInstructionCard = ({
                 }
                 className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="NGUYEN VAN A"
-              />
-            </label>
-            <label className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Ghi chú chuyển khoản{" "}
-              <input
-                type="text"
-                value={bankForm.bankTransferNote}
-                onChange={(event) =>
-                  onChange("bankTransferNote", event.target.value)
-                }
-                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                placeholder={`THAM GIA-${club.code ?? "CAULACBO"}`}
               />
             </label>
           </div>

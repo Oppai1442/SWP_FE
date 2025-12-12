@@ -19,7 +19,6 @@ interface CreateClubForm {
   imageFileName?: string;
   meetingLocation: string;
   mission: string;
-  foundedDate: string;
   operatingDays: string[];
   operatingStartTime: string;
   operatingEndTime: string;
@@ -227,17 +226,6 @@ return (
                             placeholder="Tòa nhà A3, phòng 204..."
                         />
                         </div>
-                    </div>
-                    <div>
-                        <label className="text-xs font-bold uppercase tracking-wide text-slate-500">
-                        Ngày thành lập
-                        </label>
-                        <input
-                        type="date"
-                        value={form.foundedDate}
-                        onChange={(event) => onChange('foundedDate', event.target.value)}
-                        className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/30 px-4 py-2.5 text-sm font-medium outline-none transition focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
-                        />
                     </div>
                 </div>
 

@@ -53,7 +53,6 @@ const JoinClubModal = ({
     const trimmedCode = sanitizedTransferCode.trim();
     return (
       trimmedCode ||
-      preview?.bankTransferNote ||
       preview?.clubCode ||
       preview?.clubName ||
       ''
