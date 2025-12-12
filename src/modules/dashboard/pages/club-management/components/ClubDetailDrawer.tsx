@@ -85,7 +85,7 @@ const ROLE_LABELS: Record<string, string> = {
 const formatRoleLabel = (role?: string | null) =>
   role ? ROLE_LABELS[role] ?? role : "---";
 
-// --- Sub-Component: Hiển thị 1 dòng thông tin ---
+// --- Sub-Component: Hiển thị một mục thông tin ---
 const DetailItem = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
     <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
@@ -93,7 +93,7 @@ const DetailItem = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-// --- Sub-Component: Nội dung chính của từng Tab ---
+// --- Sub-Component: Render nội dung theo từng Tab ---
 interface DetailContentProps {
   tab: DetailTab;
   club: ClubDetail;
@@ -113,18 +113,18 @@ const DetailContent = ({
   history = [],
   isActivitiesLoading = false,
 }: DetailContentProps) => {
-  // --- Logic chung: Xử lý danh sách thành viên & Leader ---
-  // Mục đích: Dùng chung cho cả tab "Tổng quan" (để đếm số lượng) và tab "Thành viên" (để hiển thị)
+  // --- Logic chung: Chuẩn hóa dữ liệu thành viên và Trưởng nhóm (Leader) ---
+  // Sử dụng chung cho tab "Tổng quan" (để đếm số lượng) và tab "Thành viên" (để hiển thị danh sách).
   const leaderId = club.leaderId ?? club.presidentId;
   const leaderName =
     club.leaderName ?? club.presidentName ?? "Trưởng nhóm câu lạc bộ";
 
-  // Kiểm tra xem Leader đã có trong danh sách members chưa
+  // Kiểm tra Leader đã tồn tại trong danh sách thành viên hay chưa
   const isLeaderInList = members.some(
     (member) => member.memberId === leaderId || member.role === "PRESIDENT"
   );
 
-  // Nếu chưa có, ta tạo một danh sách ảo bao gồm cả Leader
+  // Nếu chưa tồn tại, bổ sung Leader vào danh sách hiển thị
   const resolvedMembers: ClubMember[] =
     Boolean(leaderId && leaderName) && !isLeaderInList
       ? [
@@ -143,8 +143,7 @@ const DetailContent = ({
         ]
       : members;
 
-  // Tính tổng số thành viên thực tế (bao gồm Leader)
-  const realMemberCount = resolvedMembers.length+1;
+  const realMemberCount = resolvedMembers.length;
 
   // --- 1. Tab Tổng quan ---
   if (tab === "overview") {
@@ -152,7 +151,7 @@ const DetailContent = ({
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <DetailItem label="Danh mục" value={club.category ?? "Không áp dụng"} />
         <DetailItem label="Leader" value={leaderName} />
-        {/* Đã sửa: Sử dụng số lượng thực tế đã tính toán thay vì club.memberCount */}
+        {/* Lưu ý: Hiển thị số lượng thực tế đã tính toán thay vì club.memberCount */}
         <DetailItem label="Số thành viên" value={String(realMemberCount)} />
         <DetailItem
           label="Ngày thành lập"
@@ -192,7 +191,9 @@ const DetailContent = ({
                 <td className="px-4 py-3 font-medium text-slate-900">
                   {member.memberName ?? "Không rõ"}
                 </td>
-                <td className="px-4 py-3 text-slate-500">{formatRoleLabel(member.role)}</td>
+                <td className="px-4 py-3 text-slate-500">
+                  {formatRoleLabel(member.role)}
+                </td>
                 <td className="px-4 py-3 text-slate-500">
                   {formatDate(member.joinedAt)}
                 </td>
@@ -279,7 +280,7 @@ const DetailContent = ({
     );
   }
 
-  // --- 4. Tab Cài đặt (Đã thêm QR Code) ---
+  // --- 4. Tab Cài đặt (Bao gồm mã QR) ---
   if (tab === "settings") {
     if (!settings)
       return (
@@ -288,74 +289,80 @@ const DetailContent = ({
         </p>
       );
 
-    // Tạo link QR VietQR
+    // Tạo đường dẫn sinh mã QR VietQR
+    // UPDATE: Đã xóa settings.bankTransferNote vì Interface không hỗ trợ
     const qrUrl =
       settings.bankId && settings.bankAccountNumber
         ? `https://img.vietqr.io/image/${settings.bankId}-${
             settings.bankAccountNumber
-          }-compact.png?amount=${settings.joinFee ?? 0}&addInfo=${encodeURIComponent(
-            settings.bankTransferNote ?? ""
-          )}&accountName=${encodeURIComponent(settings.bankAccountName ?? "")}`
+          }-compact.png?amount=${
+            settings.joinFee ?? 0
+          }&addInfo=&accountName=${encodeURIComponent(
+            settings.bankAccountName ?? ""
+          )}`
         : null;
 
     return (
       <div className="mt-6 space-y-4">
-        {/* Phần hiển thị QR Code */}
+        {/* Khu vực hiển thị mã QR */}
         {qrUrl && (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 p-6">
             <div className="rounded-lg bg-white p-2 shadow-sm">
-               <img src={qrUrl} alt="Mã QR Chuyển khoản" className="h-48 w-48 object-contain" />
+              <img
+                src={qrUrl}
+                alt="Mã QR Chuyển khoản"
+                className="h-48 w-48 object-contain"
+              />
             </div>
             <p className="mt-3 text-sm font-medium text-slate-500">
               Quét mã để thanh toán phí gia nhập
             </p>
             <p className="text-xs font-bold text-orange-500 mt-1">
-                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(settings.joinFee ?? 0)}
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(settings.joinFee ?? 0)}
             </p>
           </div>
         )}
 
-        {/* Thông tin chi tiết */}
+        {/* Thông tin tài khoản ngân hàng */}
         <div className="grid gap-4 md:grid-cols-2">
-            <DetailItem
-              label="Ngân hàng"
-              value={settings.bankId ?? "—"}
-            />
-            <DetailItem
-              label="Số tài khoản"
-              value={settings.bankAccountNumber ?? "—"}
-            />
-            <DetailItem
-              label="Tên tài khoản"
-              value={settings.bankAccountName ?? "—"}
-            />
-            <DetailItem
-              label="Phí gia nhập"
-              value={settings.joinFee ? `${settings.joinFee.toLocaleString()} VND` : "Miễn phí"}
-            />
-        </div>
-        
-        <div className="space-y-3">
-             <DetailItem
-              label="Ghi chú chuyển khoản"
-              value={settings.bankTransferNote ?? "—"}
-            />
+          <DetailItem label="Ngân hàng" value={settings.bankId ?? "—"} />
+          <DetailItem
+            label="Số tài khoản"
+            value={settings.bankAccountNumber ?? "—"}
+          />
+          <DetailItem
+            label="Tên tài khoản"
+            value={settings.bankAccountName ?? "—"}
+          />
+          <DetailItem
+            label="Phí gia nhập"
+            value={
+              settings.joinFee
+                ? `${settings.joinFee.toLocaleString()} VND`
+                : "Miễn phí"
+            }
+          />
         </div>
 
-        <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <DetailItem
-              label="Yêu cầu phê duyệt"
-              value={settings.requireApproval ? "Có" : "Không"}
-            />
-            <DetailItem
-              label="Danh sách chờ"
-              value={settings.allowWaitlist ? "Cho phép" : "Không"}
-            />
-            <DetailItem
-              label="Thông báo"
-              value={settings.enableNotifications ? "Bật" : "Tắt"}
-            />
-        </div>
+        {/* UPDATE: Đã xóa phần hiển thị "Ghi chú chuyển khoản" vì không có dữ liệu */}
+
+        {/* <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <DetailItem
+            label="Yêu cầu phê duyệt"
+            value={settings.requireApproval ? "Có" : "Không"}
+          />
+          <DetailItem
+            label="Danh sách chờ"
+            value={settings.allowWaitlist ? "Cho phép" : "Không"}
+          />
+          <DetailItem
+            label="Thông báo"
+            value={settings.enableNotifications ? "Bật" : "Tắt"}
+          />
+        </div> */}
       </div>
     );
   }
@@ -397,7 +404,7 @@ const DetailContent = ({
   );
 };
 
-// --- Main Drawer Component ---
+// --- Component chính: Drawer chi tiết câu lạc bộ ---
 interface ClubDetailDrawerProps {
   clubSummary: ClubSummary;
   club: ClubDetail | null;
@@ -446,7 +453,7 @@ export const ClubDetailDrawer = ({
         </div>
 
         <div className="px-6 py-5 space-y-6">
-          {/* Ảnh đại diện (View Only) */}
+          {/* Ảnh bìa / Avatar (Chế độ xem) */}
           <div className="overflow-hidden rounded-3xl border border-slate-100 bg-slate-50 h-64 relative w-full">
             {resolved.imageUrl ? (
               <img
@@ -464,7 +471,7 @@ export const ClubDetailDrawer = ({
             )}
           </div>
 
-          {/* Tabs Navigation */}
+          {/* Điều hướng Tabs */}
           <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
             {detailTabs.map((t) => (
               <button
@@ -481,7 +488,7 @@ export const ClubDetailDrawer = ({
             ))}
           </div>
 
-          {/* Tab Content */}
+          {/* Nội dung chi tiết của Tab */}
           {isLoading ? (
             <div className="py-12 flex justify-center text-slate-400">
               <Loader2 className="animate-spin h-5 w-5" />

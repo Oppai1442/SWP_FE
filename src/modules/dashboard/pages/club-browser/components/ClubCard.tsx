@@ -15,7 +15,11 @@ import {
   type ClubJoinRequestStatus,
 } from "../../my-club/services/myClubService";
 
-// --- Helpers ---
+// ==========================================
+// 1. CÁC HÀM TIỆN ÍCH (HELPER FUNCTIONS)
+// ==========================================
+
+// Bảng map tên ngày sang tiếng Việt viết tắt
 const WEEKDAY_LABELS: Record<string, string> = {
   MONDAY: "T2",
   TUESDAY: "T3",
@@ -26,57 +30,66 @@ const WEEKDAY_LABELS: Record<string, string> = {
   SUNDAY: "CN",
 };
 
+/**
+ * Định dạng danh sách ngày hoạt động
+ * VD: ["MONDAY", "WEDNESDAY"] -> "T2, T4"
+ */
 const formatOperatingDays = (days?: string[] | null) => {
   if (!days || days.length === 0) return null;
   if (days.length === 7) return "Cả tuần";
   return days.map((day) => WEEKDAY_LABELS[day] ?? day).join(", ");
 };
 
+/**
+ * Định dạng hiển thị tiền tệ (VND)
+ * Xử lý các trường hợp: Null, Miễn phí (0đ), và Có phí
+ */
 const formatMoney = (amount?: number | null) => {
-  if (amount === undefined || amount === null)
-    return { text: "---", color: "text-slate-500 bg-slate-100" };
-  if (amount === 0)
+  // Trường hợp chưa có dữ liệu
+  if (amount === undefined || amount === null) {
+    return { 
+      text: "---", 
+      color: "text-slate-500 bg-slate-100 border-slate-200" 
+    };
+  }
+  
+  // Trường hợp miễn phí
+  if (amount === 0) {
     return {
       text: "Miễn phí",
       color: "text-emerald-600 bg-emerald-50 border-emerald-100",
     };
+  }
+
+  // Trường hợp có phí -> Format tiền Việt
   const formatted = new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
   }).format(amount);
-  return { text: formatted, color: "text-blue-600 bg-blue-50 border-blue-100" };
+  
+  return { 
+    text: formatted, 
+    color: "text-blue-600 bg-blue-50 border-blue-100" 
+  };
 };
 
-// --- PHẦN ẨN (COMMENTED OUT) THEO YÊU CẦU ---
-/*
+/* // --- PHẦN CODE CŨ (ĐÃ ẨN) ---
+// Logic hiển thị trạng thái CLB (Active, Pending...)
 const STATUS_META: Record<ClubStatus, { label: string; className: string }> = {
-  ACTIVE: {
-    label: "Hoạt động",
-    className: "bg-emerald-500 text-white shadow-emerald-200",
-  },
-  PENDING: {
-    label: "Chờ duyệt",
-    className: "bg-amber-500 text-white shadow-amber-200",
-  },
-  REJECTED: {
-    label: "Từ chối",
-    className: "bg-rose-500 text-white shadow-rose-200",
-  },
-  INACTIVE: {
-    label: "Tạm dừng",
-    className: "bg-slate-500 text-white shadow-slate-200",
-  },
-  ARCHIVED: {
-    label: "Lưu trữ",
-    className: "bg-slate-400 text-white shadow-slate-200",
-  },
+  ACTIVE: { label: "Hoạt động", className: "bg-emerald-500 text-white shadow-emerald-200" },
+  PENDING: { label: "Chờ duyệt", className: "bg-amber-500 text-white shadow-amber-200" },
+  REJECTED: { label: "Từ chối", className: "bg-rose-500 text-white shadow-rose-200" },
+  INACTIVE: { label: "Tạm dừng", className: "bg-slate-500 text-white shadow-slate-200" },
+  ARCHIVED: { label: "Lưu trữ", className: "bg-slate-400 text-white shadow-slate-200" },
 };
-
 const getStatusMeta = (status: ClubStatus) =>
   STATUS_META[status] ?? { label: "N/A", className: "bg-slate-400 text-white" };
 */
 
-// --- Main Component ---
+// ==========================================
+// 2. COMPONENT CHÍNH: CLUB CARD
+// ==========================================
+
 interface ClubCardProps {
   club: ClubSummary;
   joinStatus?: ClubJoinRequestStatus;
@@ -98,40 +111,53 @@ const ClubCard = ({
   onJoin,
   onViewActivities,
 }: ClubCardProps) => {
-  // const statusMeta = getStatusMeta(club.status); // <-- Đã ẩn dòng này
+  // --- A. Xử lý Logic dữ liệu ---
 
+  // 1. Format thời gian hoạt động
   const scheduleDays = formatOperatingDays(club.operatingDays);
   const scheduleHours =
     club.operatingStartTime && club.operatingEndTime
-      ? `${club.operatingStartTime.slice(0, 5)} - ${club.operatingEndTime.slice(
-          0,
-          5
-        )}`
+      ? `${club.operatingStartTime.slice(0, 5)} - ${club.operatingEndTime.slice(0, 5)}`
       : null;
 
-  // Logic nút bấm
-  const isBlocked = joinStatus === "PENDING" || joinStatus === "APPROVED";
-  const isJoinableStatus = club.status === "ACTIVE";
-  const hasInvite = Boolean(club.inviteCode);
-  const disabled =
-    !hasInvite ||
-    isBlocked ||
-    isLeader ||
-    !isJoinableStatus ||
-    (isJoinableStatus && !hasJoinSettings);
-
-  let label = "Tham gia câu lạc bộ";
-  if (isLeader) label = "Bạn là Leader";
-  else if (joinStatus === "PENDING") label = "Đang chờ";
-  else if (joinStatus === "APPROVED") label = "Thành viên";
-  else if (!isJoinableStatus) label = "Đóng";
-  else if (!hasJoinSettings) label = "Chưa hoàn tất cài đặt";
-
+  // 2. Format thông tin phí
   const feeInfo = formatMoney(joinFee);
 
+  // 3. Logic xác định trạng thái nút "Tham gia" (Label & Disabled)
+  const getButtonState = () => {
+    const isBlocked = joinStatus === "PENDING" || joinStatus === "APPROVED";
+    const isJoinableStatus = club.status === "ACTIVE";
+    const hasInvite = Boolean(club.inviteCode);
+
+    // Điều kiện disable nút
+    const isDisabled =
+      !hasInvite ||         // Không có mã mời
+      isBlocked ||          // Đang chờ hoặc đã là thành viên
+      isLeader ||           // Là chủ nhiệm
+      !isJoinableStatus ||  // CLB không hoạt động
+      (isJoinableStatus && !hasJoinSettings); // Chưa cài đặt tham gia
+
+    // Xác định nhãn hiển thị (Label)
+    let label = "Tham gia";
+    if (isLeader) label = "Bạn là Leader";
+    else if (joinStatus === "PENDING") label = "Đang chờ";
+    else if (joinStatus === "APPROVED") label = "Thành viên";
+    else if (!isJoinableStatus) label = "Đóng";
+    else if (!hasJoinSettings) label = "Chưa cài đặt";
+    else label = "Tham gia ngay"; // Mặc định
+
+    return { label, isDisabled };
+  };
+
+  const { label, isDisabled } = getButtonState();
+
+  // --- B. Render Giao diện ---
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-orange-200 hover:shadow-xl hover:shadow-orange-500/10">
-      {/* 1. Hình ảnh cover */}
+      
+      {/* --------------------------- */}
+      {/* PHẦN 1: ẢNH BÌA & BADGE */}
+      {/* --------------------------- */}
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
         {club.imageUrl ? (
           <img
@@ -145,23 +171,18 @@ const ClubCard = ({
           </div>
         )}
 
-        {/* --- Badge trạng thái (ĐÃ ẨN) --- */}
-        {/* <span
-          className={`absolute left-3 top-3 rounded-lg px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-lg ${statusMeta.className}`}
-        >
-          {statusMeta.label}
-        </span> 
-        */}
-
-        {/* Badge Category */}
+        {/* Badge danh mục (Góc phải trên) */}
         <span className="absolute right-3 top-3 rounded-lg bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-700 backdrop-blur-sm shadow-sm">
           {club.category ?? "Chung"}
         </span>
       </div>
 
-      {/* 2. Nội dung chính */}
+      {/* --------------------------- */}
+      {/* PHẦN 2: NỘI DUNG CHÍNH */}
+      {/* --------------------------- */}
       <div className="flex flex-1 flex-col p-4">
-        {/* Header: Mã + Tên + Mô tả */}
+        
+        {/* Header: Mã, Tên, Mô tả */}
         <div className="mb-4">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-orange-500">
@@ -179,40 +200,35 @@ const ClubCard = ({
           </p>
         </div>
 
-        {/* Info Grid: Thống kê quan trọng */}
+        {/* Grid thông tin: Phí & Số lượng thành viên */}
         <div className="mb-4 grid grid-cols-2 gap-3">
-          {/* Phí gia nhập */}
+          
+          {/* Box 1: Phí gia nhập (Có Tooltip) */}
           <div
             className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${feeInfo.color} bg-opacity-50 border-opacity-50`}
           >
             <Banknote className="h-5 w-5 shrink-0 opacity-70" />
-
-            {/* Container chữ: overflow-visible để tooltip không bị cắt */}
             <div className="flex flex-col overflow-visible">
               <div className="mb-0.5 flex items-center gap-1 leading-none opacity-70">
-                <span className="text-[10px] font-medium">Phí gia nhập</span>
-
-                {/* --- ICON INFO & TOOLTIP --- */}
+                <span className="text-[10px] font-medium">Phí tháng</span>
+                
+                {/* Tooltip Icon */}
                 <div className="group/info relative flex items-center">
                   <Info className="h-3 w-3 cursor-help text-slate-500 transition-colors hover:text-slate-800" />
-
                   {/* Tooltip Content */}
                   <div className="pointer-events-none invisible absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-[150px] -translate-x-1/2 rounded-lg bg-slate-800 px-2 py-1.5 text-center text-[10px] font-medium leading-tight text-white opacity-0 shadow-sm transition-all group-hover/info:visible group-hover/info:translate-y-0 group-hover/info:opacity-100">
-                    Đây là phí chỉ thu 1 lần khi gia nhập
-                    {/* Mũi tên nhỏ */}
+                    Đây là phí thu hàng tháng để duy trì thành viên
                     <div className="absolute -bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-slate-800"></div>
                   </div>
                 </div>
-                {/* ------------------------- */}
               </div>
-
               <span className="truncate text-xs font-bold leading-none">
                 {feeInfo.text}
               </span>
             </div>
           </div>
 
-          {/* Số thành viên */}
+          {/* Box 2: Số thành viên */}
           <div className="flex items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-slate-600">
             <Users className="h-5 w-5 shrink-0 text-orange-400" />
             <div className="flex flex-col overflow-hidden">
@@ -226,9 +242,9 @@ const ClubCard = ({
           </div>
         </div>
 
-        {/* Detailed Info: Địa điểm & Thời gian */}
+        {/* Footer info: Địa điểm & Thời gian */}
         <div className="mt-auto space-y-2 border-t border-slate-100 pt-3">
-          {/* Location */}
+          {/* Địa điểm */}
           <div className="flex items-start gap-2 text-xs text-slate-500">
             <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
             <span className="line-clamp-1">
@@ -236,7 +252,7 @@ const ClubCard = ({
             </span>
           </div>
 
-          {/* Time */}
+          {/* Thời gian */}
           {scheduleDays || scheduleHours ? (
             <div className="flex items-start gap-2 text-xs text-slate-500">
               <Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -257,35 +273,41 @@ const ClubCard = ({
           )}
         </div>
 
-        {/* Footer: Leader & Buttons */}
+        {/* --------------------------- */}
+        {/* PHẦN 3: NÚT HÀNH ĐỘNG (ACTIONS) */}
+        {/* --------------------------- */}
         <div className="mt-4 flex items-center gap-2">
+          
+          {/* Nút 1: Xem hoạt động (Party icon) */}
           <button
             onClick={() => onViewActivities(club.id)}
             disabled={!hasActiveActivities}
             className={`group/btn flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors 
             ${
               hasActiveActivities
-                ? "hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600" // Có hoạt động: Hover sáng lên
-                : "opacity-50 cursor-not-allowed" // Không hoạt động: Mờ đi, không hover, chuột hiển thị dấu cấm
+                ? "hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+                : "opacity-50 cursor-not-allowed"
             }`}
             title={hasActiveActivities ? "Xem hoạt động" : "Chưa có hoạt động"}
           >
             <PartyPopper className="h-4 w-4" />
           </button>
 
+          {/* Nút 2: Tham gia / Trạng thái */}
           <button
             onClick={() => onJoin(club)}
-            disabled={disabled}
+            disabled={isDisabled}
             className={`flex h-9 flex-1 items-center justify-center gap-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
-              disabled
+              isDisabled
                 ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                 : "bg-orange-500 text-white hover:bg-orange-600 hover:shadow-orange-500/25 active:scale-95"
             }`}
           >
             {label}
-            {!disabled && <ChevronRight className="h-3 w-3" />}
+            {!isDisabled && <ChevronRight className="h-3 w-3" />}
           </button>
         </div>
+
       </div>
     </div>
   );
