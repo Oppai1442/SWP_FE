@@ -12,6 +12,60 @@ import type {
 } from "../../my-club/services/myClubService";
 import { formatDate, formatDateTime } from "../../my-club/utils";
 
+const GMT7_OFFSET_MS = 7 * 60 * 60 * 1000;
+const runtimeStatusMeta = {
+  upcoming: {
+    label: "Sắp diễn ra",
+    className: "border-amber-200 bg-amber-50 text-amber-600",
+  },
+  ongoing: {
+    label: "Đang diễn ra",
+    className: "border-emerald-200 bg-emerald-50 text-emerald-600",
+  },
+  past: {
+    label: "Đã kết thúc",
+    className: "border-slate-200 bg-slate-50 text-slate-500",
+  },
+};
+
+const toGmt7Millis = (value?: string | null) => {
+  if (!value) return null;
+  const timestamp = new Date(value).getTime();
+  if (Number.isNaN(timestamp)) {
+    return null;
+  }
+  return timestamp + GMT7_OFFSET_MS;
+};
+
+const getRuntimeStatusMeta = (activity: ClubActivity) => {
+  const now = Date.now() + GMT7_OFFSET_MS;
+  const start = toGmt7Millis(activity.startDate);
+  const end = toGmt7Millis(activity.endDate);
+
+  if (start && now < start) {
+    return runtimeStatusMeta.upcoming;
+  }
+
+  if (start && end) {
+    if (now >= start && now <= end) {
+      return runtimeStatusMeta.ongoing;
+    }
+    if (now > end) {
+      return runtimeStatusMeta.past;
+    }
+  }
+
+  if (start && !end) {
+    return now >= start ? runtimeStatusMeta.past : runtimeStatusMeta.upcoming;
+  }
+
+  if (!start && end) {
+    return now <= end ? runtimeStatusMeta.ongoing : runtimeStatusMeta.past;
+  }
+
+  return runtimeStatusMeta.upcoming;
+};
+
 // --- Constants ---
 const detailTabs = [
   { id: "overview", label: "Tổng quan" },
@@ -37,6 +91,7 @@ interface DetailContentProps {
   club: ClubDetail;
   members: ClubMember[];
   activities: ClubActivity[];
+  isActivitiesLoading?: boolean;
   settings: ClubSettingInfo | null;
   history: ClubJoinRequest[];
 }
@@ -48,6 +103,7 @@ const DetailContent = ({
   activities = [],
   settings,
   history = [],
+  isActivitiesLoading = false,
 }: DetailContentProps) => {
   // --- Logic chung: Xử lý danh sách thành viên & Leader ---
   // Mục đích: Dùng chung cho cả tab "Tổng quan" (để đếm số lượng) và tab "Thành viên" (để hiển thị)
@@ -145,58 +201,75 @@ const DetailContent = ({
 
   // --- 3. Tab Hoạt động ---
   if (tab === "activities") {
-    return activities.length === 0 ? (
-      <p className="py-6 text-sm text-slate-500">
-        Không có hoạt động nào được ghi nhận.
-      </p>
-    ) : (
+    if (isActivitiesLoading) {
+      return (
+        <div className="flex items-center justify-center py-10 text-slate-400">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      );
+    }
+    if (activities.length === 0) {
+      return (
+        <p className="py-6 text-sm text-slate-500">
+          Không có hoạt động nào được ghi nhận.
+        </p>
+      );
+    }
+    return (
       <div className="mt-6 space-y-3">
-        {activities.map((activity) => (
-          <div
-            key={activity.id}
-            className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  {activity.title}
-                </p>
-                {activity.description && (
-                  <p className="text-xs text-slate-500">
-                    {activity.description}
+        {activities.map((activity) => {
+          const statusMeta = getRuntimeStatusMeta(activity);
+          return (
+            <div
+              key={activity.id}
+              className="rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {activity.title}
                   </p>
+                  {activity.description && (
+                    <p className="text-xs text-slate-500">
+                      {activity.description}
+                    </p>
+                  )}
+                </div>
+                <span
+                  className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold ${statusMeta.className}`}
+                >
+                  {statusMeta.label}
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
+                {activity.startDate && (
+                  <span>
+                    Bắt đầu{" "}
+                    <strong className="text-slate-900">
+                      {formatDateTime(activity.startDate)}
+                    </strong>
+                  </span>
+                )}
+                {activity.endDate && (
+                  <span>
+                    Kết thúc{" "}
+                    <strong className="text-slate-900">
+                      {formatDateTime(activity.endDate)}
+                    </strong>
+                  </span>
+                )}
+                {activity.location && (
+                  <span>
+                    Địa điểm{" "}
+                    <strong className="text-slate-900">
+                      {activity.location}
+                    </strong>
+                  </span>
                 )}
               </div>
-              <span className="text-xs font-semibold uppercase text-slate-500">
-                {activity.status}
-              </span>
             </div>
-            <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
-              {activity.startDate && (
-                <span>
-                  Bắt đầu{" "}
-                  <strong className="text-slate-900">
-                    {formatDate(activity.startDate)}
-                  </strong>
-                </span>
-              )}
-              {activity.endDate && (
-                <span>
-                  Kết thúc{" "}
-                  <strong className="text-slate-900">
-                    {formatDate(activity.endDate)}
-                  </strong>
-                </span>
-              )}
-              {activity.location && (
-                <span>
-                  Địa điểm{" "}
-                  <strong className="text-slate-900">{activity.location}</strong>
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -325,6 +398,7 @@ interface ClubDetailDrawerProps {
   club: ClubDetail | null;
   members: ClubMember[];
   activities: ClubActivity[];
+  isActivitiesLoading?: boolean;
   settings: ClubSettingInfo | null;
   history: ClubJoinRequest[];
   activeTab: DetailTab;
