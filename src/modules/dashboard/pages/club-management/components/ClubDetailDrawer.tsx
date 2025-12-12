@@ -77,6 +77,14 @@ const detailTabs = [
 
 type DetailTab = (typeof detailTabs)[number]["id"];
 
+const ROLE_LABELS: Record<string, string> = {
+  PRESIDENT: "Trưởng câu lạc bộ",
+  MEMBER: "Thành viên",
+};
+
+const formatRoleLabel = (role?: string | null) =>
+  role ? ROLE_LABELS[role] ?? role : "---";
+
 // --- Sub-Component: Hiển thị 1 dòng thông tin ---
 const DetailItem = ({ label, value }: { label: string; value: string }) => (
   <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
@@ -136,14 +144,13 @@ const DetailContent = ({
       : members;
 
   // Tính tổng số thành viên thực tế (bao gồm Leader)
-  const realMemberCount = resolvedMembers.length;
+  const realMemberCount = resolvedMembers.length+1;
 
   // --- 1. Tab Tổng quan ---
   if (tab === "overview") {
     return (
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <DetailItem label="Danh mục" value={club.category ?? "Không áp dụng"} />
-        <DetailItem label="Trạng thái" value={club.status} />
         <DetailItem label="Leader" value={leaderName} />
         {/* Đã sửa: Sử dụng số lượng thực tế đã tính toán thay vì club.memberCount */}
         <DetailItem label="Số thành viên" value={String(realMemberCount)} />
@@ -176,7 +183,6 @@ const DetailContent = ({
             <tr>
               <th className="px-4 py-3 text-left">Thành viên</th>
               <th className="px-4 py-3 text-left">Vai trò</th>
-              <th className="px-4 py-3 text-left">Trạng thái</th>
               <th className="px-4 py-3 text-left">Tham gia lúc</th>
             </tr>
           </thead>
@@ -186,8 +192,7 @@ const DetailContent = ({
                 <td className="px-4 py-3 font-medium text-slate-900">
                   {member.memberName ?? "Không rõ"}
                 </td>
-                <td className="px-4 py-3 text-slate-500">{member.role}</td>
-                <td className="px-4 py-3 text-slate-500">{member.status}</td>
+                <td className="px-4 py-3 text-slate-500">{formatRoleLabel(member.role)}</td>
                 <td className="px-4 py-3 text-slate-500">
                   {formatDate(member.joinedAt)}
                 </td>
